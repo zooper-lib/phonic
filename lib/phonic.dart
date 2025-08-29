@@ -49,6 +49,7 @@ export 'src/exceptions/unsupported_format_exception.dart';
 export 'src/format_constraints.dart';
 export 'src/id3/id3v2_frame_map.dart';
 export 'src/lazy_artwork_loader.dart';
+export 'src/media_kind.dart';
 export 'src/metadata_tag.dart';
 export 'src/mime_type.dart';
 export 'src/tag_capability.dart';
