@@ -93,4 +93,18 @@ void main() {
     expect(semantics.isValidTextLength(25), equals(true));
     expect(semantics.isValidTextLength(35), equals(false));
   });
+
+  test('CorruptedContainerException is exported from main library', () {
+    const exception = CorruptedContainerException(
+      'Test corruption message',
+      byteOffset: 1024,
+      context: 'test context',
+    );
+
+    expect(exception.message, equals('Test corruption message'));
+    expect(exception.byteOffset, equals(1024));
+    expect(exception.context, equals('test context'));
+    expect(exception, isA<PhonicException>());
+    expect(exception, isA<Exception>());
+  });
 }

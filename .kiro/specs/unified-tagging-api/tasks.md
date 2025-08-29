@@ -293,28 +293,28 @@
   - Write unit tests verifying capability definitions
   - _Requirements: 5.1, 10.6_
 
-- [ ] 36. Create PhonicException base class
+- [x] 36. Create PhonicException base class
 
   - Implement PhonicException with message and context fields
   - Add comprehensive Dart documentation with usage examples
   - Write unit tests for exception creation and string representation
   - _Requirements: 8.1, 8.2_
 
-- [ ] 37. Implement UnsupportedFormatException
+- [x] 37. Implement UnsupportedFormatException
 
   - Create UnsupportedFormatException extending PhonicException
   - Add specific constructor and documentation
   - Write unit tests for exception creation and inheritance
   - _Requirements: 8.1_
 
-- [ ] 38. Implement CorruptedContainerException
+- [x] 38. Implement CorruptedContainerException
 
   - Create CorruptedContainerException with byteOffset field
   - Add specific constructor and documentation
   - Write unit tests for exception creation with offset tracking
   - _Requirements: 8.1, 8.2_
 
-- [ ] 39. Implement TagValidationException
+- [x] 39. Implement TagValidationException
 
   - Create TagValidationException with tagKey and reason fields
   - Add specific constructor and documentation
