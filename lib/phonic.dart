@@ -8,3 +8,4 @@ library phonic;
 export 'src/container_kind.dart';
 export 'src/tag_confidence.dart';
 export 'src/tag_key.dart';
+export 'src/tag_provenance.dart';
