@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'artwork_data.dart';
 import 'tag_key.dart';
 import 'tag_provenance.dart';
 
@@ -26,6 +27,8 @@ part 'tags/year_tag.dart';
 part 'tags/date_recorded_tag.dart';
 part 'tags/bpm_tag.dart';
 part 'tags/rating_tag.dart';
+part 'tags/artwork_tag.dart';
+part 'tags/custom_tag.dart';
 
 /// Base sealed class for all metadata tags in the unified tagging system.
 ///

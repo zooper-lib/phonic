@@ -199,7 +199,6 @@
 
 - [x] 23. Implement DateRecordedTag class
 
-
   - Create DateRecordedTag extending MetadataTag<String>
 
   - Implement constructor with TagKey.dateRecorded and ISO-8601 validation
@@ -209,29 +208,26 @@
 
 - [x] 24. Create ArtworkType enum
 
-
-
-
   - Define ArtworkType enum with all standard artwork typ
-es
+    es
   - Add comprehensive documentation for each artwork type
   - _Requirements: 3.4_
 
-- [ ] 25. Implement ArtworkData class
+- [x] 25. Implement ArtworkData class
 
   - Create ArtworkData class with mimeType, type, description, and lazy data loader
   - Implement Equatable for proper comparison (excluding data loader)
   - Add comprehensive Dart documentation
   - _Requirements: 3.4, 7.1, 7.2_
 
-- [ ] 26. Create LazyArtworkLoader class
+- [x] 26. Create LazyArtworkLoader class
 
   - Implement LazyArtworkLoader with container bytes and offset/length
   - Add load() method that extracts artwork data on demand
   - Write unit tests for lazy loading behavior
   - _Requirements: 7.1, 7.2_
 
-- [ ] 27. Implement ArtworkTag class
+- [x] 27. Implement ArtworkTag class
 
   - Create ArtworkTag extending MetadataTag<ArtworkData>
   - Implement constructor with TagKey.artwork
@@ -239,7 +235,8 @@ es
   - Write unit tests for ArtworkTag creation and lazy loading
   - _Requirements: 3.4, 7.1_
 
-- [ ] 28. Implement CustomTag class
+- [x] 28. Implement CustomTag class
+
 
   - Create CustomTag extending MetadataTag<String> for custom fields
   - Implement constructor with TagKey.custom
