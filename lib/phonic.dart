@@ -7,9 +7,14 @@ library phonic;
 
 export 'src/artwork_data.dart';
 export 'src/artwork_type.dart';
+export 'src/capabilities/capabilities.dart';
 export 'src/container_kind.dart';
+export 'src/format_constraints.dart';
 export 'src/lazy_artwork_loader.dart';
 export 'src/metadata_tag.dart';
+export 'src/tag_capability.dart';
 export 'src/tag_confidence.dart';
 export 'src/tag_key.dart';
 export 'src/tag_provenance.dart';
+export 'src/tag_semantics.dart';
+export 'src/text_encoding.dart';

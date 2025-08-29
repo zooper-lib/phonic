@@ -237,35 +237,38 @@
 
 - [x] 28. Implement CustomTag class
 
-
   - Create CustomTag extending MetadataTag<String> for custom fields
   - Implement constructor with TagKey.custom
   - Override withProvenance method
   - Write unit tests for CustomTag functionality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 29. Create TagSemantics class
+- [x] 29. Create TagSemantics class
 
   - Implement TagSemantics with multiValued, maxTextLength, minValue, maxValue fields
   - Add const constructor and comprehensive documentation
   - Write unit tests for TagSemantics creation
   - _Requirements: 5.1, 5.2_
 
-- [ ] 30. Create TagCapability class
+- [x] 30. Create TagCapability class
 
   - Implement TagCapability with containerKind, containerVersion, semanticsByKey
   - Add supports() and semantics() methods
   - Write unit tests for capability lookup functionality
   - _Requirements: 5.1, 5.2_
 
-- [ ] 31. Define ID3v1 capability constants
+- [x] 31. Define ID3v1 capability constants
+
 
   - Create id3v1Capability constant with supported fields and length limits
   - Include 30-character limits for text fields and 28 for comment with track
   - Write unit tests verifying capability definitions
   - _Requirements: 5.4, 10.1_
 
-- [ ] 32. Define ID3v2.3 capability constants
+- [x] 32. Define ID3v2.3 capability constants
+
+
+
 
   - Create id3v23Capability constant with all supported ID3v2.3 fields
   - Include rating range 0-255 and BPM constraints

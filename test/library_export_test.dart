@@ -62,4 +62,35 @@ void main() {
     expect(tag.key, equals(TagKey.artist));
     expect(tag.provenance, equals(const TagProvenance.none()));
   });
+
+  test('TagCapability is exported from main library', () {
+    const capability = TagCapability(
+      containerKind: ContainerKind.id3v1,
+      containerVersion: 'v1',
+      semanticsByKey: {
+        TagKey.title: TagSemantics(maxTextLength: 30),
+        TagKey.artist: TagSemantics(maxTextLength: 30),
+      },
+    );
+
+    expect(capability.containerKind, equals(ContainerKind.id3v1));
+    expect(capability.containerVersion, equals('v1'));
+    expect(capability.supports(TagKey.title), equals(true));
+    expect(capability.supports(TagKey.artwork), equals(false));
+    expect(capability.supportedFieldCount, equals(2));
+  });
+
+  test('TagSemantics is exported from main library', () {
+    const semantics = TagSemantics(
+      maxTextLength: 30,
+      minValue: 0,
+      maxValue: 100,
+    );
+
+    expect(semantics.maxTextLength, equals(30));
+    expect(semantics.minValue, equals(0));
+    expect(semantics.maxValue, equals(100));
+    expect(semantics.isValidTextLength(25), equals(true));
+    expect(semantics.isValidTextLength(35), equals(false));
+  });
 }
