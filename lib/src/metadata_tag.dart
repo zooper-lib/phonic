@@ -13,6 +13,12 @@ part 'tags/artist_tag.dart';
 part 'tags/album_tag.dart';
 part 'tags/album_artist_tag.dart';
 part 'tags/genre_tag.dart';
+part 'tags/comment_tag.dart';
+part 'tags/grouping_tag.dart';
+part 'tags/composer_tag.dart';
+part 'tags/encoder_tag.dart';
+part 'tags/isrc_tag.dart';
+part 'tags/musical_key_tag.dart';
 
 /// Base sealed class for all metadata tags in the unified tagging system.
 ///

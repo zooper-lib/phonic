@@ -18,12 +18,12 @@ void main() {
       });
 
       test('encodes single genre without null terminator', () {
-        final tag = GenreTag(['Rock']);
+        final tag = GenreTag(const ['Rock']);
         expect(tag.toId3v24String(), equals('Rock'));
       });
 
       test('encodes multiple genres with null terminators', () {
-        final tag = GenreTag(['Rock', 'Alternative', 'Indie']);
+        final tag = GenreTag(const ['Rock', 'Alternative', 'Indie']);
         expect(tag.toId3v24String(), equals('Rock\0Alternative\0Indie'));
       });
 
@@ -33,7 +33,7 @@ void main() {
       });
 
       test('handles empty genre list encoding', () {
-        final tag = GenreTag([]);
+        final tag = GenreTag(const []);
         expect(tag.toId3v24String(), equals(''));
       });
 
@@ -83,12 +83,12 @@ void main() {
       });
 
       test('encodes single genre without slash', () {
-        final tag = GenreTag(['Rock']);
+        final tag = GenreTag(const ['Rock']);
         expect(tag.toId3v23String(), equals('Rock'));
       });
 
       test('encodes multiple genres with slashes', () {
-        final tag = GenreTag(['Rock', 'Alternative', 'Indie']);
+        final tag = GenreTag(const ['Rock', 'Alternative', 'Indie']);
         expect(tag.toId3v23String(), equals('Rock/Alternative/Indie'));
       });
 
@@ -98,7 +98,7 @@ void main() {
       });
 
       test('handles empty genre list encoding', () {
-        final tag = GenreTag([]);
+        final tag = GenreTag(const []);
         expect(tag.toId3v23String(), equals(''));
       });
 
@@ -153,7 +153,7 @@ void main() {
       });
 
       test('encodes multiple genres with semicolons', () {
-        final tag = GenreTag(['Rock', 'Alternative', 'Indie']);
+        final tag = GenreTag(const ['Rock', 'Alternative', 'Indie']);
         expect(tag.toEncodedString(';'), equals('Rock;Alternative;Indie'));
       });
 
@@ -190,7 +190,7 @@ void main() {
       });
 
       test('encodes multiple genres with pipes', () {
-        final tag = GenreTag(['Rock', 'Alternative', 'Indie']);
+        final tag = GenreTag(const ['Rock', 'Alternative', 'Indie']);
         expect(tag.toEncodedString('|'), equals('Rock|Alternative|Indie'));
       });
 
@@ -227,7 +227,7 @@ void main() {
       });
 
       test('encodes multiple genres with commas', () {
-        final tag = GenreTag(['Rock', 'Alternative', 'Indie']);
+        final tag = GenreTag(const ['Rock', 'Alternative', 'Indie']);
         expect(tag.toEncodedString(','), equals('Rock,Alternative,Indie'));
       });
 
@@ -262,7 +262,7 @@ void main() {
       });
 
       test('handles human-readable format with spaces', () {
-        final tag = GenreTag(['Rock', 'Alternative', 'Indie']);
+        final tag = GenreTag(const ['Rock', 'Alternative', 'Indie']);
         expect(tag.toEncodedString(', '), equals('Rock, Alternative, Indie'));
       });
     });
@@ -274,7 +274,7 @@ void main() {
       });
 
       test('encodes multiple genres with backslashes', () {
-        final tag = GenreTag(['Rock', 'Alternative', 'Indie']);
+        final tag = GenreTag(const ['Rock', 'Alternative', 'Indie']);
         expect(tag.toEncodedString('\\'), equals('Rock\\Alternative\\Indie'));
       });
 
@@ -576,7 +576,7 @@ void main() {
     group('format-specific provenance handling', () {
       test('maintains provenance through ID3v2.4 round-trip', () {
         const provenance = TagProvenance(ContainerKind.id3v2, '2.4', TagConfidence.certain);
-        final originalTag = GenreTag(['Rock', 'Alternative'], provenance: provenance);
+        final originalTag = GenreTag(const ['Rock', 'Alternative'], provenance: provenance);
 
         final encoded = originalTag.toId3v24String();
         final decodedTag = GenreTag.fromId3v24String(encoded, provenance: provenance);
@@ -587,7 +587,7 @@ void main() {
 
       test('maintains provenance through ID3v2.3 round-trip', () {
         const provenance = TagProvenance(ContainerKind.id3v2, '2.3', TagConfidence.certain);
-        final originalTag = GenreTag(['Rock', 'Alternative'], provenance: provenance);
+        final originalTag = GenreTag(const ['Rock', 'Alternative'], provenance: provenance);
 
         final encoded = originalTag.toId3v23String();
         final decodedTag = GenreTag.fromId3v23String(encoded, provenance: provenance);
@@ -598,7 +598,7 @@ void main() {
 
       test('maintains provenance through generic format round-trip', () {
         const provenance = TagProvenance(ContainerKind.mp4, '1.0', TagConfidence.inferred);
-        final originalTag = GenreTag(['Rock', 'Alternative'], provenance: provenance);
+        final originalTag = GenreTag(const ['Rock', 'Alternative'], provenance: provenance);
 
         final encoded = originalTag.toEncodedString(';');
         final decodedTag = GenreTag.fromString(encoded, provenance: provenance);

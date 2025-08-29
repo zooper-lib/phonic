@@ -80,18 +80,12 @@
 
 - [x] 10a. Update MetadataTag base class for GenreTag
 
-
   - Add GenreTag to the part files in metadata_tag.dart
   - Update documentation examples to include GenreTag usage with multi-delimiter support
   - Ensure type safety for List<String> generic parameter
   - _Requirements: 3.1, 9.1_
 
 - [x] 10b. Create comprehensive GenreTag format tests
-
-
-
-
-
 
   - Test ID3v2.4 null-terminated parsing and encoding (`Rock\0Alternative\0Indie`)
   - Test ID3v2.3 slash-separated parsing and encoding (`Rock/Alternative/Indie`)
@@ -105,7 +99,7 @@
   - Test compatibility with existing files from different tagging software
   - _Requirements: 3.1, 9.1_
 
-- [ ] 11. Implement CommentTag class
+- [x] 11. Implement CommentTag class
 
   - Create CommentTag extending MetadataTag<String>
   - Implement constructor with TagKey.comment
@@ -113,7 +107,7 @@
   - Write unit tests for CommentTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 12. Implement GroupingTag class
+- [x] 12. Implement GroupingTag class
 
   - Create GroupingTag extending MetadataTag<String>
   - Implement constructor with TagKey.grouping
@@ -121,7 +115,7 @@
   - Write unit tests for GroupingTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 13. Implement ComposerTag class
+- [x] 13. Implement ComposerTag class
 
   - Create ComposerTag extending MetadataTag<String>
   - Implement constructor with TagKey.composer
@@ -129,7 +123,7 @@
   - Write unit tests for ComposerTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 14. Implement EncoderTag class
+- [x] 14. Implement EncoderTag class
 
   - Create EncoderTag extending MetadataTag<String>
   - Implement constructor with TagKey.encoder
@@ -137,7 +131,7 @@
   - Write unit tests for EncoderTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 15. Implement IsrcTag class
+- [x] 15. Implement IsrcTag class
 
   - Create IsrcTag extending MetadataTag<String>
   - Implement constructor with TagKey.isrc
@@ -145,7 +139,8 @@
   - Write unit tests for IsrcTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 16. Implement MusicalKeyTag class
+- [x] 16. Implement MusicalKeyTag class
+
 
   - Create MusicalKeyTag extending MetadataTag<String>
   - Implement constructor with TagKey.musicalKey
