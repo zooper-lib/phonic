@@ -28,14 +28,13 @@
 
 - [x] 5. Create base MetadataTag sealed class
 
-
   - Define sealed MetadataTag<T> class with value, key, provenance fields
   - Implement const constructor and Equatable mixin
   - Add abstract withProvenance method for immutable updates
   - Write unit tests for base MetadataTag functionality
   - _Requirements: 3.2, 4.1, 9.1_
 
-- [ ] 6. Implement TitleTag class
+- [x] 6. Implement TitleTag class
 
   - Create TitleTag extending MetadataTag<String>
   - Implement constructor with TagKey.title
@@ -43,7 +42,7 @@
   - Write unit tests for TitleTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 7. Implement ArtistTag class
+- [x] 7. Implement ArtistTag class
 
   - Create ArtistTag extending MetadataTag<String>
   - Implement constructor with TagKey.artist
@@ -51,7 +50,7 @@
   - Write unit tests for ArtistTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 8. Implement AlbumTag class
+- [x] 8. Implement AlbumTag class
 
   - Create AlbumTag extending MetadataTag<String>
   - Implement constructor with TagKey.album
@@ -59,7 +58,8 @@
   - Write unit tests for AlbumTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 9. Implement AlbumArtistTag class
+- [x] 9. Implement AlbumArtistTag class
+
 
   - Create AlbumArtistTag extending MetadataTag<String>
   - Implement constructor with TagKey.albumArtist

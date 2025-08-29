@@ -7,6 +7,12 @@ import 'tag_provenance.dart';
 // This is necessary for comprehensive testing of the base class functionality
 part 'metadata_tag_test_helpers.dart';
 
+// Concrete tag implementations
+part 'tags/title_tag.dart';
+part 'tags/artist_tag.dart';
+part 'tags/album_tag.dart';
+part 'tags/album_artist_tag.dart';
+
 /// Base sealed class for all metadata tags in the unified tagging system.
 ///
 /// MetadataTag provides a type-safe, immutable representation of metadata

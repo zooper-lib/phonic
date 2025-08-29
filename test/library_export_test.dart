@@ -46,4 +46,20 @@ void main() {
     expect(updatedTag.provenance, equals(newProvenance));
     expect(updatedTag, isA<TestStringTag>());
   });
+
+  test('TitleTag is exported from main library', () {
+    const tag = TitleTag('Test Title');
+
+    expect(tag.value, equals('Test Title'));
+    expect(tag.key, equals(TagKey.title));
+    expect(tag.provenance, equals(const TagProvenance.none()));
+  });
+
+  test('ArtistTag is exported from main library', () {
+    const tag = ArtistTag('Test Artist');
+
+    expect(tag.value, equals('Test Artist'));
+    expect(tag.key, equals(TagKey.artist));
+    expect(tag.provenance, equals(const TagProvenance.none()));
+  });
 }
