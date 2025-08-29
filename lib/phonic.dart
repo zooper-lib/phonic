@@ -1,1 +1,10 @@
+/// Phonic - A unified audio metadata tagging library for Dart.
+///
+/// This library provides a format-agnostic interface for reading and writing
+/// audio metadata tags across different container formats (ID3v1, ID3v2.x,
+/// Vorbis Comments, MP4 atoms).
+library phonic;
 
+export 'src/container_kind.dart';
+export 'src/tag_confidence.dart';
+export 'src/tag_key.dart';

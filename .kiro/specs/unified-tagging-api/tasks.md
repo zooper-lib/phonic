@@ -1,18 +1,19 @@
 # Implementation Plan
 
-- [ ] 1. Create TagKey enum
+- [x] 1. Create TagKey enum
 
   - Define TagKey enum with all unified field types (title, artist, album, etc.)
   - Add comprehensive Dart documentation for each enum value
   - _Requirements: 3.1_
 
-- [ ] 2. Create TagConfidence enum
+- [x] 2. Create TagConfidence enum
 
   - Define TagConfidence enum with certain, inferred, derived values
   - Add Dart documentation explaining each confidence level
   - _Requirements: 4.3_
 
-- [ ] 3. Create ContainerKind enum
+- [x] 3. Create ContainerKind enum
+
 
   - Define ContainerKind enum with none, id3v2, id3v1, vorbis, mp4 values
   - Add documentation for each container type
