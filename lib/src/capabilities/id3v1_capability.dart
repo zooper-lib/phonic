@@ -13,7 +13,7 @@ import '../text_encoding.dart';
 /// Corresponds to:
 /// - [TextEncoding.iso88591]: ISO-8859-1 (Latin-1)
 const Set<String> _id3v1TextEncodings = {
-  'ISO-8859-1', // TextEncoding.iso88591.standardName
+  TextEncoding.iso88591Name,
 };
 
 /// ID3v1 metadata capability definition with format-specific constraints.

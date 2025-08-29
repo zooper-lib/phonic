@@ -26,10 +26,10 @@ import '../text_encoding.dart';
 /// - [TextEncoding.utf16be]: UTF-16 Big Endian
 /// - [TextEncoding.utf16le]: UTF-16 Little Endian
 const Set<String> _id3v23TextEncodings = {
-  'ISO-8859-1', // TextEncoding.iso88591.standardName
-  'UTF-16', // TextEncoding.utf16.standardName
-  'UTF-16BE', // TextEncoding.utf16be.standardName
-  'UTF-16LE', // TextEncoding.utf16le.standardName
+  TextEncoding.iso88591Name,
+  TextEncoding.utf16Name,
+  TextEncoding.utf16beName,
+  TextEncoding.utf16leName,
 };
 
 /// Capability definition for ID3v2.3 metadata format.

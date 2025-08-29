@@ -26,11 +26,11 @@ import '../text_encoding.dart';
 /// - [TextEncoding.utf16le]: UTF-16 Little Endian
 /// - [TextEncoding.utf8]: UTF-8 (ID3v2.4 enhancement)
 const Set<String> _id3v24TextEncodings = {
-  'ISO-8859-1', // TextEncoding.iso88591.standardName
-  'UTF-16', // TextEncoding.utf16.standardName
-  'UTF-16BE', // TextEncoding.utf16be.standardName
-  'UTF-16LE', // TextEncoding.utf16le.standardName
-  'UTF-8', // TextEncoding.utf8.standardName
+  TextEncoding.iso88591Name,
+  TextEncoding.utf16Name,
+  TextEncoding.utf16beName,
+  TextEncoding.utf16leName,
+  TextEncoding.utf8Name,
 };
 
 /// Capability definition for ID3v2.4 metadata format.

@@ -25,7 +25,7 @@ enum TextEncoding {
   /// - ID3v1: Only supported encoding
   /// - ID3v2.3: Default encoding, always supported
   /// - ID3v2.4: Supported as fallback encoding
-  iso88591('ISO-8859-1'),
+  iso88591(iso88591Name),
 
   /// UTF-8 encoding.
   ///
@@ -39,7 +39,7 @@ enum TextEncoding {
   /// - MP4: Standard encoding for text atoms
   /// - ID3v2.3: Not supported
   /// - ID3v1: Not supported
-  utf8('UTF-8'),
+  utf8(utf8Name),
 
   /// UTF-16 encoding (with BOM).
   ///
@@ -52,25 +52,25 @@ enum TextEncoding {
   /// - ID3v1: Not supported
   /// - Vorbis: Not supported (UTF-8 only)
   /// - MP4: Not commonly used (UTF-8 preferred)
-  utf16('UTF-16'),
+  utf16(utf16Name),
 
   /// UTF-16BE (Big Endian) encoding without BOM.
   ///
   /// UTF-16 with explicit big-endian byte order, used in some
   /// ID3v2 implementations that don't include a BOM.
-  utf16be('UTF-16BE'),
+  utf16be(utf16beName),
 
   /// UTF-16LE (Little Endian) encoding without BOM.
   ///
   /// UTF-16 with explicit little-endian byte order, used in some
   /// ID3v2 implementations that don't include a BOM.
-  utf16le('UTF-16LE'),
+  utf16le(utf16leName),
 
   /// ASCII encoding (7-bit).
   ///
   /// Basic ASCII character set (0-127), subset of ISO-8859-1.
   /// Rarely used directly but sometimes referenced for compatibility.
-  ascii('ASCII');
+  ascii(asciiName);
 
   /// Creates a TextEncoding with the specified standard name.
   const TextEncoding(this.standardName);
@@ -80,6 +80,14 @@ enum TextEncoding {
   /// This name follows the standard encoding names used by Dart's
   /// encoding libraries and is suitable for use with codec operations.
   final String standardName;
+
+  // Const string constants for use in const expressions
+  static const String iso88591Name = 'ISO-8859-1';
+  static const String utf8Name = 'UTF-8';
+  static const String utf16Name = 'UTF-16';
+  static const String utf16beName = 'UTF-16BE';
+  static const String utf16leName = 'UTF-16LE';
+  static const String asciiName = 'ASCII';
 
   /// Returns the standard name of this encoding.
   ///

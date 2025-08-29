@@ -279,7 +279,7 @@
 
   - _Requirements: 5.1, 10.1_
 
-- [ ] 34. Define Vorbis capability constants
+- [x] 34. Define Vorbis capability constants
 
   - Create vorbisCapability constant with all Vorbis comment fields
   - Include multi-valued field support and UTF-8 encoding
