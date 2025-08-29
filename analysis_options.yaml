@@ -1,4 +1,85 @@
+# Include the recommended Flutter lints.
 include: package:flutter_lints/flutter.yaml
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+formatter:
+  # Keep trailing commas.
+  trailing_commas: preserve
+
+  # Set the line length
+  line-length: 160
+
+# Customize additional linter rules.
+linter:
+  # Specify rules to be enabled or disabled.
+  rules:
+    # **Style Rules**
+    # Enforce using const constructors where possible.
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+
+    # Prefer single quotes over double quotes where possible.
+    prefer_single_quotes: true
+
+    # Enforce a consistent type definition for variables.
+    always_specify_types: false
+
+    # **Best Practices**
+    # Avoid using dynamic types.
+    avoid_dynamic_calls: true
+
+    # Avoid using print statements in production code.
+    avoid_print: true
+
+    # Prefer using the `final` keyword for variables that are not reassigned.
+    prefer_final_fields: true
+    prefer_final_locals: true
+
+    # Avoid empty catch clauses.
+    avoid_empty_catches: true
+
+    # **Error Prevention**
+    # Disallow the use of deprecated members.
+    deprecated_member_use: true
+
+    # Enforce non-nullable types where possible.
+    always_require_non_null_named_parameters: true
+
+    # **Documentation**
+    # Require documentation for public members.
+    public_member_api_docs: false
+
+    # **Formatting**
+    # Enforce consistent indentation (2 spaces).
+    indent: 4
+
+    # **Other Useful Rules**
+    # Enforce sorting of directives (e.g., imports).
+    directives_ordering: true
+
+    # Prefer using `isEmpty` and `isNotEmpty` over `length` comparisons.
+    prefer_is_empty: true
+    prefer_is_not_empty: true
+
+    # Limit the number of lines in a file for better readability.
+    file_length: 500
+
+    # **Disable Rules (if necessary)**
+    # Uncomment the following lines to disable specific lints.
+    # avoid_unused_constructor_parameters: false
+    # unnecessary_null_in_if_null_operators: false
+
+# Analyzer settings.
+analyzer:
+  # Exclude certain files or directories from analysis.
+  exclude:
+    - "**/*.g.dart"
+    - "**/build/**"
+    - "**/generated/**"
+    - "**/mocks/**"
+    - "**/*.freezed.dart/**"
+
+  # Enable experimental language features if needed.
+  # For example, to enable null safety (if not already enabled).
+  language:
+    enable-experiment:
+      - non-nullable
