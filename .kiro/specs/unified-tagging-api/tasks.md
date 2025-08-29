@@ -321,21 +321,21 @@
   - Write unit tests for validation exception scenarios
   - _Requirements: 5.1, 8.1_
 
-- [ ] 40. Create Id3v2FrameMap class
+- [x] 40. Create Id3v2FrameMap class
 
   - Implement static maps for v2.2, v2.3, v2.4 frame ID mappings
   - Include all standard frame types (TIT2, TPE1, TALB, etc.)
   - Write unit tests verifying mapping completeness
   - _Requirements: 10.1_
 
-- [ ] 41. Create VorbisCommentMap class
+- [x] 41. Create VorbisCommentMap class
 
   - Implement static map for Vorbis comment field name mappings
   - Include standard field names (TITLE, ARTIST, ALBUM, etc.)
   - Write unit tests verifying mapping completeness
   - _Requirements: 10.2, 10.3_
 
-- [ ] 42. Create Mp4AtomMap class
+- [x] 42. Create Mp4AtomMap class
 
   - Implement static map for MP4 atom mappings (©nam, ©ART, etc.)
   - Include freeform atom patterns and artwork handling
