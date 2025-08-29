@@ -141,14 +141,13 @@
 
 - [x] 16. Implement MusicalKeyTag class
 
-
   - Create MusicalKeyTag extending MetadataTag<String>
   - Implement constructor with TagKey.musicalKey
   - Override withProvenance method
   - Write unit tests for MusicalKeyTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 17. Implement LyricsTag class
+- [x] 17. Implement LyricsTag class
 
   - Create LyricsTag extending MetadataTag<String>
   - Implement constructor with TagKey.lyrics
@@ -156,7 +155,7 @@
   - Write unit tests for LyricsTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 18. Implement TrackNumberTag class
+- [x] 18. Implement TrackNumberTag class
 
   - Create TrackNumberTag extending MetadataTag<int>
   - Implement constructor with TagKey.trackNumber and validation (> 0)
@@ -164,7 +163,7 @@
   - Write unit tests including validation edge cases
   - _Requirements: 3.1, 9.1_
 
-- [ ] 19. Implement DiscNumberTag class
+- [x] 19. Implement DiscNumberTag class
 
   - Create DiscNumberTag extending MetadataTag<int>
   - Implement constructor with TagKey.discNumber and validation (> 0)
@@ -172,7 +171,7 @@
   - Write unit tests including validation edge cases
   - _Requirements: 3.1, 9.1_
 
-- [ ] 20. Implement YearTag class
+- [x] 20. Implement YearTag class
 
   - Create YearTag extending MetadataTag<int>
   - Implement constructor with TagKey.year and validation (reasonable year range)
@@ -180,33 +179,41 @@
   - Write unit tests including validation edge cases
   - _Requirements: 3.1, 9.1_
 
-- [ ] 21. Implement BpmTag class
+- [x] 21. Implement BpmTag class
 
   - Create BpmTag extending MetadataTag<int>
+
   - Implement constructor with TagKey.bpm and validation (> 0, < 1000)
   - Override withProvenance method
   - Write unit tests including validation edge cases
   - _Requirements: 3.1, 9.1_
 
-- [ ] 22. Implement RatingTag class
+- [x] 22. Implement RatingTag class
 
   - Create RatingTag extending MetadataTag<int>
-  - Implement constructor with TagKey.rating and validation (0-100 range)
+  - Implement constructor with Tag
+    Key.rating and validation (0-100 range)
   - Override withProvenance method
   - Write unit tests including boundary validation
   - _Requirements: 3.1, 3.3, 9.1_
 
-- [ ] 23. Implement DateRecordedTag class
+- [x] 23. Implement DateRecordedTag class
+
 
   - Create DateRecordedTag extending MetadataTag<String>
+
   - Implement constructor with TagKey.dateRecorded and ISO-8601 validation
   - Override withProvenance method
   - Write unit tests for date format validation
   - _Requirements: 3.1, 3.2, 9.1_
 
-- [ ] 24. Create ArtworkType enum
+- [x] 24. Create ArtworkType enum
 
-  - Define ArtworkType enum with all standard artwork types
+
+
+
+  - Define ArtworkType enum with all standard artwork typ
+es
   - Add comprehensive documentation for each artwork type
   - _Requirements: 3.4_
 

@@ -5,6 +5,7 @@
 /// Vorbis Comments, MP4 atoms).
 library phonic;
 
+export 'src/artwork_type.dart';
 export 'src/container_kind.dart';
 export 'src/metadata_tag.dart';
 export 'src/tag_confidence.dart';

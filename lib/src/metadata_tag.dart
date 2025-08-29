@@ -18,7 +18,14 @@ part 'tags/grouping_tag.dart';
 part 'tags/composer_tag.dart';
 part 'tags/encoder_tag.dart';
 part 'tags/isrc_tag.dart';
+part 'tags/lyrics_tag.dart';
 part 'tags/musical_key_tag.dart';
+part 'tags/track_number_tag.dart';
+part 'tags/disc_number_tag.dart';
+part 'tags/year_tag.dart';
+part 'tags/date_recorded_tag.dart';
+part 'tags/bpm_tag.dart';
+part 'tags/rating_tag.dart';
 
 /// Base sealed class for all metadata tags in the unified tagging system.
 ///
