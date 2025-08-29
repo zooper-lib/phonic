@@ -10,6 +10,7 @@
 /// - [id3v23Capability]: ID3v2.3 format with UTF-16 support and separate date frames
 /// - [id3v24Capability]: ID3v2.4 format with UTF-8 support and unified TDRC frame
 /// - [vorbisCapability]: Vorbis Comments format with UTF-8 and multi-valued field support
+/// - [mp4Capability]: MP4 format with iTunes-style atoms and freeform atom support
 ///
 /// Usage:
 /// ```dart
@@ -29,4 +30,5 @@ library capabilities;
 export 'id3v1_capability.dart';
 export 'id3v23_capability.dart';
 export 'id3v24_capability.dart';
+export 'mp4_capability.dart';
 export 'vorbis_capability.dart';

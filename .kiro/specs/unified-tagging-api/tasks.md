@@ -286,7 +286,7 @@
   - Write unit tests verifying capability definitions
   - _Requirements: 5.1, 10.2, 10.3_
 
-- [ ] 35. Define MP4 capability constants
+- [x] 35. Define MP4 capability constants
 
   - Create mp4Capability constant with iTunes-style atom support
   - Include freeform atom support and artwork handling
