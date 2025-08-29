@@ -47,6 +47,7 @@ export 'src/exceptions/phonic_exception.dart';
 export 'src/exceptions/tag_validation_exception.dart';
 export 'src/exceptions/unsupported_format_exception.dart';
 export 'src/format_constraints.dart';
+export 'src/format_strategy.dart';
 export 'src/id3/id3v2_frame_map.dart';
 export 'src/lazy_artwork_loader.dart';
 export 'src/media_kind.dart';
