@@ -20,14 +20,14 @@
 
 - [x] 4. Implement TagProvenance class
 
-
   - Create TagProvenance class with containerKind, containerVersion, confidence fields
   - Implement const constructors including TagProvenance.none()
   - Add Equatable implementation for proper equality comparison
   - Write unit tests for TagProvenance equality and construction
   - _Requirements: 4.1, 4.3_
 
-- [ ] 5. Create base MetadataTag sealed class
+- [x] 5. Create base MetadataTag sealed class
+
 
   - Define sealed MetadataTag<T> class with value, key, provenance fields
   - Implement const constructor and Equatable mixin
