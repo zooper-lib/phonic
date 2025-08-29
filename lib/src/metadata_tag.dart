@@ -12,6 +12,7 @@ part 'tags/title_tag.dart';
 part 'tags/artist_tag.dart';
 part 'tags/album_tag.dart';
 part 'tags/album_artist_tag.dart';
+part 'tags/genre_tag.dart';
 
 /// Base sealed class for all metadata tags in the unified tagging system.
 ///

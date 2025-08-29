@@ -38,34 +38,47 @@ void main() {
         TitleTag('Song Title'),
         ArtistTag('Artist Name'),
         AlbumTag('Album Name'),
+        AlbumArtistTag('Album Artist Name'),
       ];
 
-      expect(tags.length, equals(3));
+      expect(tags.length, equals(4));
       expect(tags[0], isA<TitleTag>());
       expect(tags[1], isA<ArtistTag>());
       expect(tags[2], isA<AlbumTag>());
+      expect(tags[3], isA<AlbumArtistTag>());
 
       // Verify each tag has the correct key
       expect(tags[0].key, equals(TagKey.title));
       expect(tags[1].key, equals(TagKey.artist));
       expect(tags[2].key, equals(TagKey.album));
+      expect(tags[3].key, equals(TagKey.albumArtist));
     });
 
-    test('supports pattern matching with other tag types', () {
-      const albumTag = AlbumTag('Test Album');
+    test('supports pattern matching with different tag types', () {
+      const tags = <MetadataTag>[
+        TitleTag('Song Title'),
+        ArtistTag('Artist Name'),
+        AlbumTag('Album Name'),
+        AlbumArtistTag('Album Artist Name'),
+      ];
 
-      String result = switch (albumTag) {
-        TitleTag() => 'title',
-        ArtistTag() => 'artist',
-        AlbumTag() => 'album',
-        _ => 'unknown',
-      };
+      final results = <String>[];
+      for (final tag in tags) {
+        final String result = switch (tag) {
+          TitleTag() => 'title',
+          ArtistTag() => 'artist',
+          AlbumTag() => 'album',
+          AlbumArtistTag() => 'albumArtist',
+          _ => 'other',
+        };
+        results.add(result);
+      }
 
-      expect(result, equals('album'));
+      expect(results, equals(['title', 'artist', 'album', 'albumArtist']));
     });
 
     test('maintains type safety in generic contexts', () {
-      MetadataTag<String> stringTag = const AlbumTag('String Album');
+      final MetadataTag<String> stringTag = const AlbumTag('String Album');
 
       expect(stringTag.value, isA<String>());
       expect(stringTag.value, equals('String Album'));

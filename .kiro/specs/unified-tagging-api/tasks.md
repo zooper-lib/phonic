@@ -60,19 +60,44 @@
 
 - [x] 9. Implement AlbumArtistTag class
 
-
   - Create AlbumArtistTag extending MetadataTag<String>
   - Implement constructor with TagKey.albumArtist
   - Override withProvenance method
   - Write unit tests for AlbumArtistTag creation and equality
   - _Requirements: 3.1, 9.1_
 
-- [ ] 10. Implement GenreTag class
+- [x] 10. Implement GenreTag class
 
-  - Create GenreTag extending MetadataTag<String>
-  - Implement constructor with TagKey.genre
+
+  - Create GenreTag extending MetadataTag<List<String>>
+  - Implement constructor with TagKey.genre accepting List<String> of genres
+  - Add convenience constructor accepting single String genre
+  - Add generic encoding method with configurable delimiter (`toEncodedString`)
+  - Implement automatic delimiter detection with null-terminator priority
   - Override withProvenance method
-  - Write unit tests for GenreTag creation and equality
+  - Write comprehensive unit tests for all constructors and encoding methods
+  - Test edge cases: empty strings, single genres, mixed delimiters, whitespace handling
+  - _Requirements: 3.1, 9.1_
+
+- [ ] 10a. Update MetadataTag base class for GenreTag
+
+  - Add GenreTag to the part files in metadata_tag.dart
+  - Update documentation examples to include GenreTag usage with multi-delimiter support
+  - Ensure type safety for List<String> generic parameter
+  - _Requirements: 3.1, 9.1_
+
+- [ ] 10b. Create comprehensive GenreTag format tests
+
+  - Test ID3v2.4 null-terminated parsing and encoding (`Rock\0Alternative\0Indie`)
+  - Test ID3v2.3 slash-separated parsing and encoding (`Rock/Alternative/Indie`)
+  - Test parsing with semicolon delimiters (MP4/other formats)
+  - Test parsing with pipe delimiters (some legacy systems)
+  - Test parsing with comma delimiters (human-readable format)
+  - Test parsing with backslash delimiters (some legacy systems)
+  - Test automatic format detection priority (null-terminators first)
+  - Test mixed delimiter scenarios and edge cases
+  - Test round-trip parsing and encoding consistency for all ID3v2 versions
+  - Test compatibility with existing files from different tagging software
   - _Requirements: 3.1, 9.1_
 
 - [ ] 11. Implement CommentTag class
@@ -385,6 +410,18 @@
   - Write unit tests for encoding detection and conversion
   - _Requirements: 8.1, 8.2_
 
+- [ ] 52a. Create ID3v2 genre parsing utilities
+
+  - Implement null-terminated string parsing for ID3v2.4 TCON frames
+  - Implement slash-separated string parsing for ID3v2.3 TCON frames
+  - Add generic delimiter detection algorithm for other formats
+  - Support common delimiters: null, slash, semicolon, pipe, comma, backslash
+  - Add delimiter frequency analysis with null-terminator priority
+  - Handle edge cases: no delimiters, mixed delimiters, escaped delimiters
+  - Create utility functions for consistent genre handling across ID3v2 versions
+  - Write comprehensive unit tests for ID3v2-specific genre parsing
+  - _Requirements: 3.1, 8.1, 10.1_
+
 - [ ] 53. Create ContainerLocator abstract class
 
   - Define ContainerLocator interface with containerKind property
@@ -514,7 +551,9 @@
   - Use header and frame parsing utilities
   - Convert frames to MetadataTag instances with provenance
   - Handle TDRC date field specific to v2.4
-  - Write unit tests with real ID3v2.4 samples
+  - Handle TCON genre frame parsing with null-terminated strings for GenreTag
+  - Parse multiple genres from single TCON frame using null delimiters
+  - Write unit tests with real ID3v2.4 samples including multi-genre scenarios
   - _Requirements: 1.1, 1.3, 3.2, 4.1_
 
 - [ ] 69. Implement Id3v24Codec writeToContainer method
@@ -522,8 +561,10 @@
   - Create writeToContainer method building ID3v2.4 tags
   - Convert MetadataTag instances to appropriate frames
   - Handle UTF-8 encoding for v2.4
+  - Handle GenreTag encoding to TCON frame with null-terminated strings
+  - Encode multiple genres as single TCON frame with null delimiters
   - Build complete ID3v2.4 structure with header
-  - Write unit tests for tag encoding
+  - Write unit tests for tag encoding with proper null-termination
   - _Requirements: 2.1, 2.2, 3.2_
 
 - [ ] 70. Create Id3v23Codec class structure
@@ -539,8 +580,10 @@
   - Create readFromContainer method parsing ID3v2.3 tags
   - Handle TYER/TDAT/TIME frames for date instead of TDRC
   - Use UTF-16 encoding (no UTF-8 support in v2.3)
+  - Handle TCON genre frame parsing with slash-separated strings for GenreTag
+  - Parse multiple genres from single TCON frame using slash delimiters
   - Convert frames to MetadataTag instances with provenance
-  - Write unit tests with real ID3v2.3 samples
+  - Write unit tests with real ID3v2.3 samples including multi-genre scenarios
   - _Requirements: 1.1, 1.3, 3.2, 4.1_
 
 - [ ] 72. Implement Id3v23Codec writeToContainer method
@@ -548,8 +591,10 @@
   - Create writeToContainer method building ID3v2.3 tags
   - Convert date fields to TYER/TDAT/TIME frames
   - Handle UTF-16 encoding requirements
+  - Handle GenreTag encoding to TCON frame with slash-separated strings
+  - Encode multiple genres as single TCON frame with slash delimiters
   - Build complete ID3v2.3 structure with header
-  - Write unit tests for tag encoding
+  - Write unit tests for tag encoding with proper slash separation
   - _Requirements: 2.1, 2.2, 3.2_
 
 - [ ] 73. Create Id3v22Codec class structure
@@ -642,14 +687,18 @@
   - Create readFromContainer method parsing Vorbis comments
   - Use comment parsing utilities and artwork handling
   - Convert comments to MetadataTag instances with provenance
+  - Handle multiple GENRE fields for GenreTag creation
+  - Handle mixed scenarios where some GENRE fields contain delimited values
+  - Support both native multi-field and delimited single-field approaches
   - Handle both FLAC and OGG comment formats
-  - Write unit tests with real Vorbis comment samples
+  - Write unit tests with real Vorbis comment samples including delimiter variations
   - _Requirements: 1.1, 1.4, 3.1, 4.1_
 
 - [ ] 84. Implement VorbisCommentsCodec writeToContainer method
 
   - Create writeToContainer method building Vorbis comment structure
   - Convert MetadataTag instances to key=value pairs
+  - Handle GenreTag encoding to multiple GENRE fields
   - Handle artwork encoding to METADATA_BLOCK_PICTURE
   - Build complete comment block with vendor string
   - Write unit tests for comment encoding
@@ -726,8 +775,9 @@
   - Implement utilities for merging tags from multiple containers
   - Add precedence-based conflict resolution for single-valued tags
   - Create multi-valued tag union logic with deduplication
+  - Handle GenreTag merging by combining genre lists and deduplicating
   - Include provenance preservation during merge operations
-  - Write unit tests for merge scenarios
+  - Write unit tests for merge scenarios including GenreTag merging
   - _Requirements: 1.2, 1.3, 4.1, 4.2_
 
 - [ ] 94. Implement tag inference system
@@ -783,7 +833,8 @@
 - [ ] 100. Implement isMultiValued utility
 
   - Create isMultiValued method checking if TagKey supports multiple values
-  - Handle artwork and other multi-valued field detection
+  - Handle artwork, genre, and other multi-valued field detection
+  - Add logic to distinguish between internally multi-valued (GenreTag) and container multi-valued fields
   - Add comprehensive documentation for multi-valued behavior
   - Write unit tests for multi-valued field detection
   - _Requirements: 1.4, 3.4_
