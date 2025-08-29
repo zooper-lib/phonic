@@ -29,7 +29,7 @@ void main() {
     });
 
     test('supportedEncodingNames returns string names', () {
-      final expectedNames = {'ISO-8859-1'};
+      final expectedNames = {TextEncoding.iso88591.standardName};
       expect(ID3v1Constraints.supportedEncodingNames, equals(expectedNames));
       expect(ID3v1Constraints.supportedEncodingNames.length, equals(1));
     });

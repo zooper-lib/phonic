@@ -7,25 +7,37 @@ void main() {
   group('ArtworkData', () {
     test('creates instance with required parameters', () {
       final artwork = ArtworkData(
-        mimeType: 'image/jpeg',
+        mimeType: MimeType.jpeg.standardName,
         type: ArtworkType.frontCover,
         dataLoader: () async => Uint8List.fromList([1, 2, 3, 4]),
       );
 
-      expect(artwork.mimeType, equals('image/jpeg'));
+      expect(artwork.mimeType, equals(MimeType.jpeg.standardName));
       expect(artwork.type, equals(ArtworkType.frontCover));
       expect(artwork.description, isNull);
     });
 
+    test('creates instance using MimeType enum', () {
+      final artwork = ArtworkData(
+        mimeType: MimeType.png.standardName,
+        type: ArtworkType.frontCover,
+        dataLoader: () async => Uint8List.fromList([1, 2, 3, 4]),
+      );
+
+      expect(artwork.mimeType, equals(MimeType.png.standardName));
+      expect(artwork.mimeTypeEnum, equals(MimeType.png));
+      expect(artwork.type, equals(ArtworkType.frontCover));
+    });
+
     test('creates instance with optional description', () {
       final artwork = ArtworkData(
-        mimeType: 'image/png',
+        mimeType: MimeType.png.standardName,
         type: ArtworkType.backCover,
         description: 'Album back cover',
         dataLoader: () async => Uint8List.fromList([5, 6, 7, 8]),
       );
 
-      expect(artwork.mimeType, equals('image/png'));
+      expect(artwork.mimeType, equals(MimeType.png.standardName));
       expect(artwork.type, equals(ArtworkType.backCover));
       expect(artwork.description, equals('Album back cover'));
     });
@@ -33,7 +45,7 @@ void main() {
     test('loads data lazily through data getter', () async {
       final testData = Uint8List.fromList([10, 20, 30, 40, 50]);
       final artwork = ArtworkData(
-        mimeType: 'image/gif',
+        mimeType: MimeType.gif.standardName,
         type: ArtworkType.artist,
         dataLoader: () async => testData,
       );
@@ -47,14 +59,14 @@ void main() {
       final loader2 = () async => Uint8List.fromList([4, 5, 6]);
 
       final artwork1 = ArtworkData(
-        mimeType: 'image/jpeg',
+        mimeType: MimeType.jpeg.standardName,
         type: ArtworkType.frontCover,
         description: 'Cover',
         dataLoader: loader1,
       );
 
       final artwork2 = ArtworkData(
-        mimeType: 'image/jpeg',
+        mimeType: MimeType.jpeg.standardName,
         type: ArtworkType.frontCover,
         description: 'Cover',
         dataLoader: loader2,
@@ -68,28 +80,28 @@ void main() {
       final loader = () async => Uint8List.fromList([1, 2, 3]);
 
       final artwork1 = ArtworkData(
-        mimeType: 'image/jpeg',
+        mimeType: MimeType.jpeg.standardName,
         type: ArtworkType.frontCover,
         description: 'Cover 1',
         dataLoader: loader,
       );
 
       final artwork2 = ArtworkData(
-        mimeType: 'image/jpeg',
+        mimeType: MimeType.jpeg.standardName,
         type: ArtworkType.frontCover,
         description: 'Cover 2',
         dataLoader: loader,
       );
 
       final artwork3 = ArtworkData(
-        mimeType: 'image/png',
+        mimeType: MimeType.png.standardName,
         type: ArtworkType.frontCover,
         description: 'Cover 1',
         dataLoader: loader,
       );
 
       final artwork4 = ArtworkData(
-        mimeType: 'image/jpeg',
+        mimeType: MimeType.jpeg.standardName,
         type: ArtworkType.backCover,
         description: 'Cover 1',
         dataLoader: loader,
@@ -102,14 +114,14 @@ void main() {
 
     test('toString includes metadata but not loader', () {
       final artwork = ArtworkData(
-        mimeType: 'image/webp',
+        mimeType: MimeType.webp.standardName,
         type: ArtworkType.illustration,
         description: 'Concept art',
         dataLoader: () async => Uint8List.fromList([]),
       );
 
       final str = artwork.toString();
-      expect(str, contains('image/webp'));
+      expect(str, contains(MimeType.webp.standardName));
       expect(str, contains('ArtworkType.illustration'));
       expect(str, contains('Concept art'));
       expect(str, isNot(contains('dataLoader')));
@@ -117,13 +129,13 @@ void main() {
 
     test('toString handles null description', () {
       final artwork = ArtworkData(
-        mimeType: 'image/bmp',
+        mimeType: MimeType.bmp.standardName,
         type: ArtworkType.media,
         dataLoader: () async => Uint8List.fromList([]),
       );
 
       final str = artwork.toString();
-      expect(str, contains('image/bmp'));
+      expect(str, contains(MimeType.bmp.standardName));
       expect(str, contains('ArtworkType.media'));
       expect(str, contains('null'));
     });
@@ -131,7 +143,7 @@ void main() {
     test('data loader can be called multiple times', () async {
       var callCount = 0;
       final artwork = ArtworkData(
-        mimeType: 'image/jpeg',
+        mimeType: MimeType.jpeg.standardName,
         type: ArtworkType.frontCover,
         dataLoader: () async {
           callCount++;
@@ -149,7 +161,7 @@ void main() {
 
     test('data loader exceptions are propagated', () async {
       final artwork = ArtworkData(
-        mimeType: 'image/jpeg',
+        mimeType: MimeType.jpeg.standardName,
         type: ArtworkType.frontCover,
         dataLoader: () async => throw Exception('Loading failed'),
       );
@@ -158,6 +170,134 @@ void main() {
         () async => await artwork.data,
         throwsA(isA<Exception>()),
       );
+    });
+
+    group('MimeType integration', () {
+      test('mimeTypeEnum returns correct enum value', () {
+        final jpegArtwork = ArtworkData(
+          mimeType: MimeType.jpeg.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(jpegArtwork.mimeTypeEnum, equals(MimeType.jpeg));
+
+        final pngArtwork = ArtworkData(
+          mimeType: MimeType.png.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(pngArtwork.mimeTypeEnum, equals(MimeType.png));
+      });
+
+      test('mimeTypeEnum returns null for unknown MIME types', () {
+        final artwork = ArtworkData(
+          mimeType: 'image/unknown',
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(artwork.mimeTypeEnum, isNull);
+      });
+
+      test('supportsTransparency works correctly', () {
+        final pngArtwork = ArtworkData(
+          mimeType: MimeType.png.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(pngArtwork.supportsTransparency, isTrue);
+
+        final jpegArtwork = ArtworkData(
+          mimeType: MimeType.jpeg.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(jpegArtwork.supportsTransparency, isFalse);
+
+        final unknownArtwork = ArtworkData(
+          mimeType: 'image/unknown',
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(unknownArtwork.supportsTransparency, isFalse);
+      });
+
+      test('isLossy works correctly', () {
+        final jpegArtwork = ArtworkData(
+          mimeType: MimeType.jpeg.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(jpegArtwork.isLossy, isTrue);
+
+        final pngArtwork = ArtworkData(
+          mimeType: MimeType.png.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(pngArtwork.isLossy, isFalse);
+      });
+
+      test('isVector works correctly', () {
+        final svgArtwork = ArtworkData(
+          mimeType: MimeType.svg.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(svgArtwork.isVector, isTrue);
+
+        final jpegArtwork = ArtworkData(
+          mimeType: MimeType.jpeg.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(jpegArtwork.isVector, isFalse);
+      });
+
+      test('fileExtension works correctly', () {
+        final jpegArtwork = ArtworkData(
+          mimeType: MimeType.jpeg.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(jpegArtwork.fileExtension, equals('jpg'));
+
+        final pngArtwork = ArtworkData(
+          mimeType: MimeType.png.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(pngArtwork.fileExtension, equals('png'));
+
+        final unknownArtwork = ArtworkData(
+          mimeType: 'image/unknown',
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(unknownArtwork.fileExtension, isNull);
+      });
+
+      test('formatDescription works correctly', () {
+        final jpegArtwork = ArtworkData(
+          mimeType: MimeType.jpeg.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(jpegArtwork.formatDescription, equals('JPEG Image'));
+
+        final svgArtwork = ArtworkData(
+          mimeType: MimeType.svg.standardName,
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(svgArtwork.formatDescription, equals('SVG Vector Image'));
+
+        final unknownArtwork = ArtworkData(
+          mimeType: 'image/unknown',
+          type: ArtworkType.frontCover,
+          dataLoader: () async => Uint8List.fromList([]),
+        );
+        expect(unknownArtwork.formatDescription, equals('image/unknown'));
+      });
     });
   });
 }

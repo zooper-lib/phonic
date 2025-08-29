@@ -93,6 +93,24 @@ enum TextEncoding {
   /// string-based encoding names.
   static Set<String> get allNames => values.map((e) => e.standardName).toSet();
 
+  /// Returns a set of encoding names for the given TextEncoding values.
+  ///
+  /// This is a convenience method for creating encoding sets from TextEncoding
+  /// enum values instead of hardcoding string literals.
+  ///
+  /// Example:
+  /// ```dart
+  /// final id3v24Encodings = TextEncoding.namesFor({
+  ///   TextEncoding.iso88591,
+  ///   TextEncoding.utf16,
+  ///   TextEncoding.utf8,
+  /// });
+  /// // Returns: {'ISO-8859-1', 'UTF-16', 'UTF-8'}
+  /// ```
+  static Set<String> namesFor(Set<TextEncoding> encodings) {
+    return encodings.map((e) => e.standardName).toSet();
+  }
+
   /// Finds a TextEncoding by its standard name.
   ///
   /// Returns the matching TextEncoding enum value, or null if no match is found.

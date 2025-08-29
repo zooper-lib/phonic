@@ -3,6 +3,7 @@ import 'package:phonic/src/capabilities/id3v1_capability.dart';
 import 'package:phonic/src/container_kind.dart';
 import 'package:phonic/src/format_constraints.dart';
 import 'package:phonic/src/tag_key.dart';
+import 'package:phonic/src/text_encoding.dart';
 
 void main() {
   group('ID3v1 Capability', () {
@@ -44,7 +45,7 @@ void main() {
           expect(semantics.multiValued, isFalse, reason: '$field should not support multiple values');
           expect(
             semantics.allowedEncodings,
-            equals({'ISO-8859-1'}),
+            equals({TextEncoding.iso88591.standardName}),
             reason: '$field should only support ISO-8859-1 encoding',
           );
         }
@@ -56,7 +57,7 @@ void main() {
         final semantics = id3v1Capability.semantics(TagKey.year);
         expect(semantics.maxTextLength, equals(4));
         expect(semantics.multiValued, isFalse);
-        expect(semantics.allowedEncodings, equals({'ISO-8859-1'}));
+        expect(semantics.allowedEncodings, equals({TextEncoding.iso88591.standardName}));
       });
 
       test('supports comment field with 28-character limit', () {
@@ -69,7 +70,7 @@ void main() {
           reason: 'Comment should be limited to 28 chars when track is present',
         );
         expect(semantics.multiValued, isFalse);
-        expect(semantics.allowedEncodings, equals({'ISO-8859-1'}));
+        expect(semantics.allowedEncodings, equals({TextEncoding.iso88591.standardName}));
       });
 
       test('supports track number with 1-255 range', () {
@@ -214,12 +215,12 @@ void main() {
         final titleSemantics = id3v1Capability.semantics(TagKey.title);
 
         // Valid encoding
-        expect(titleSemantics.isValidEncoding('ISO-8859-1'), isTrue);
+        expect(titleSemantics.isValidEncoding(TextEncoding.iso88591.standardName), isTrue);
 
         // Invalid encodings
-        expect(titleSemantics.isValidEncoding('UTF-8'), isFalse);
-        expect(titleSemantics.isValidEncoding('UTF-16'), isFalse);
-        expect(titleSemantics.isValidEncoding('ASCII'), isFalse);
+        expect(titleSemantics.isValidEncoding(TextEncoding.utf8.standardName), isFalse);
+        expect(titleSemantics.isValidEncoding(TextEncoding.utf16.standardName), isFalse);
+        expect(titleSemantics.isValidEncoding(TextEncoding.ascii.standardName), isFalse);
       });
     });
 
@@ -329,7 +330,7 @@ void main() {
 
         // Encoding limitations
         for (final field in [TagKey.title, TagKey.artist, TagKey.album, TagKey.year, TagKey.comment]) {
-          expect(id3v1Capability.semantics(field).allowedEncodings, equals({'ISO-8859-1'}));
+          expect(id3v1Capability.semantics(field).allowedEncodings, equals({TextEncoding.iso88591.standardName}));
         }
 
         // Unsupported fields

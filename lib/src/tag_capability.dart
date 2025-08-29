@@ -52,7 +52,11 @@ import 'tag_semantics.dart';
 ///   containerKind: ContainerKind.id3v2,
 ///   containerVersion: '2.4',
 ///   semanticsByKey: {
-///     TagKey.title: TagSemantics(allowedEncodings: {'ISO-8859-1', 'UTF-16', 'UTF-8'}),
+///     TagKey.title: TagSemantics(allowedEncodings: {
+///       TextEncoding.iso88591.standardName,
+///       TextEncoding.utf16.standardName,
+///       TextEncoding.utf8.standardName
+///     }),
 ///     TagKey.genre: TagSemantics(multiValued: false), // Single TCON frame
 ///     TagKey.artwork: TagSemantics(multiValued: true), // Multiple APIC frames
 ///     TagKey.rating: TagSemantics(minValue: 0, maxValue: 255),
@@ -64,7 +68,7 @@ import 'tag_semantics.dart';
 ///   containerKind: ContainerKind.vorbis,
 ///   containerVersion: '',
 ///   semanticsByKey: {
-///     TagKey.genre: TagSemantics(multiValued: true, allowedEncodings: {'UTF-8'}),
+///     TagKey.genre: TagSemantics(multiValued: true, allowedEncodings: {TextEncoding.utf8.standardName}),
 ///     TagKey.artwork: TagSemantics(multiValued: true),
 ///   },
 /// );

@@ -1,3 +1,5 @@
+import 'text_encoding.dart';
+
 /// Defines the semantic constraints and capabilities for a specific tag field
 /// within a particular container format.
 ///
@@ -20,7 +22,7 @@
 /// // Define semantics for Vorbis genre field (supports multiple values)
 /// const vorbisGenreSemantics = TagSemantics(
 ///   multiValued: true,
-///   allowedEncodings: {'UTF-8'},
+///   allowedEncodings: {TextEncoding.utf8.standardName},
 /// );
 ///
 /// // Define semantics for ID3v2 rating field (0-255 range)
@@ -90,10 +92,10 @@ class TagSemantics {
   /// When `null`, no encoding restrictions are enforced.
   ///
   /// Common encoding sets:
-  /// - ID3v2.3: `{'ISO-8859-1', 'UTF-16'}`
-  /// - ID3v2.4: `{'ISO-8859-1', 'UTF-16', 'UTF-8'}`
-  /// - Vorbis: `{'UTF-8'}`
-  /// - MP4: `{'UTF-8'}`
+  /// - ID3v2.3: `{TextEncoding.iso88591.standardName, TextEncoding.utf16.standardName}`
+  /// - ID3v2.4: `{TextEncoding.iso88591.standardName, TextEncoding.utf16.standardName, TextEncoding.utf8.standardName}`
+  /// - Vorbis: `{TextEncoding.utf8.standardName}`
+  /// - MP4: `{TextEncoding.utf8.standardName}`
   final Set<String>? allowedEncodings;
 
   /// Creates a new [TagSemantics] instance with the specified constraints.
@@ -113,13 +115,13 @@ class TagSemantics {
   /// // Restrictive semantics for ID3v1 text field
   /// const id3v1Semantics = TagSemantics(
   ///   maxTextLength: 30,
-  ///   allowedEncodings: {'ISO-8859-1'},
+  ///   allowedEncodings: {TextEncoding.iso88591.standardName},
   /// );
   ///
   /// // Multi-valued field with UTF-8 encoding
   /// const vorbisSemantics = TagSemantics(
   ///   multiValued: true,
-  ///   allowedEncodings: {'UTF-8'},
+  ///   allowedEncodings: {TextEncoding.utf8.standardName},
   /// );
   /// ```
   const TagSemantics({
@@ -185,12 +187,34 @@ class TagSemantics {
   ///
   /// Example:
   /// ```dart
-  /// const semantics = TagSemantics(allowedEncodings: {'UTF-8', 'UTF-16'});
-  /// print(semantics.isValidEncoding('UTF-8'));     // true
-  /// print(semantics.isValidEncoding('ISO-8859-1')); // false
+  /// const semantics = TagSemantics(allowedEncodings: {
+  ///   TextEncoding.utf8.standardName,
+  ///   TextEncoding.utf16.standardName
+  /// });
+  /// print(semantics.isValidEncoding(TextEncoding.utf8.standardName));     // true
+  /// print(semantics.isValidEncoding(TextEncoding.iso88591.standardName)); // false
   /// ```
   bool isValidEncoding(String encoding) {
     return allowedEncodings == null || allowedEncodings!.contains(encoding);
+  }
+
+  /// Validates whether the given [TextEncoding] is allowed for this field.
+  ///
+  /// This is a convenience method that works with the [TextEncoding] enum
+  /// instead of raw strings. Returns `true` if the encoding's standard name
+  /// is in the [allowedEncodings] set, or if no encoding restrictions are defined.
+  ///
+  /// Example:
+  /// ```dart
+  /// const semantics = TagSemantics(allowedEncodings: {
+  ///   TextEncoding.utf8.standardName,
+  ///   TextEncoding.utf16.standardName
+  /// });
+  /// print(semantics.supportsEncoding(TextEncoding.utf8));     // true
+  /// print(semantics.supportsEncoding(TextEncoding.iso88591)); // false
+  /// ```
+  bool supportsEncoding(TextEncoding encoding) {
+    return isValidEncoding(encoding.standardName);
   }
 
   /// Clamps the given numeric value to fit within the allowed range.

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 
 import 'artwork_type.dart';
+import 'mime_type.dart';
 
 /// Represents artwork data embedded in audio metadata with lazy loading support.
 ///
@@ -178,18 +179,28 @@ class ArtworkData extends Equatable {
   /// artwork metadata. The [dataLoader] function will be called lazily
   /// when the actual image data is needed.
   ///
-  /// @param mimeType The MIME type of the image (e.g., 'image/jpeg')
+  /// @param mimeType The MIME type of the image (e.g., 'image/jpeg').
+  ///                 Consider using [MimeType] enum values for type safety.
   /// @param type The classification of this artwork image
   /// @param description Optional human-readable description
   /// @param dataLoader Function that returns the image data when called
   ///
   /// Example:
   /// ```dart
-  /// final artwork = ArtworkData(
+  /// // Using string MIME type
+  /// final artwork1 = ArtworkData(
   ///   mimeType: 'image/jpeg',
   ///   type: ArtworkType.frontCover,
   ///   description: 'Album cover art',
   ///   dataLoader: () async => await File('cover.jpg').readAsBytes(),
+  /// );
+  ///
+  /// // Using MimeType enum for type safety
+  /// final artwork2 = ArtworkData(
+  ///   mimeType: MimeType.png.standardName,
+  ///   type: ArtworkType.frontCover,
+  ///   description: 'Album cover art',
+  ///   dataLoader: () async => await File('cover.png').readAsBytes(),
   /// );
   /// ```
   const ArtworkData({
@@ -235,6 +246,89 @@ class ArtworkData extends Equatable {
   /// @returns A future that completes with the raw image data
   /// @throws Various exceptions depending on the loader implementation
   Future<Uint8List> get data => _dataLoader();
+
+  /// Returns the [MimeType] enum value for this artwork's MIME type.
+  ///
+  /// This is a convenience method that converts the string-based [mimeType]
+  /// to the corresponding [MimeType] enum value. Returns null if the MIME
+  /// type is not recognized or supported by the enum.
+  ///
+  /// This method is useful for:
+  /// - Type-safe MIME type checking
+  /// - Accessing MIME type properties (transparency, compression, etc.)
+  /// - Format-specific processing logic
+  /// - Validation and compatibility checking
+  ///
+  /// Example:
+  /// ```dart
+  /// final artwork = ArtworkData(
+  ///   mimeType: 'image/jpeg',
+  ///   type: ArtworkType.frontCover,
+  ///   dataLoader: () async => imageBytes,
+  /// );
+  ///
+  /// final mimeTypeEnum = artwork.mimeTypeEnum;
+  /// if (mimeTypeEnum != null) {
+  ///   print('Supports transparency: ${mimeTypeEnum.supportsTransparency}');
+  ///   print('Is lossy: ${mimeTypeEnum.isLossy}');
+  ///   print('File extension: ${mimeTypeEnum.fileExtension}');
+  /// }
+  /// ```
+  MimeType? get mimeTypeEnum => MimeType.fromName(mimeType);
+
+  /// Returns true if this artwork's MIME type supports transparency.
+  ///
+  /// This is a convenience method that checks if the artwork format
+  /// supports alpha channel transparency. Useful for determining
+  /// display behavior and format compatibility.
+  ///
+  /// Returns false if the MIME type is not recognized.
+  bool get supportsTransparency => mimeTypeEnum?.supportsTransparency ?? false;
+
+  /// Returns true if this artwork's MIME type uses lossy compression.
+  ///
+  /// This is a convenience method that checks if the artwork format
+  /// uses lossy compression, which may affect quality but provides
+  /// better file size reduction.
+  ///
+  /// Returns false if the MIME type is not recognized.
+  bool get isLossy => mimeTypeEnum?.isLossy ?? false;
+
+  /// Returns true if this artwork's MIME type is vector-based.
+  ///
+  /// This is a convenience method that checks if the artwork format
+  /// is vector-based and can scale without quality loss.
+  ///
+  /// Returns false if the MIME type is not recognized.
+  bool get isVector => mimeTypeEnum?.isVector ?? false;
+
+  /// Returns the typical file extension for this artwork's MIME type.
+  ///
+  /// This is a convenience method that returns the most common file
+  /// extension for the artwork format, without the leading dot.
+  ///
+  /// Returns null if the MIME type is not recognized.
+  ///
+  /// Example:
+  /// ```dart
+  /// final artwork = ArtworkData(mimeType: 'image/jpeg', ...);
+  /// print(artwork.fileExtension); // 'jpg'
+  /// ```
+  String? get fileExtension => mimeTypeEnum?.fileExtension;
+
+  /// Returns a human-readable description of this artwork's format.
+  ///
+  /// This is a convenience method that returns a user-friendly
+  /// description of the artwork format.
+  ///
+  /// Returns the raw MIME type string if not recognized.
+  ///
+  /// Example:
+  /// ```dart
+  /// final artwork = ArtworkData(mimeType: 'image/png', ...);
+  /// print(artwork.formatDescription); // 'PNG Image'
+  /// ```
+  String get formatDescription => mimeTypeEnum?.description ?? mimeType;
 
   /// Returns a list of properties used for equality comparison.
   ///

@@ -3,6 +3,20 @@ import 'package:phonic/src/container_kind.dart';
 import 'package:phonic/src/tag_capability.dart';
 import 'package:phonic/src/tag_key.dart';
 import 'package:phonic/src/tag_semantics.dart';
+import 'package:phonic/src/text_encoding.dart';
+
+// Test encoding sets using TextEncoding enum constants
+const _utf8Only = {'UTF-8'}; // TextEncoding.utf8.standardName
+const _iso88591Only = {'ISO-8859-1'}; // TextEncoding.iso88591.standardName
+const _id3v23Encodings = {
+  'ISO-8859-1', // TextEncoding.iso88591.standardName
+  'UTF-16', // TextEncoding.utf16.standardName
+};
+const _id3v24Encodings = {
+  'ISO-8859-1', // TextEncoding.iso88591.standardName
+  'UTF-16', // TextEncoding.utf16.standardName
+  'UTF-8', // TextEncoding.utf8.standardName
+};
 
 void main() {
   group('TagCapability', () {
@@ -42,7 +56,7 @@ void main() {
           containerVersion: '2.4',
           semanticsByKey: {
             TagKey.title: TagSemantics(
-              allowedEncodings: {'ISO-8859-1', 'UTF-16', 'UTF-8'},
+              allowedEncodings: _id3v24Encodings,
             ),
             TagKey.genre: TagSemantics(multiValued: false),
             TagKey.artwork: TagSemantics(multiValued: true),
@@ -64,7 +78,7 @@ void main() {
           semanticsByKey: {
             TagKey.genre: TagSemantics(
               multiValued: true,
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
           },
         );
@@ -162,7 +176,7 @@ void main() {
             TagKey.rating: TagSemantics(minValue: 0, maxValue: 255),
             TagKey.genre: TagSemantics(
               multiValued: false,
-              allowedEncodings: {'ISO-8859-1'},
+              allowedEncodings: _iso88591Only,
             ),
           },
         );
@@ -181,7 +195,7 @@ void main() {
 
         final genreSemantics = capability.semantics(TagKey.genre);
         expect(genreSemantics.multiValued, equals(false));
-        expect(genreSemantics.allowedEncodings, equals({'ISO-8859-1'}));
+        expect(genreSemantics.allowedEncodings, equals(_iso88591Only));
       });
 
       test('returns default semantics for unsupported fields', () {
@@ -391,7 +405,7 @@ void main() {
           containerKind: ContainerKind.vorbis,
           containerVersion: '',
           semanticsByKey: {
-            TagKey.title: TagSemantics(allowedEncodings: {'UTF-8'}),
+            TagKey.title: TagSemantics(allowedEncodings: _utf8Only),
           },
         );
         expect(encodingConstraint.hasConstraints, equals(true));
@@ -684,29 +698,29 @@ void main() {
           containerVersion: '2.4',
           semanticsByKey: {
             TagKey.title: TagSemantics(
-              allowedEncodings: {'ISO-8859-1', 'UTF-16', 'UTF-8'},
+              allowedEncodings: _id3v24Encodings,
             ),
             TagKey.artist: TagSemantics(
-              allowedEncodings: {'ISO-8859-1', 'UTF-16', 'UTF-8'},
+              allowedEncodings: _id3v24Encodings,
             ),
             TagKey.album: TagSemantics(
-              allowedEncodings: {'ISO-8859-1', 'UTF-16', 'UTF-8'},
+              allowedEncodings: _id3v24Encodings,
             ),
             TagKey.genre: TagSemantics(multiValued: false),
             TagKey.artwork: TagSemantics(multiValued: true),
             TagKey.rating: TagSemantics(minValue: 0, maxValue: 255),
             TagKey.dateRecorded: TagSemantics(),
             TagKey.lyrics: TagSemantics(
-              allowedEncodings: {'ISO-8859-1', 'UTF-16', 'UTF-8'},
+              allowedEncodings: _id3v24Encodings,
             ),
           },
         );
 
         // Test UTF-8 support (ID3v2.4 feature)
         final titleSemantics = id3v24Capability.semantics(TagKey.title);
-        expect(titleSemantics.isValidEncoding('UTF-8'), equals(true));
-        expect(titleSemantics.isValidEncoding('UTF-16'), equals(true));
-        expect(titleSemantics.isValidEncoding('ISO-8859-1'), equals(true));
+        expect(titleSemantics.supportsEncoding(TextEncoding.utf8), equals(true));
+        expect(titleSemantics.supportsEncoding(TextEncoding.utf16), equals(true));
+        expect(titleSemantics.supportsEncoding(TextEncoding.iso88591), equals(true));
 
         // Test multi-valued artwork support
         final artworkSemantics = id3v24Capability.semantics(TagKey.artwork);
@@ -731,38 +745,38 @@ void main() {
           containerVersion: '',
           semanticsByKey: {
             TagKey.title: TagSemantics(
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
             TagKey.artist: TagSemantics(
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
             TagKey.album: TagSemantics(
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
             TagKey.genre: TagSemantics(
               multiValued: true,
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
             TagKey.artwork: TagSemantics(multiValued: true),
             TagKey.trackNumber: TagSemantics(
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
             TagKey.discNumber: TagSemantics(
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
           },
         );
 
         // Test UTF-8 only encoding
         final titleSemantics = vorbisCapability.semantics(TagKey.title);
-        expect(titleSemantics.isValidEncoding('UTF-8'), equals(true));
-        expect(titleSemantics.isValidEncoding('UTF-16'), equals(false));
-        expect(titleSemantics.isValidEncoding('ISO-8859-1'), equals(false));
+        expect(titleSemantics.supportsEncoding(TextEncoding.utf8), equals(true));
+        expect(titleSemantics.supportsEncoding(TextEncoding.utf16), equals(false));
+        expect(titleSemantics.supportsEncoding(TextEncoding.iso88591), equals(false));
 
         // Test multi-valued genre support (native Vorbis feature)
         final genreSemantics = vorbisCapability.semantics(TagKey.genre);
         expect(genreSemantics.multiValued, equals(true));
-        expect(genreSemantics.isValidEncoding('UTF-8'), equals(true));
+        expect(genreSemantics.supportsEncoding(TextEncoding.utf8), equals(true));
 
         // Test multi-valued artwork support
         final artworkSemantics = vorbisCapability.semantics(TagKey.artwork);
@@ -778,36 +792,36 @@ void main() {
           containerVersion: '',
           semanticsByKey: {
             TagKey.title: TagSemantics(
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
             TagKey.artist: TagSemantics(
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
             TagKey.album: TagSemantics(
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
             TagKey.genre: TagSemantics(
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
             TagKey.artwork: TagSemantics(multiValued: true),
             TagKey.trackNumber: TagSemantics(),
             TagKey.discNumber: TagSemantics(),
             TagKey.year: TagSemantics(),
             TagKey.custom: TagSemantics(
-              allowedEncodings: {'UTF-8'},
+              allowedEncodings: _utf8Only,
             ),
           },
         );
 
         // Test UTF-8 encoding for text fields
         final titleSemantics = mp4Capability.semantics(TagKey.title);
-        expect(titleSemantics.isValidEncoding('UTF-8'), equals(true));
-        expect(titleSemantics.isValidEncoding('UTF-16'), equals(false));
+        expect(titleSemantics.supportsEncoding(TextEncoding.utf8), equals(true));
+        expect(titleSemantics.supportsEncoding(TextEncoding.utf16), equals(false));
 
         // Test custom field support (freeform atoms)
         expect(mp4Capability.supports(TagKey.custom), equals(true));
         final customSemantics = mp4Capability.semantics(TagKey.custom);
-        expect(customSemantics.isValidEncoding('UTF-8'), equals(true));
+        expect(customSemantics.supportsEncoding(TextEncoding.utf8), equals(true));
 
         // Test multi-valued artwork
         final artworkSemantics = mp4Capability.semantics(TagKey.artwork);
@@ -836,10 +850,10 @@ void main() {
             containerVersion: '2.3',
             semanticsByKey: {
               TagKey.title: TagSemantics(
-                allowedEncodings: {'ISO-8859-1', 'UTF-16'},
+                allowedEncodings: _id3v23Encodings,
               ),
               TagKey.artist: TagSemantics(
-                allowedEncodings: {'ISO-8859-1', 'UTF-16'},
+                allowedEncodings: _id3v23Encodings,
               ),
               TagKey.artwork: TagSemantics(multiValued: true),
             },
@@ -849,10 +863,10 @@ void main() {
             containerVersion: '2.4',
             semanticsByKey: {
               TagKey.title: TagSemantics(
-                allowedEncodings: {'ISO-8859-1', 'UTF-16', 'UTF-8'},
+                allowedEncodings: _id3v24Encodings,
               ),
               TagKey.artist: TagSemantics(
-                allowedEncodings: {'ISO-8859-1', 'UTF-16', 'UTF-8'},
+                allowedEncodings: _id3v24Encodings,
               ),
               TagKey.artwork: TagSemantics(multiValued: true),
               TagKey.dateRecorded: TagSemantics(),
@@ -872,7 +886,7 @@ void main() {
           (cap) => cap.containerKind == ContainerKind.id3v2 && cap.containerVersion == '2.4',
         );
         expect(id3v24.supports(TagKey.dateRecorded), equals(true));
-        expect(id3v24.semantics(TagKey.title).isValidEncoding('UTF-8'), equals(true));
+        expect(id3v24.semantics(TagKey.title).supportsEncoding(TextEncoding.utf8), equals(true));
       });
 
       test('can filter capabilities by supported field', () {
@@ -902,7 +916,7 @@ void main() {
 
         expect(mostCapable.containerKind, equals(ContainerKind.id3v2));
         expect(mostCapable.containerVersion, equals('2.4'));
-        expect(mostCapable.semantics(TagKey.title).isValidEncoding('UTF-8'), equals(true));
+        expect(mostCapable.semantics(TagKey.title).supportsEncoding(TextEncoding.utf8), equals(true));
       });
 
       test('can validate field value against multiple capabilities', () {

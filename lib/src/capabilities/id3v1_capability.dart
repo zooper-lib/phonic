@@ -3,6 +3,18 @@ import '../format_constraints.dart';
 import '../tag_capability.dart';
 import '../tag_key.dart';
 import '../tag_semantics.dart';
+import '../text_encoding.dart';
+
+/// Encoding set for ID3v1 text fields with Latin-1 only support.
+///
+/// ID3v1 only supports ISO-8859-1 (Latin-1) encoding, providing basic
+/// Western European character support but no Unicode capabilities.
+///
+/// Corresponds to:
+/// - [TextEncoding.iso88591]: ISO-8859-1 (Latin-1)
+const Set<String> _id3v1TextEncodings = {
+  'ISO-8859-1', // TextEncoding.iso88591.standardName
+};
 
 /// ID3v1 metadata capability definition with format-specific constraints.
 ///
@@ -62,7 +74,7 @@ const id3v1Capability = TagCapability(
     TagKey.title: TagSemantics(
       maxTextLength: ID3v1Constraints.maxTextLength,
       multiValued: false,
-      allowedEncodings: {'ISO-8859-1'},
+      allowedEncodings: _id3v1TextEncodings,
     ),
 
     /// Artist field: 30-character limit, single value only.
@@ -72,7 +84,7 @@ const id3v1Capability = TagCapability(
     TagKey.artist: TagSemantics(
       maxTextLength: ID3v1Constraints.maxTextLength,
       multiValued: false,
-      allowedEncodings: {'ISO-8859-1'},
+      allowedEncodings: _id3v1TextEncodings,
     ),
 
     /// Album field: 30-character limit, single value only.
@@ -82,7 +94,7 @@ const id3v1Capability = TagCapability(
     TagKey.album: TagSemantics(
       maxTextLength: ID3v1Constraints.maxTextLength,
       multiValued: false,
-      allowedEncodings: {'ISO-8859-1'},
+      allowedEncodings: _id3v1TextEncodings,
     ),
 
     /// Year field: exactly 4 characters, single value only.
@@ -93,7 +105,7 @@ const id3v1Capability = TagCapability(
     TagKey.year: TagSemantics(
       maxTextLength: ID3v1Constraints.yearLength,
       multiValued: false,
-      allowedEncodings: {'ISO-8859-1'},
+      allowedEncodings: _id3v1TextEncodings,
     ),
 
     /// Comment field: 30 characters normally, 28 when track number is present.
@@ -109,7 +121,7 @@ const id3v1Capability = TagCapability(
     TagKey.comment: TagSemantics(
       maxTextLength: ID3v1Constraints.commentLengthWithTrack, // Conservative limit when track number is present
       multiValued: false,
-      allowedEncodings: {'ISO-8859-1'},
+      allowedEncodings: _id3v1TextEncodings,
     ),
 
     /// Track number: single byte value (1-255).

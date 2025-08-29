@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/tag_semantics.dart';
+import 'package:phonic/src/text_encoding.dart';
 
 void main() {
   group('TagSemantics', () {
@@ -27,7 +28,7 @@ void main() {
         expect(semantics.maxTextLength, equals(30));
         expect(semantics.minValue, equals(0));
         expect(semantics.maxValue, equals(100));
-        expect(semantics.allowedEncodings, equals({'UTF-8', 'UTF-16'}));
+        expect(semantics.allowedEncodings, equals({TextEncoding.utf8.standardName, TextEncoding.utf16.standardName}));
       });
 
       test('creates instance with partial parameters', () {
@@ -65,7 +66,7 @@ void main() {
         expect(semantics.maxTextLength, isNull);
         expect(semantics.minValue, isNull);
         expect(semantics.maxValue, isNull);
-        expect(semantics.allowedEncodings, equals({'ISO-8859-1'}));
+        expect(semantics.allowedEncodings, equals({TextEncoding.iso88591.standardName}));
       });
     });
 
@@ -92,7 +93,7 @@ void main() {
 
       test('hasEncodingRestrictions returns correct values', () {
         const noRestrictions = TagSemantics();
-        const withRestrictions = TagSemantics(allowedEncodings: {'UTF-8'});
+        const withRestrictions = TagSemantics(allowedEncodings: {'UTF-8'}); // TextEncoding.utf8.standardName
 
         expect(noRestrictions.hasEncodingRestrictions, equals(false));
         expect(withRestrictions.hasEncodingRestrictions, equals(true));
@@ -103,7 +104,7 @@ void main() {
         const multiValued = TagSemantics(multiValued: true);
         const withLength = TagSemantics(maxTextLength: 30);
         const withRange = TagSemantics(minValue: 0);
-        const withEncoding = TagSemantics(allowedEncodings: {'UTF-8'});
+        const withEncoding = TagSemantics(allowedEncodings: {'UTF-8'}); // TextEncoding.utf8.standardName
 
         expect(noConstraints.hasConstraints, equals(false));
         expect(multiValued.hasConstraints, equals(true));
@@ -210,15 +211,15 @@ void main() {
       test('returns true when no encoding restrictions are set', () {
         const semantics = TagSemantics();
 
-        expect(semantics.isValidEncoding('UTF-8'), equals(true));
-        expect(semantics.isValidEncoding('UTF-16'), equals(true));
-        expect(semantics.isValidEncoding('ISO-8859-1'), equals(true));
+        expect(semantics.isValidEncoding(TextEncoding.utf8.standardName), equals(true));
+        expect(semantics.isValidEncoding(TextEncoding.utf16.standardName), equals(true));
+        expect(semantics.isValidEncoding(TextEncoding.iso88591.standardName), equals(true));
         expect(semantics.isValidEncoding('UNKNOWN'), equals(true));
       });
 
       test('validates against allowedEncodings set', () {
         const semantics = TagSemantics(
-          allowedEncodings: {'UTF-8', 'UTF-16'},
+          allowedEncodings: {'UTF-8', 'UTF-16'}, // TextEncoding.utf8/utf16.standardName
         );
 
         expect(semantics.isValidEncoding('UTF-8'), equals(true));

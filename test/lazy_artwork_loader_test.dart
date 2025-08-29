@@ -284,7 +284,7 @@ void main() {
       test('works as dataLoader for ArtworkData', () async {
         final loader = LazyArtworkLoader(containerBytes, 20, 10);
         final artworkData = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           description: 'Test artwork',
           dataLoader: () => loader.load(),
@@ -303,13 +303,13 @@ void main() {
         final loader = LazyArtworkLoader(containerBytes, 25, 5);
 
         final artwork1 = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           dataLoader: () => loader.load(),
         );
 
         final artwork2 = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           dataLoader: () => loader.load(),
         );
@@ -329,13 +329,13 @@ void main() {
         final loader2 = LazyArtworkLoader(containerBytes, 30, 5);
 
         final artwork1 = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           dataLoader: () => loader1.load(),
         );
 
         final artwork2 = ArtworkData(
-          mimeType: 'image/png',
+          mimeType: MimeType.png.standardName,
           type: ArtworkType.backCover,
           dataLoader: () => loader2.load(),
         );

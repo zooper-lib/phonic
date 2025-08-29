@@ -6,6 +6,7 @@ import 'package:phonic/src/artwork_type.dart';
 import 'package:phonic/src/container_kind.dart';
 import 'package:phonic/src/lazy_artwork_loader.dart';
 import 'package:phonic/src/metadata_tag.dart';
+import 'package:phonic/src/mime_type.dart';
 import 'package:phonic/src/tag_confidence.dart';
 import 'package:phonic/src/tag_key.dart';
 import 'package:phonic/src/tag_provenance.dart';
@@ -25,7 +26,7 @@ void main() {
       ]);
 
       testArtworkData = ArtworkData(
-        mimeType: 'image/jpeg',
+        mimeType: MimeType.jpeg.standardName,
         type: ArtworkType.frontCover,
         description: 'Test album cover',
         dataLoader: () async => testImageBytes,
@@ -63,7 +64,7 @@ void main() {
       test('creates instance with different artwork types', () {
         for (final artworkType in ArtworkType.values) {
           final artworkData = ArtworkData(
-            mimeType: 'image/png',
+            mimeType: MimeType.png.standardName,
             type: artworkType,
             dataLoader: () async => testImageBytes,
           );
@@ -75,7 +76,12 @@ void main() {
       });
 
       test('creates instance with different MIME types', () {
-        final mimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        final mimeTypes = [
+          MimeType.jpeg.standardName,
+          MimeType.png.standardName,
+          MimeType.gif.standardName,
+          MimeType.webp.standardName,
+        ];
 
         for (final mimeType in mimeTypes) {
           final artworkData = ArtworkData(
@@ -92,7 +98,7 @@ void main() {
       test('creates instance with and without description', () {
         // With description
         final artworkWithDesc = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.backCover,
           description: 'Back cover artwork',
           dataLoader: () async => testImageBytes,
@@ -103,7 +109,7 @@ void main() {
 
         // Without description
         final artworkWithoutDesc = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.backCover,
           dataLoader: () async => testImageBytes,
         );
@@ -222,12 +228,12 @@ void main() {
 
       test('not equal with different artwork data', () {
         final artworkData1 = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           dataLoader: () async => testImageBytes,
         );
         final artworkData2 = ArtworkData(
-          mimeType: 'image/png',
+          mimeType: MimeType.png.standardName,
           type: ArtworkType.frontCover,
           dataLoader: () async => testImageBytes,
         );
@@ -266,13 +272,13 @@ void main() {
 
       test('equal artwork data with different loaders but same metadata', () {
         final artworkData1 = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           description: 'Cover',
           dataLoader: () async => testImageBytes,
         );
         final artworkData2 = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           description: 'Cover',
           dataLoader: () async => Uint8List.fromList([1, 2, 3]), // Different loader
@@ -291,7 +297,7 @@ void main() {
         final tag = ArtworkTag(testArtworkData);
 
         // These should be accessible immediately without async operations
-        expect(tag.value.mimeType, equals('image/jpeg'));
+        expect(tag.value.mimeType, equals(MimeType.jpeg.standardName));
         expect(tag.value.type, equals(ArtworkType.frontCover));
         expect(tag.value.description, equals('Test album cover'));
       });
@@ -314,7 +320,7 @@ void main() {
 
         final loader = LazyArtworkLoader(containerBytes, 50, testImageBytes.length);
         final artworkData = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           description: 'Lazy loaded cover',
           dataLoader: () => loader.load(),
@@ -322,7 +328,7 @@ void main() {
         final tag = ArtworkTag(artworkData);
 
         // Verify metadata is accessible
-        expect(tag.value.mimeType, equals('image/jpeg'));
+        expect(tag.value.mimeType, equals(MimeType.jpeg.standardName));
         expect(tag.value.type, equals(ArtworkType.frontCover));
         expect(tag.value.description, equals('Lazy loaded cover'));
 
@@ -333,14 +339,14 @@ void main() {
 
       test('handles loading errors gracefully', () async {
         final artworkDataWithError = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           dataLoader: () async => throw Exception('Loading failed'),
         );
         final tag = ArtworkTag(artworkDataWithError);
 
         // Metadata should still be accessible
-        expect(tag.value.mimeType, equals('image/jpeg'));
+        expect(tag.value.mimeType, equals(MimeType.jpeg.standardName));
         expect(tag.value.type, equals(ArtworkType.frontCover));
 
         // Loading should throw the expected error
@@ -452,7 +458,7 @@ void main() {
         }
 
         final artworkData = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           dataLoader: () async => largeImageBytes,
         );
@@ -466,7 +472,7 @@ void main() {
       test('handles empty image data', () async {
         final emptyImageBytes = Uint8List(0);
         final artworkData = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           dataLoader: () async => emptyImageBytes,
         );
@@ -479,7 +485,7 @@ void main() {
 
       test('handles unicode characters in description', () {
         final artworkData = ArtworkData(
-          mimeType: 'image/jpeg',
+          mimeType: MimeType.jpeg.standardName,
           type: ArtworkType.frontCover,
           description: '🎵 Album cover with émojis and ñ special chars 中文',
           dataLoader: () async => testImageBytes,
@@ -492,7 +498,7 @@ void main() {
       test('handles all artwork types', () {
         for (final artworkType in ArtworkType.values) {
           final artworkData = ArtworkData(
-            mimeType: 'image/png',
+            mimeType: MimeType.png.standardName,
             type: artworkType,
             description: 'Test ${artworkType.name}',
             dataLoader: () async => testImageBytes,

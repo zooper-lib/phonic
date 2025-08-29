@@ -158,13 +158,13 @@ void main() {
       test('genre field supports null-terminated multi-values', () {
         final genreSemantics = id3v24Capability.semantics(TagKey.genre);
         expect(genreSemantics.multiValued, isTrue);
-        expect(genreSemantics.allowedEncodings?.contains('UTF-8'), isTrue);
+        expect(genreSemantics.allowedEncodings?.contains(TextEncoding.utf8.standardName), isTrue);
       });
 
       test('date recorded field uses unified TDRC frame semantics', () {
         final dateSemantics = id3v24Capability.semantics(TagKey.dateRecorded);
         expect(dateSemantics.multiValued, isFalse);
-        expect(dateSemantics.allowedEncodings?.contains('UTF-8'), isTrue);
+        expect(dateSemantics.allowedEncodings?.contains(TextEncoding.utf8.standardName), isTrue);
       });
 
       test('all text fields support UTF-8 encoding', () {
