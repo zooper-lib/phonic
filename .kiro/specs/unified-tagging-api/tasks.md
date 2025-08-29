@@ -259,7 +259,6 @@
 
 - [x] 31. Define ID3v1 capability constants
 
-
   - Create id3v1Capability constant with supported fields and length limits
   - Include 30-character limits for text fields and 28 for comment with track
   - Write unit tests verifying capability definitions
@@ -267,19 +266,17 @@
 
 - [x] 32. Define ID3v2.3 capability constants
 
-
-
-
   - Create id3v23Capability constant with all supported ID3v2.3 fields
   - Include rating range 0-255 and BPM constraints
   - Write unit tests verifying capability definitions
   - _Requirements: 5.1, 10.1_
 
-- [ ] 33. Define ID3v2.4 capability constants
+- [x] 33. Define ID3v2.4 capability constants
 
   - Create id3v24Capability constant extending v2.3 with TDRC support
   - Include UTF-8 encoding support differences from v2.3
   - Write unit tests verifying capability definitions
+
   - _Requirements: 5.1, 10.1_
 
 - [ ] 34. Define Vorbis capability constants
