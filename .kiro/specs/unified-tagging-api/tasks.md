@@ -68,7 +68,6 @@
 
 - [x] 10. Implement GenreTag class
 
-
   - Create GenreTag extending MetadataTag<List<String>>
   - Implement constructor with TagKey.genre accepting List<String> of genres
   - Add convenience constructor accepting single String genre
@@ -79,14 +78,20 @@
   - Test edge cases: empty strings, single genres, mixed delimiters, whitespace handling
   - _Requirements: 3.1, 9.1_
 
-- [ ] 10a. Update MetadataTag base class for GenreTag
+- [x] 10a. Update MetadataTag base class for GenreTag
+
 
   - Add GenreTag to the part files in metadata_tag.dart
   - Update documentation examples to include GenreTag usage with multi-delimiter support
   - Ensure type safety for List<String> generic parameter
   - _Requirements: 3.1, 9.1_
 
-- [ ] 10b. Create comprehensive GenreTag format tests
+- [x] 10b. Create comprehensive GenreTag format tests
+
+
+
+
+
 
   - Test ID3v2.4 null-terminated parsing and encoding (`Rock\0Alternative\0Indie`)
   - Test ID3v2.3 slash-separated parsing and encoding (`Rock/Alternative/Indie`)

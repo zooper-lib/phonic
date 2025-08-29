@@ -29,6 +29,7 @@ part 'tags/genre_tag.dart';
 /// The generic type parameter [T] ensures type safety for tag values:
 /// - String for text fields (title, artist, album, etc.)
 /// - int for numeric fields (trackNumber, year, rating, etc.)
+/// - List<String> for multi-valued text fields (genre)
 /// - ArtworkData for artwork fields
 /// - Other specialized types as needed
 ///
@@ -42,6 +43,20 @@ part 'tags/genre_tag.dart';
 ///   'Artist Name',
 ///   provenance: TagProvenance(ContainerKind.id3v2, '2.4', TagConfidence.certain),
 /// );
+///
+/// // Creating multi-genre tags with automatic delimiter detection
+/// final genreTag = GenreTag.fromString('Rock;Alternative;Indie');
+/// final genreFromSlash = GenreTag.fromString('Rock/Alternative/Indie');
+/// final genreFromComma = GenreTag.fromString('Rock, Alternative, Indie');
+/// // All result in: ['Rock', 'Alternative', 'Indie']
+///
+/// // Creating single genre tags
+/// final singleGenre = GenreTag.single('Jazz');
+/// final multiGenre = GenreTag(['Electronic', 'Ambient', 'Downtempo']);
+///
+/// // Format-specific genre parsing for container compatibility
+/// final id3v24Genre = GenreTag.fromId3v24String('Rock\0Alternative\0Indie');
+/// final id3v23Genre = GenreTag.fromId3v23String('Rock/Alternative/Indie');
 ///
 /// // Updating provenance immutably
 /// final updatedTag = titleTag.withProvenance(
@@ -65,10 +80,14 @@ sealed class MetadataTag<T> extends Equatable {
   ///
   /// The type of this value is determined by the generic parameter [T]
   /// and corresponds to the semantic meaning of the tag key:
-  /// - Text fields use String values
-  /// - Numeric fields use int values
+  /// - Text fields use String values (title, artist, album, etc.)
+  /// - Numeric fields use int values (trackNumber, year, rating, etc.)
+  /// - Multi-valued text fields use List<String> values (genre)
   /// - Artwork fields use ArtworkData values
   /// - Custom fields may use specialized types
+  ///
+  /// For List<String> values like GenreTag, the list is made immutable
+  /// to ensure thread safety and prevent accidental modifications.
   ///
   /// Values are immutable once created. To change a value, create a new
   /// tag instance or use transformation methods like [withProvenance].
