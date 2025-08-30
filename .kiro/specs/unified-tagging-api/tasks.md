@@ -377,14 +377,24 @@
   - Write unit tests for OGG format detection
   - _Requirements: 10.3_
 
-- [ ] 48. Implement OpusFormatStrategy class
+- [x] 48. Implement OpusFormatStrategy class
+
+
+
+
+
 
   - Create OpusFormatStrategy with Vorbis-only precedence and fanout
   - Implement canHandle method checking for Opus signature
   - Write unit tests for Opus format detection
   - _Requirements: 10.3_
 
-- [ ] 49. Implement Mp4FormatStrategy class
+- [x] 49. Implement Mp4FormatStrategy class
+
+
+
+
+
 
   - Create Mp4FormatStrategy with MP4 atom-only precedence and fanout
   - Implement canHandle method checking for MP4/M4A signatures
