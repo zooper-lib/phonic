@@ -1,4 +1,4 @@
-import '../tag_key.dart';
+import '../../core/tag_key.dart';
 
 /// Mapping table for MP4 atom identifiers.
 ///

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/mime_type.dart';
+import 'package:phonic/src/core/mime_type.dart';
 
 void main() {
   group('MimeType', () {

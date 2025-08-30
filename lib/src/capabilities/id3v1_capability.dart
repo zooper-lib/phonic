@@ -1,9 +1,9 @@
-import '../container_kind.dart';
-import '../format_constraints.dart';
-import '../tag_capability.dart';
-import '../tag_key.dart';
-import '../tag_semantics.dart';
-import '../text_encoding.dart';
+import '../core/container_kind.dart';
+import '../core/format_constraints.dart';
+import '../core/tag_capability.dart';
+import '../core/tag_key.dart';
+import '../core/tag_semantics.dart';
+import '../core/text_encoding.dart';
 
 /// Encoding set for ID3v1 text fields with Latin-1 only support.
 ///

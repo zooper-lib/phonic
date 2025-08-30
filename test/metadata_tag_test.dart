@@ -1,17 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/container_kind.dart';
-import 'package:phonic/src/metadata_tag.dart';
-import 'package:phonic/src/tag_confidence.dart';
-import 'package:phonic/src/tag_key.dart';
-import 'package:phonic/src/tag_provenance.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/metadata_tag.dart';
+import 'package:phonic/src/core/tag_confidence.dart';
+import 'package:phonic/src/core/tag_key.dart';
+import 'package:phonic/src/core/tag_provenance.dart';
 
 void main() {
   group('MetadataTag', () {
     group('constructor', () {
       test('creates instance with all required parameters', () {
-        const tag = TestStringTag(
+        const tag = TitleTag(
           'Test Value',
-          key: TagKey.title,
           provenance: TagProvenance(
             ContainerKind.id3v2,
             '2.4',
@@ -27,7 +26,7 @@ void main() {
       });
 
       test('creates instance with default provenance', () {
-        const tag = TestStringTag('Test Value');
+        const tag = TitleTag('Test Value');
 
         expect(tag.value, equals('Test Value'));
         expect(tag.key, equals(TagKey.title));
@@ -35,8 +34,8 @@ void main() {
       });
 
       test('creates instance with different value types', () {
-        const stringTag = TestStringTag('String Value');
-        const intTag = TestIntTag(42);
+        const stringTag = TitleTag('String Value');
+        final intTag = TrackNumberTag(42);
 
         expect(stringTag.value, isA<String>());
         expect(stringTag.value, equals('String Value'));
@@ -44,17 +43,23 @@ void main() {
         expect(intTag.value, equals(42));
       });
 
-      test('creates instance with all tag keys', () {
-        for (final key in TagKey.values) {
-          final tag = TestStringTag('Test', key: key);
-          expect(tag.key, equals(key));
-        }
+      test('creates instance with different tag keys', () {
+        // Each tag class has its specific key
+        const titleTag = TitleTag('Test');
+        const artistTag = ArtistTag('Artist Name');
+        const albumTag = AlbumTag('Album Name');
+        final trackTag = TrackNumberTag(1);
+
+        expect(titleTag.key, equals(TagKey.title));
+        expect(artistTag.key, equals(TagKey.artist));
+        expect(albumTag.key, equals(TagKey.album));
+        expect(trackTag.key, equals(TagKey.trackNumber));
       });
 
       test('creates instance with all container kinds in provenance', () {
         for (final kind in ContainerKind.values) {
           final provenance = TagProvenance(kind, 'v1', TagConfidence.certain);
-          final tag = TestStringTag('Test', provenance: provenance);
+          final tag = TitleTag('Test', provenance: provenance);
           expect(tag.provenance.containerKind, equals(kind));
         }
       });
@@ -62,7 +67,7 @@ void main() {
       test('creates instance with all confidence levels in provenance', () {
         for (final confidence in TagConfidence.values) {
           final provenance = TagProvenance(ContainerKind.id3v2, '2.4', confidence);
-          final tag = TestStringTag('Test', provenance: provenance);
+          final tag = TitleTag('Test', provenance: provenance);
           expect(tag.provenance.confidence, equals(confidence));
         }
       });
@@ -70,7 +75,7 @@ void main() {
 
     group('withProvenance', () {
       test('returns new instance with updated provenance', () {
-        const originalTag = TestStringTag(
+        const originalTag = TitleTag(
           'Original Value',
           provenance: TagProvenance(ContainerKind.id3v1, 'v1', TagConfidence.certain),
         );
@@ -98,8 +103,8 @@ void main() {
       });
 
       test('returns correct concrete type', () {
-        const stringTag = TestStringTag('Test');
-        const intTag = TestIntTag(42);
+        const stringTag = TitleTag('Test');
+        final intTag = TrackNumberTag(42);
 
         const newProvenance = TagProvenance(
           ContainerKind.vorbis,
@@ -110,16 +115,15 @@ void main() {
         final updatedStringTag = stringTag.withProvenance(newProvenance);
         final updatedIntTag = intTag.withProvenance(newProvenance);
 
-        expect(updatedStringTag, isA<TestStringTag>());
-        expect(updatedIntTag, isA<TestIntTag>());
+        expect(updatedStringTag, isA<TitleTag>());
+        expect(updatedIntTag, isA<TrackNumberTag>());
         expect(updatedStringTag.value, isA<String>());
         expect(updatedIntTag.value, isA<int>());
       });
 
       test('preserves value and key exactly', () {
-        const originalTag = TestStringTag(
+        const originalTag = CommentTag(
           'Complex Value with Special Characters: éñ中文🎵',
-          key: TagKey.comment,
         );
 
         const newProvenance = TagProvenance(
@@ -136,7 +140,7 @@ void main() {
       });
 
       test('works with none provenance', () {
-        const originalTag = TestStringTag(
+        const originalTag = TitleTag(
           'Test',
           provenance: TagProvenance(ContainerKind.id3v2, '2.4', TagConfidence.certain),
         );
@@ -159,14 +163,10 @@ void main() {
           TagConfidence.certain,
         );
 
-        const tag1 = TestStringTag(
-          'Same Value',
-          key: TagKey.artist,
+        const tag1 = ArtistTag('Same Value',
           provenance: provenance,
         );
-        const tag2 = TestStringTag(
-          'Same Value',
-          key: TagKey.artist,
+        const tag2 = ArtistTag('Same Value',
           provenance: provenance,
         );
 
@@ -175,15 +175,15 @@ void main() {
       });
 
       test('not equal with different values', () {
-        const tag1 = TestStringTag('Value 1');
-        const tag2 = TestStringTag('Value 2');
+        const tag1 = TitleTag('Value 1');
+        const tag2 = TitleTag('Value 2');
 
         expect(tag1, isNot(equals(tag2)));
       });
 
       test('not equal with different keys', () {
-        const tag1 = TestStringTag('Same Value', key: TagKey.title);
-        const tag2 = TestStringTag('Same Value', key: TagKey.artist);
+        const tag1 = TitleTag('Same Value'); // key: TagKey.title
+        const tag2 = ArtistTag('Same Value'); // key: TagKey.artist
 
         expect(tag1, isNot(equals(tag2)));
       });
@@ -200,22 +200,22 @@ void main() {
           TagConfidence.certain,
         );
 
-        const tag1 = TestStringTag('Same Value', provenance: provenance1);
-        const tag2 = TestStringTag('Same Value', provenance: provenance2);
+        const tag1 = TitleTag('Same Value', provenance: provenance1);
+        const tag2 = TitleTag('Same Value', provenance: provenance2);
 
         expect(tag1, isNot(equals(tag2)));
       });
 
       test('not equal between different tag types with same value', () {
-        const stringTag = TestStringTag('42');
-        const intTag = TestIntTag(42);
+        const stringTag = TitleTag('42');
+        final intTag = TrackNumberTag(42);
 
         expect(stringTag, isNot(equals(intTag)));
       });
 
       test('equal with default provenance', () {
-        const tag1 = TestStringTag('Test');
-        const tag2 = TestStringTag('Test');
+        const tag1 = TitleTag('Test');
+        const tag2 = TitleTag('Test');
 
         expect(tag1, equals(tag2));
         expect(tag1.hashCode, equals(tag2.hashCode));
@@ -229,9 +229,8 @@ void main() {
           '',
           TagConfidence.inferred,
         );
-        const tag = TestStringTag(
+        const tag = AlbumTag(
           'Test Value',
-          key: TagKey.album,
           provenance: provenance,
         );
 
@@ -242,8 +241,8 @@ void main() {
       });
 
       test('props support different value types', () {
-        const stringTag = TestStringTag('String');
-        const intTag = TestIntTag(123);
+        const stringTag = TitleTag('String');
+        final intTag = TrackNumberTag(123);
 
         expect(stringTag.props[0], isA<String>());
         expect(stringTag.props[0], equals('String'));
@@ -254,10 +253,10 @@ void main() {
 
     group('toString', () {
       test('returns formatted string with class name and value', () {
-        const tag = TestStringTag('Test Value');
+        const tag = TitleTag('Test Value');
         final result = tag.toString();
 
-        expect(result, contains('TestStringTag'));
+        expect(result, contains('TitleTag'));
         expect(result, contains('Test Value'));
         expect(result, contains('TagProvenance.none()'));
       });
@@ -268,48 +267,46 @@ void main() {
           '2.4',
           TagConfidence.certain,
         );
-        const tag = TestStringTag('Test', provenance: provenance);
+        const tag = TitleTag('Test', provenance: provenance);
         final result = tag.toString();
 
-        expect(result, contains('TestStringTag'));
+        expect(result, contains('TitleTag'));
         expect(result, contains('Test'));
         expect(result, contains('TagProvenance(id3v2 v2.4, certain)'));
       });
 
       test('handles different value types correctly', () {
-        const stringTag = TestStringTag('String Value');
-        const intTag = TestIntTag(42);
+        const stringTag = TitleTag('String Value');
+        final intTag = TrackNumberTag(42);
 
         final stringResult = stringTag.toString();
         final intResult = intTag.toString();
 
         expect(stringResult, contains('String Value'));
         expect(intResult, contains('42'));
-        expect(stringResult, contains('TestStringTag'));
-        expect(intResult, contains('TestIntTag'));
+        expect(stringResult, contains('TitleTag'));
+        expect(intResult, contains('TrackNumberTag'));
       });
 
       test('handles special characters in values', () {
-        const tag = TestStringTag('Special: éñ中文🎵');
+        const tag = TitleTag('Special: éñ中文🎵');
         final result = tag.toString();
 
         expect(result, contains('Special: éñ中文🎵'));
       });
 
       test('handles empty and null-like values', () {
-        const emptyTag = TestStringTag('');
-        const zeroTag = TestIntTag(0);
+        const emptyTag = TitleTag('');
+        final validTag = TrackNumberTag(1); // Use a valid track number
 
-        expect(emptyTag.toString(), contains('TestStringTag('));
-        expect(zeroTag.toString(), contains('TestIntTag(0'));
+        expect(emptyTag.toString(), contains('TitleTag('));
+        expect(validTag.toString(), contains('TrackNumberTag(1'));
       });
     });
 
     group('immutability', () {
       test('all fields are final and cannot be modified', () {
-        const tag = TestStringTag(
-          'Immutable Value',
-          key: TagKey.title,
+        const tag = TitleTag('Immutable Value',
           provenance: TagProvenance(ContainerKind.id3v2, '2.4', TagConfidence.certain),
         );
 
@@ -321,9 +318,7 @@ void main() {
 
       test('const constructor creates compile-time constants', () {
         // This should compile as a const expression
-        const tag = TestStringTag(
-          'Const Value',
-          key: TagKey.artist,
+        const tag = ArtistTag('Const Value',
           provenance: TagProvenance.none(),
         );
 
@@ -332,7 +327,7 @@ void main() {
       });
 
       test('withProvenance returns new instance without modifying original', () {
-        const originalTag = TestStringTag('Original');
+        const originalTag = TitleTag('Original');
         const newProvenance = TagProvenance(
           ContainerKind.mp4,
           '1.0',
@@ -356,8 +351,8 @@ void main() {
 
     group('type safety', () {
       test('generic type parameter enforces value type', () {
-        const stringTag = TestStringTag('String');
-        const intTag = TestIntTag(42);
+        const stringTag = TitleTag('String');
+        final intTag = TrackNumberTag(42);
 
         expect(stringTag.value, isA<String>());
         expect(intTag.value, isA<int>());
@@ -366,15 +361,15 @@ void main() {
       });
 
       test('withProvenance maintains concrete type', () {
-        const originalStringTag = TestStringTag('Test');
-        const originalIntTag = TestIntTag(123);
+        const originalStringTag = TitleTag('Test');
+        final originalIntTag = TrackNumberTag(123);
         const newProvenance = TagProvenance.none();
 
         final newStringTag = originalStringTag.withProvenance(newProvenance);
         final newIntTag = originalIntTag.withProvenance(newProvenance);
 
-        expect(newStringTag, isA<TestStringTag>());
-        expect(newIntTag, isA<TestIntTag>());
+        expect(newStringTag, isA<TitleTag>());
+        expect(newIntTag, isA<TrackNumberTag>());
         expect(newStringTag.value, isA<String>());
         expect(newIntTag.value, isA<int>());
       });
@@ -383,34 +378,40 @@ void main() {
     group('edge cases', () {
       test('handles very long string values', () {
         final longValue = 'A' * 10000;
-        final tag = TestStringTag(longValue);
+        final tag = TitleTag(longValue);
 
         expect(tag.value, equals(longValue));
         expect(tag.value.length, equals(10000));
       });
 
-      test('handles negative integer values', () {
-        const tag = TestIntTag(-42);
-        expect(tag.value, equals(-42));
+      test('validates track number range', () {
+        // Test that TrackNumberTag validates its input
+        expect(() => TrackNumberTag(-42), throwsArgumentError);
+        expect(() => TrackNumberTag(0), throwsArgumentError);
+        
+        // Valid values should work
+        final validTag = TrackNumberTag(42);
+        expect(validTag.value, equals(42));
       });
 
-      test('handles zero and boundary values', () {
-        const zeroTag = TestIntTag(0);
-        const maxTag = TestIntTag(2147483647); // Max int32
-        const minTag = TestIntTag(-2147483648); // Min int32
+      test('handles boundary values correctly', () {
+        // Test maximum valid values for different tag types  
+        final maxTrack = TrackNumberTag(2147483647); // Max int32
+        final validYear = YearTag(2023); // Valid year
+        final validBpm = BpmTag(120); // Valid BPM
 
-        expect(zeroTag.value, equals(0));
-        expect(maxTag.value, equals(2147483647));
-        expect(minTag.value, equals(-2147483648));
+        expect(maxTrack.value, equals(2147483647));
+        expect(validYear.value, equals(2023));
+        expect(validBpm.value, equals(120));
       });
 
       test('handles unicode and emoji in string values', () {
-        const tag = TestStringTag('🎵 Music with émojis and ñ special chars 中文');
+        const tag = TitleTag('🎵 Music with émojis and ñ special chars 中文');
         expect(tag.value, equals('🎵 Music with émojis and ñ special chars 中文'));
       });
 
       test('handles empty string values', () {
-        const tag = TestStringTag('');
+        const tag = TitleTag('');
         expect(tag.value, equals(''));
         expect(tag.value.isEmpty, isTrue);
       });

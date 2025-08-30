@@ -1,4 +1,4 @@
-import '../tag_key.dart';
+import '../../core/tag_key.dart';
 
 /// Mapping tables for ID3v2 frame identifiers across different versions.
 ///

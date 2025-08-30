@@ -1,4 +1,4 @@
-import '../tag_key.dart';
+import '../core/tag_key.dart';
 import 'phonic_exception.dart';
 
 /// Exception thrown when tag validation fails due to constraint violations.

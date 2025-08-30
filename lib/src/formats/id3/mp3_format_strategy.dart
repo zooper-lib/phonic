@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'container_kind.dart';
-import 'exceptions/unsupported_format_exception.dart';
-import 'format_strategy.dart';
-import 'media_kind.dart';
+import '../../core/container_kind.dart';
+import '../../core/format_strategy.dart';
+import '../../core/media_kind.dart';
+import '../../exceptions/unsupported_format_exception.dart';
 
 /// Format strategy for MP3 audio files with ID3 metadata containers.
 ///

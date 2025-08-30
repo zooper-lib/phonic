@@ -1,15 +1,15 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/artwork_data.dart';
-import 'package:phonic/src/artwork_type.dart';
-import 'package:phonic/src/container_kind.dart';
-import 'package:phonic/src/lazy_artwork_loader.dart';
-import 'package:phonic/src/metadata_tag.dart';
-import 'package:phonic/src/mime_type.dart';
-import 'package:phonic/src/tag_confidence.dart';
-import 'package:phonic/src/tag_key.dart';
-import 'package:phonic/src/tag_provenance.dart';
+import 'package:phonic/src/core/artwork_data.dart';
+import 'package:phonic/src/core/artwork_type.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/metadata_tag.dart';
+import 'package:phonic/src/core/mime_type.dart';
+import 'package:phonic/src/core/tag_confidence.dart';
+import 'package:phonic/src/core/tag_key.dart';
+import 'package:phonic/src/core/tag_provenance.dart';
+import 'package:phonic/src/utils/lazy_artwork_loader.dart';
 
 void main() {
   group('ArtworkTag', () {

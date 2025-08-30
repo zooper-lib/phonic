@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/id3/id3v2_frame_map.dart';
-import 'package:phonic/src/tag_key.dart';
+import 'package:phonic/src/core/tag_key.dart';
+import 'package:phonic/src/formats/id3/id3v2_frame_map.dart';
 
 void main() {
   group('Id3v2FrameMap', () {

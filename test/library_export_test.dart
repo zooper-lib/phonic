@@ -24,8 +24,8 @@ void main() {
   });
 
   test('MetadataTag is exported from main library', () {
-    // This test verifies that MetadataTag and its test implementations can be imported
-    const tag = TestStringTag('Test Value');
+    // This test verifies that MetadataTag and its implementations can be imported
+    const tag = TitleTag('Test Value');
 
     expect(tag.value, equals('Test Value'));
     expect(tag.key, equals(TagKey.title));
@@ -33,7 +33,7 @@ void main() {
   });
 
   test('MetadataTag withProvenance works through main library', () {
-    const originalTag = TestStringTag('Test');
+    const originalTag = TitleTag('Test');
     const newProvenance = TagProvenance(
       ContainerKind.vorbis,
       '',
@@ -44,7 +44,7 @@ void main() {
 
     expect(updatedTag.value, equals('Test'));
     expect(updatedTag.provenance, equals(newProvenance));
-    expect(updatedTag, isA<TestStringTag>());
+    expect(updatedTag, isA<TitleTag>());
   });
 
   test('TitleTag is exported from main library', () {

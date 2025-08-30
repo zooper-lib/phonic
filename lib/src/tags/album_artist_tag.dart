@@ -1,4 +1,4 @@
-part of '../metadata_tag.dart';
+part of '../core/metadata_tag.dart';
 
 /// Represents an album artist metadata tag for audio files.
 ///

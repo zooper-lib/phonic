@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/exceptions/phonic_exception.dart';
 import 'package:phonic/src/exceptions/tag_validation_exception.dart';
-import 'package:phonic/src/tag_key.dart';
 
 void main() {
   group('TagValidationException', () {

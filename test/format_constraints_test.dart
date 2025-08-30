@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/format_constraints.dart';
-import 'package:phonic/src/text_encoding.dart';
+import 'package:phonic/src/core/format_constraints.dart';
+import 'package:phonic/src/core/text_encoding.dart';
 
 void main() {
   group('ID3v1Constraints', () {

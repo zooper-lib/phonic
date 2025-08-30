@@ -1,4 +1,4 @@
-part of '../metadata_tag.dart';
+part of '../core/metadata_tag.dart';
 
 /// Represents an ISRC (International Standard Recording Code) metadata tag for audio files.
 ///

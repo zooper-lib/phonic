@@ -8,11 +8,11 @@
 /// structure with both standardized iTunes-compatible atoms and extensible
 /// freeform atoms for custom metadata.
 
-import '../container_kind.dart';
-import '../tag_capability.dart';
-import '../tag_key.dart';
-import '../tag_semantics.dart';
-import '../text_encoding.dart';
+import '../core/container_kind.dart';
+import '../core/tag_capability.dart';
+import '../core/tag_key.dart';
+import '../core/tag_semantics.dart';
+import '../core/text_encoding.dart';
 
 /// Encoding set for MP4 text atoms with UTF-8 support.
 ///

@@ -7,11 +7,11 @@
 /// significant improvements over ID3v2.3 including UTF-8 encoding support,
 /// unified date handling, and enhanced frame structure.
 
-import '../container_kind.dart';
-import '../tag_capability.dart';
-import '../tag_key.dart';
-import '../tag_semantics.dart';
-import '../text_encoding.dart';
+import '../core/container_kind.dart';
+import '../core/tag_capability.dart';
+import '../core/tag_key.dart';
+import '../core/tag_semantics.dart';
+import '../core/text_encoding.dart';
 
 /// Encoding set for ID3v2.4 text fields with full Unicode support.
 ///

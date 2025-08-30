@@ -1,4 +1,4 @@
-part of '../metadata_tag.dart';
+part of '../core/metadata_tag.dart';
 
 /// Represents a BPM (beats per minute) metadata tag for audio files.
 ///

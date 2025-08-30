@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/mp4/mp4_atom_map.dart';
-import 'package:phonic/src/tag_key.dart';
+import 'package:phonic/src/core/tag_key.dart';
+import 'package:phonic/src/formats/mp4/mp4_atom_map.dart';
 
 void main() {
   group('Mp4AtomMap', () {

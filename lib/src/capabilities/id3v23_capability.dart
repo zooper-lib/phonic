@@ -8,11 +8,11 @@
 /// variable-length fields, multiple text encodings (except UTF-8), and
 /// extensive metadata including artwork and custom fields.
 
-import '../container_kind.dart';
-import '../tag_capability.dart';
-import '../tag_key.dart';
-import '../tag_semantics.dart';
-import '../text_encoding.dart';
+import '../core/container_kind.dart';
+import '../core/tag_capability.dart';
+import '../core/tag_key.dart';
+import '../core/tag_semantics.dart';
+import '../core/text_encoding.dart';
 
 /// Encoding set for ID3v2.3 text fields without UTF-8 support.
 ///

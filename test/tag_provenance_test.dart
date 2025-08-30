@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/container_kind.dart';
-import 'package:phonic/src/tag_confidence.dart';
-import 'package:phonic/src/tag_provenance.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/tag_confidence.dart';
+import 'package:phonic/src/core/tag_provenance.dart';
 
 void main() {
   group('TagProvenance', () {

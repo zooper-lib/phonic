@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/container_kind.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/media_kind.dart';
 import 'package:phonic/src/exceptions/unsupported_format_exception.dart';
-import 'package:phonic/src/media_kind.dart';
-import 'package:phonic/src/opus_format_strategy.dart';
+import 'package:phonic/src/formats/vorbis/opus_format_strategy.dart';
 
 void main() {
   group('OpusFormatStrategy', () {

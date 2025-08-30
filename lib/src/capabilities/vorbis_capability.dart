@@ -7,11 +7,11 @@
 /// support and native multi-valued field capabilities, making them one of
 /// the most flexible metadata formats supported by the library.
 
-import '../container_kind.dart';
-import '../tag_capability.dart';
-import '../tag_key.dart';
-import '../tag_semantics.dart';
-import '../text_encoding.dart';
+import '../core/container_kind.dart';
+import '../core/tag_capability.dart';
+import '../core/tag_key.dart';
+import '../core/tag_semantics.dart';
+import '../core/text_encoding.dart';
 
 /// Encoding set for Vorbis Comments with UTF-8 support only.
 ///

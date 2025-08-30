@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/container_kind.dart';
-import 'package:phonic/src/tag_capability.dart';
-import 'package:phonic/src/tag_key.dart';
-import 'package:phonic/src/tag_semantics.dart';
-import 'package:phonic/src/text_encoding.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/tag_capability.dart';
+import 'package:phonic/src/core/tag_key.dart';
+import 'package:phonic/src/core/tag_semantics.dart';
+import 'package:phonic/src/core/text_encoding.dart';
 
 // Test encoding sets using TextEncoding enum constants
 const _utf8Only = {'UTF-8'}; // TextEncoding.utf8.standardName
