@@ -605,7 +605,7 @@
   - Write unit tests for tag encoding with proper slash separation
   - _Requirements: 2.1, 2.2, 3.2_
 
-- [ ] 73. Create Id3v22Codec class structure
+- [x] 73. Create Id3v22Codec class structure
 
   - Implement Id3v22Codec class implementing TagCodec interface
   - Add containerKind, containerVersion, and capability properties
@@ -613,7 +613,7 @@
   - Write unit tests for codec instantiation
   - _Requirements: 1.1, 1.3, 10.1_
 
-- [ ] 74. Implement Id3v22Codec readFromContainer method
+- [x] 74. Implement Id3v22Codec readFromContainer method
 
   - Create readFromContainer method parsing ID3v2.2 tags
   - Handle 3-character frame IDs (TT2, TP1, TAL, etc.)
@@ -622,7 +622,7 @@
   - Write unit tests with real ID3v2.2 samples
   - _Requirements: 1.1, 1.3, 4.1_
 
-- [ ] 75. Implement Id3v22Codec writeToContainer method
+- [x] 75. Implement Id3v22Codec writeToContainer method
 
   - Create writeToContainer method building ID3v2.2 tags
   - Convert to 3-character frame IDs
