@@ -14,6 +14,7 @@ export 'media_kind.dart';
 export 'metadata_tag.dart';
 export 'mime_type.dart';
 export 'tag_capability.dart';
+export 'tag_codec.dart';
 export 'tag_confidence.dart';
 export 'tag_key.dart';
 export 'tag_provenance.dart';

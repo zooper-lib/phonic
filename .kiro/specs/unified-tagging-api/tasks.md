@@ -445,7 +445,6 @@
 
 - [x] 55. Implement Id3v1Locator class
 
-
   - Create Id3v1Locator for detecting 128-byte tags at file end
   - Implement fileMatches checking for "TAG" signature at offset -128
   - Add extract method returning fixed 128-byte tail
@@ -455,11 +454,6 @@
 
 - [x] 56. Implement VorbisLocator class for FLAC
 
-
-
-
-
-
   - Create VorbisLocator for FLAC Vorbis comment block detection
   - Implement fileMatches checking for FLAC signature
   - Add extract method finding and parsing Vorbis comment metadata block
@@ -467,19 +461,10 @@
   - Write unit tests for FLAC Vorbis comment handling
   - _Requirements: 1.1, 1.2, 10.2_
 
-
-
-
-
 - [x] 57. Implement OggVorbisLocator class
-
 
   - Create OggVorbisLocator for OGG Vorbis comment detection
   - Implement fileMatches checking for OGG signature
-
-
-
-
 
   - Add extract method parsing OGG pages to find comment header
   - Implement inject method rebuilding OGG stream with new comments
@@ -488,7 +473,6 @@
 
 - [x] 58. Implement Mp4Locator class
 
-
   - Create Mp4Locator for MP4 ilst atom detection within moov
   - Implement fileMatches checking for MP4/M4A signatures
   - Add extract method navigating atom hierarchy to find ilst
@@ -496,7 +480,7 @@
   - Write unit tests for MP4 atom navigation and replacement
   - _Requirements: 1.1, 1.2, 10.6_
 
-- [] 59. Create TagCodec abstract class
+- [x] 59. Create TagCodec abstract class
 
   - Define TagCodec interface with containerKind, containerVersion, capability
   - Add abstract methods: readFromContainer, writeToContainer
@@ -512,6 +496,7 @@
   - _Requirements: 1.1, 8.1, 8.2_
 
 - [ ] 61. Create ID3v2 frame parsing utilities
+
 
   - Implement generic ID3v2 frame header parsing (ID, size, flags)
   - Add frame data extraction with encoding detection
