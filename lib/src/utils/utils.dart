@@ -5,7 +5,9 @@
 library phonic.utils;
 
 export 'byte_reader.dart';
+export 'flac_picture_parser.dart';
 export 'lazy_artwork_loader.dart';
 export 'locators/locators.dart';
 export 'synchsafe_int.dart';
 export 'text_encoding_utils.dart';
+export 'vorbis_comment_parser.dart';

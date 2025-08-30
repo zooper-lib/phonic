@@ -665,7 +665,7 @@
   - Write unit tests for constraint handling
   - _Requirements: 2.1, 2.2, 5.4_
 
-- [ ] 80. Create VorbisCommentsCodec class structure
+- [x] 80. Create VorbisCommentsCodec class structure
 
   - Implement VorbisCommentsCodec class implementing TagCodec interface
   - Add containerKind, containerVersion, and capability properties
@@ -673,7 +673,7 @@
   - Write unit tests for codec instantiation
   - _Requirements: 1.1, 10.2, 10.3_
 
-- [ ] 81. Implement Vorbis comment parsing utilities
+- [x] 81. Implement Vorbis comment parsing utilities
 
   - Create utilities for parsing key=value comment pairs
   - Handle UTF-8 text decoding for all fields
@@ -682,7 +682,7 @@
   - Write unit tests for comment parsing variations
   - _Requirements: 1.1, 1.4, 3.1_
 
-- [ ] 82. Implement METADATA_BLOCK_PICTURE parsing
+- [x] 82. Implement METADATA_BLOCK_PICTURE parsing
 
   - Create FLAC artwork parsing from METADATA_BLOCK_PICTURE blocks
   - Extract picture type, MIME type, description, and image data
@@ -690,7 +690,7 @@
   - Write unit tests for FLAC artwork handling
   - _Requirements: 1.4, 7.1, 10.2_
 
-- [ ] 83. Implement VorbisCommentsCodec readFromContainer method
+- [x] 83. Implement VorbisCommentsCodec readFromContainer method
 
   - Create readFromContainer method parsing Vorbis comments
   - Use comment parsing utilities and artwork handling
@@ -702,7 +702,7 @@
   - Write unit tests with real Vorbis comment samples including delimiter variations
   - _Requirements: 1.1, 1.4, 3.1, 4.1_
 
-- [ ] 84. Implement VorbisCommentsCodec writeToContainer method
+- [x] 84. Implement VorbisCommentsCodec writeToContainer method
 
   - Create writeToContainer method building Vorbis comment structure
   - Convert MetadataTag instances to key=value pairs
