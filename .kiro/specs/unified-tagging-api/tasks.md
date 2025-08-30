@@ -408,14 +408,14 @@
 
 - [x] 52. Create text encoding utilities
 
-
   - Implement UTF-8, UTF-16, and Latin-1 encoding detection
   - Add text conversion utilities between encodings
   - Include BOM handling for UTF-16
   - Write unit tests for encoding detection and conversion
   - _Requirements: 8.1, 8.2_
 
-- [ ] 52a. Create ID3v2 genre parsing utilities
+- [x] 52a. Create ID3v2 genre parsing utilities
+
 
   - Implement null-terminated string parsing for ID3v2.4 TCON frames
 

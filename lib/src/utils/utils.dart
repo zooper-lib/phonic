@@ -5,6 +5,7 @@
 library phonic.utils;
 
 export 'byte_reader.dart';
+export 'id3v2_genre_utils.dart';
 export 'lazy_artwork_loader.dart';
 export 'synchsafe_int.dart';
 export 'text_encoding_utils.dart';
