@@ -712,7 +712,7 @@
   - Write unit tests for comment encoding
   - _Requirements: 2.1, 2.2, 1.4_
 
-- [ ] 85. Create MP4 atom parsing utilities
+- [x] 85. Create MP4 atom parsing utilities
 
   - Implement MP4 atom header parsing (size, type)
   - Add atom navigation utilities for hierarchical structure
@@ -720,7 +720,7 @@
   - Write unit tests for atom parsing functionality
   - _Requirements: 1.1, 8.1, 10.6_
 
-- [ ] 86. Create Mp4AtomsCodec class structure
+- [x] 86. Create Mp4AtomsCodec class structure
 
   - Implement Mp4AtomsCodec class implementing TagCodec interface
   - Add containerKind, containerVersion, and capability properties
@@ -728,7 +728,7 @@
   - Write unit tests for codec instantiation
   - _Requirements: 1.1, 10.6_
 
-- [ ] 87. Implement MP4 standard atom parsing
+- [x] 87. Implement MP4 standard atom parsing
 
   - Create parsing for standard atoms (©nam, ©ART, trkn, disk)
   - Handle different data types (text, integers, binary)
@@ -736,7 +736,7 @@
   - Write unit tests for standard atom parsing
   - _Requirements: 1.1, 1.4, 10.6_
 
-- [ ] 88. Implement MP4 freeform atom parsing
+- [x] 88. Implement MP4 freeform atom parsing
 
   - Create parsing for freeform atoms (----:domain:name format)
   - Handle domain and name extraction
@@ -744,7 +744,7 @@
   - Write unit tests for freeform atom parsing
   - _Requirements: 1.1, 10.6_
 
-- [ ] 89. Implement Mp4AtomsCodec readFromContainer method
+- [x] 89. Implement Mp4AtomsCodec readFromContainer method
 
   - Create readFromContainer method parsing MP4 ilst atoms
   - Use atom parsing utilities for standard and freeform atoms
@@ -753,7 +753,7 @@
   - Write unit tests with real MP4 samples
   - _Requirements: 1.1, 1.4, 4.1, 7.1_
 
-- [ ] 90. Implement Mp4AtomsCodec writeToContainer method
+- [x] 90. Implement Mp4AtomsCodec writeToContainer method
 
   - Create writeToContainer method building MP4 ilst structure
   - Convert MetadataTag instances to appropriate atoms
