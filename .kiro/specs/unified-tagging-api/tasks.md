@@ -564,7 +564,6 @@
 
 - [x] 69. Implement Id3v24Codec writeToContainer method
 
-
   - Create writeToContainer method building ID3v2.4 tags
   - Convert MetadataTag instances to appropriate frames
   - Handle UTF-8 encoding for v2.4
@@ -574,7 +573,7 @@
   - Write unit tests for tag encoding with proper null-termination
   - _Requirements: 2.1, 2.2, 3.2_
 
-- [ ] 70. Create Id3v23Codec class structure
+- [x] 70. Create Id3v23Codec class structure
 
   - Implement Id3v23Codec class implementing TagCodec interface
   - Add containerKind, containerVersion, and capability properties
@@ -582,18 +581,20 @@
   - Write unit tests for codec instantiation
   - _Requirements: 1.1, 1.3, 10.1_
 
-- [ ] 71. Implement Id3v23Codec readFromContainer method
+- [x] 71. Implement Id3v23Codec readFromContainer method
 
   - Create readFromContainer method parsing ID3v2.3 tags
   - Handle TYER/TDAT/TIME frames for date instead of TDRC
   - Use UTF-16 encoding (no UTF-8 support in v2.3)
   - Handle TCON genre frame parsing with slash-separated strings for GenreTag
   - Parse multiple genres from single TCON frame using slash delimiters
+
   - Convert frames to MetadataTag instances with provenance
   - Write unit tests with real ID3v2.3 samples including multi-genre scenarios
   - _Requirements: 1.1, 1.3, 3.2, 4.1_
 
-- [ ] 72. Implement Id3v23Codec writeToContainer method
+- [x] 72. Implement Id3v23Codec writeToContainer method
+
 
   - Create writeToContainer method building ID3v2.3 tags
   - Convert date fields to TYER/TDAT/TIME frames
