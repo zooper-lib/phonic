@@ -4,6 +4,7 @@
 /// commonly found in MP3 files.
 library phonic.formats.id3;
 
+export 'id3v24_codec.dart';
 export 'id3v2_apic_frame_parser.dart';
 export 'id3v2_comm_frame_parser.dart';
 export 'id3v2_frame_map.dart';

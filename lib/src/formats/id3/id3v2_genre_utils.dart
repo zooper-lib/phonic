@@ -80,7 +80,9 @@ class Id3v2GenreUtils {
     if (genreString.isEmpty) return <String>[];
 
     // Split by null terminators and clean up
-    return genreString.split('\0').map((genre) => genre.trim()).where((genre) => genre.isNotEmpty).toList();
+    // Use String.fromCharCode(0) instead of '\0' for proper null character handling
+    final nullChar = String.fromCharCode(0);
+    return genreString.split(nullChar).map((genre) => genre.trim()).where((genre) => genre.isNotEmpty).toList();
   }
 
   /// Parses genre information from ID3v2.3/v2.2 TCON frame data.
@@ -194,7 +196,9 @@ class Id3v2GenreUtils {
   /// ```
   static String encodeId3v24Genres(List<String> genres) {
     if (genres.isEmpty) return '';
-    return genres.where((genre) => genre.isNotEmpty).join('\0');
+    // Use String.fromCharCode(0) instead of '\0' for proper null character handling
+    final nullChar = String.fromCharCode(0);
+    return genres.where((genre) => genre.isNotEmpty).join(nullChar);
   }
 
   /// Encodes a list of genres for ID3v2.3/v2.2 TCON frame.

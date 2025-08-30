@@ -529,7 +529,6 @@
 
 - [x] 65. Implement ID3v2 COMM frame parsing
 
-
   - Create COMM (comment) frame parsing with language and description
   - Handle encoding and extract comment text
   - Add language code processing
@@ -538,18 +537,13 @@
 
 - [x] 66. Implement ID3v2 USLT frame parsing
 
-
-
-
-
-
   - Create USLT (lyrics) frame parsing with language and description
   - Handle encoding and extract lyrics text
   - Add language code processing
   - Write unit tests for USLT frame variations
   - _Requirements: 1.1, 1.3_
 
-- [ ] 67. Create Id3v24Codec class structure
+- [x] 67. Create Id3v24Codec class structure
 
   - Implement Id3v24Codec class implementing TagCodec interface
   - Add containerKind, containerVersion, and capability properties
@@ -557,7 +551,7 @@
   - Write unit tests for codec instantiation
   - _Requirements: 1.1, 1.3, 10.1_
 
-- [ ] 68. Implement Id3v24Codec readFromContainer method
+- [x] 68. Implement Id3v24Codec readFromContainer method
 
   - Create readFromContainer method parsing ID3v2.4 tags
   - Use header and frame parsing utilities
@@ -568,7 +562,8 @@
   - Write unit tests with real ID3v2.4 samples including multi-genre scenarios
   - _Requirements: 1.1, 1.3, 3.2, 4.1_
 
-- [ ] 69. Implement Id3v24Codec writeToContainer method
+- [x] 69. Implement Id3v24Codec writeToContainer method
+
 
   - Create writeToContainer method building ID3v2.4 tags
   - Convert MetadataTag instances to appropriate frames
