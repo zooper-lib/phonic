@@ -631,7 +631,7 @@
   - Write unit tests for tag encoding
   - _Requirements: 2.1, 2.2_
 
-- [ ] 76. Create ID3v1 genre lookup table
+- [x] 76. Create ID3v1 genre lookup table
 
   - Implement standard ID3v1 genre table (0-255 values)
   - Add genre name to number conversion utilities
@@ -639,7 +639,7 @@
   - Write unit tests for genre lookup functionality
   - _Requirements: 1.1, 10.1_
 
-- [ ] 77. Create Id3v1Codec class structure
+- [x] 77. Create Id3v1Codec class structure
 
   - Implement Id3v1Codec class implementing TagCodec interface
   - Add containerKind, containerVersion, and capability properties
@@ -647,7 +647,7 @@
   - Write unit tests for codec instantiation
   - _Requirements: 1.1, 5.4, 10.1_
 
-- [ ] 78. Implement Id3v1Codec readFromContainer method
+- [x] 78. Implement Id3v1Codec readFromContainer method
 
   - Create readFromContainer method parsing 128-byte ID3v1 structure
   - Extract title, artist, album, year, comment fields at fixed offsets
@@ -656,7 +656,7 @@
   - Write unit tests with various ID3v1 configurations
   - _Requirements: 1.1, 5.4, 10.1_
 
-- [ ] 79. Implement Id3v1Codec writeToContainer method
+- [x] 79. Implement Id3v1Codec writeToContainer method
 
   - Create writeToContainer method building 128-byte ID3v1 structure
   - Apply 30-character truncation for text fields
