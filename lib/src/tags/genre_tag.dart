@@ -126,7 +126,7 @@ final class GenreTag extends MetadataTag<List<String>> {
     String genreString, {
     TagProvenance provenance = const TagProvenance.none(),
   }) : this(
-         genreString.split('\0').where((g) => g.isNotEmpty).toList(),
+         genreString.split(String.fromCharCode(0)).where((g) => g.isNotEmpty).toList(),
          provenance: provenance,
        );
 
@@ -181,7 +181,7 @@ final class GenreTag extends MetadataTag<List<String>> {
   /// final genres = GenreTag(['Rock', 'Alternative', 'Indie']);
   /// final encoded = genres.toId3v24String(); // 'Rock\0Alternative\0Indie'
   /// ```
-  String toId3v24String() => value.join('\0');
+  String toId3v24String() => value.join(String.fromCharCode(0));
 
   /// Encodes the genres for ID3v2.3/v2.2 using slash separation.
   ///
@@ -218,8 +218,9 @@ final class GenreTag extends MetadataTag<List<String>> {
     if (genreString.trim().isEmpty) return [];
 
     // Handle null-terminated strings (ID3v2.4) with highest priority
-    if (genreString.contains('\0')) {
-      return genreString.split('\0').where((g) => g.isNotEmpty).toList();
+    final nullChar = String.fromCharCode(0);
+    if (genreString.contains(nullChar)) {
+      return genreString.split(nullChar).where((g) => g.isNotEmpty).toList();
     }
 
     // Common delimiters used by different systems

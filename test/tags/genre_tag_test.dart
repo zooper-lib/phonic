@@ -166,7 +166,7 @@ void main() {
         });
 
         test('prioritizes null terminator over other delimiters', () {
-          final tag = GenreTag.fromString('Rock\0Alternative\0Indie/Jazz;Blues');
+          final tag = GenreTag.fromString('Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie/Jazz;Blues');
 
           expect(tag.value, equals(['Rock', 'Alternative', 'Indie/Jazz;Blues']));
           expect(tag.key, equals(TagKey.genre));
@@ -246,7 +246,7 @@ void main() {
 
     group('fromId3v24String constructor', () {
       test('parses null-terminated string correctly', () {
-        final tag = GenreTag.fromId3v24String('Rock\0Alternative\0Indie');
+        final tag = GenreTag.fromId3v24String('Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie');
 
         expect(tag.value, equals(['Rock', 'Alternative', 'Indie']));
         expect(tag.key, equals(TagKey.genre));
@@ -265,19 +265,21 @@ void main() {
       });
 
       test('filters out empty values between null terminators', () {
-        final tag = GenreTag.fromId3v24String('Rock\0\0Alternative\0\0\0Indie');
+        final tag = GenreTag.fromId3v24String(
+          'Rock${String.fromCharCode(0)}${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}${String.fromCharCode(0)}${String.fromCharCode(0)}Indie',
+        );
 
         expect(tag.value, equals(['Rock', 'Alternative', 'Indie']));
       });
 
       test('handles trailing null terminator', () {
-        final tag = GenreTag.fromId3v24String('Rock\0Alternative\0');
+        final tag = GenreTag.fromId3v24String('Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}');
 
         expect(tag.value, equals(['Rock', 'Alternative']));
       });
 
       test('handles leading null terminator', () {
-        final tag = GenreTag.fromId3v24String('\0Rock\0Alternative');
+        final tag = GenreTag.fromId3v24String('${String.fromCharCode(0)}Rock${String.fromCharCode(0)}Alternative');
 
         expect(tag.value, equals(['Rock', 'Alternative']));
       });
@@ -288,7 +290,7 @@ void main() {
           '2.4',
           TagConfidence.certain,
         );
-        final tag = GenreTag.fromId3v24String('Rock\0Jazz', provenance: provenance);
+        final tag = GenreTag.fromId3v24String('Rock${String.fromCharCode(0)}Jazz', provenance: provenance);
 
         expect(tag.value, equals(['Rock', 'Jazz']));
         expect(tag.provenance, equals(provenance));
@@ -403,7 +405,7 @@ void main() {
         final tag = GenreTag(const ['Rock', 'Alternative', 'Indie']);
         final result = tag.toId3v24String();
 
-        expect(result, equals('Rock\0Alternative\0Indie'));
+        expect(result, equals('Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie'));
       });
 
       test('handles single genre', () {
@@ -424,7 +426,7 @@ void main() {
         final tag = GenreTag(const ['Música Popular', 'Électronique']);
         final result = tag.toId3v24String();
 
-        expect(result, equals('Música Popular\0Électronique'));
+        expect(result, equals('Música Popular${String.fromCharCode(0)}Électronique'));
       });
     });
 

@@ -501,7 +501,6 @@ void main() {
 
       test('should add missing seconds when time is present', () {
         // When hour and minute are present but second is not, should default to 00
-        final result = DateNormalization.parseIso8601Date('2023-03-15T14:30:00');
         final normalized = DateNormalization.normalizeIso8601Date('2023-03-15T14:30:00');
         expect(normalized, contains(':00')); // Should have seconds
       });

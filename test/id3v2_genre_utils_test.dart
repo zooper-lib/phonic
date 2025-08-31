@@ -6,7 +6,8 @@ void main() {
     group('parseId3v24Genres', () {
       test('parses null-terminated genre strings correctly', () {
         // Standard multi-genre case
-        final result = Id3v2GenreUtils.parseId3v24Genres('Rock\0Alternative\0Indie');
+        final input = 'Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Rock', 'Alternative', 'Indie']));
       });
 
@@ -21,37 +22,45 @@ void main() {
       });
 
       test('handles string with trailing null terminator', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres('Rock\0Alternative\0');
+        final input = 'Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Rock', 'Alternative']));
       });
 
       test('handles string with leading null terminator', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres('\0Rock\0Alternative');
+        final input = '${String.fromCharCode(0)}Rock${String.fromCharCode(0)}Alternative';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Rock', 'Alternative']));
       });
 
       test('filters empty genres from multiple null terminators', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres('Rock\0\0Alternative\0\0\0Indie');
+        final input =
+            'Rock${String.fromCharCode(0)}${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}${String.fromCharCode(0)}${String.fromCharCode(0)}Indie';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Rock', 'Alternative', 'Indie']));
       });
 
       test('trims whitespace from genres', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres(' Rock \0 Alternative \0 Indie ');
+        final input = ' Rock ${String.fromCharCode(0)} Alternative ${String.fromCharCode(0)} Indie ';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Rock', 'Alternative', 'Indie']));
       });
 
       test('handles genres with spaces in names', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres('Progressive Rock\0New Wave\0Indie Pop');
+        final input = 'Progressive Rock${String.fromCharCode(0)}New Wave${String.fromCharCode(0)}Indie Pop';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Progressive Rock', 'New Wave', 'Indie Pop']));
       });
 
       test('handles single null terminator', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres('\0');
+        final input = String.fromCharCode(0);
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals([]));
       });
 
       test('handles multiple consecutive null terminators', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres('\0\0\0');
+        final input = '${String.fromCharCode(0)}${String.fromCharCode(0)}${String.fromCharCode(0)}';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals([]));
       });
     });
@@ -125,7 +134,8 @@ void main() {
 
     group('parseGenresWithDelimiterDetection', () {
       test('detects null terminators (ID3v2.4 format)', () {
-        final result = Id3v2GenreUtils.parseGenresWithDelimiterDetection('Rock\0Alternative\0Indie');
+        final input = 'Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie';
+        final result = Id3v2GenreUtils.parseGenresWithDelimiterDetection(input);
         expect(result, equals(['Rock', 'Alternative', 'Indie']));
       });
 
@@ -171,7 +181,8 @@ void main() {
 
       test('prioritizes null terminators over other delimiters', () {
         // String contains both null terminators and slashes
-        final result = Id3v2GenreUtils.parseGenresWithDelimiterDetection('Rock\0Alternative/Indie\0Pop');
+        final input = 'Rock${String.fromCharCode(0)}Alternative/Indie${String.fromCharCode(0)}Pop';
+        final result = Id3v2GenreUtils.parseGenresWithDelimiterDetection(input);
         expect(result, equals(['Rock', 'Alternative/Indie', 'Pop']));
       });
 
@@ -201,7 +212,8 @@ void main() {
     group('encodeId3v24Genres', () {
       test('encodes multiple genres with null terminators', () {
         final result = Id3v2GenreUtils.encodeId3v24Genres(['Rock', 'Alternative', 'Indie']);
-        expect(result, equals('Rock\0Alternative\0Indie'));
+        final expected = 'Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie';
+        expect(result, equals(expected));
       });
 
       test('encodes single genre without null terminator', () {
@@ -216,17 +228,20 @@ void main() {
 
       test('filters empty genres', () {
         final result = Id3v2GenreUtils.encodeId3v24Genres(['Rock', '', 'Alternative', '', 'Indie']);
-        expect(result, equals('Rock\0Alternative\0Indie'));
+        final expected = 'Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie';
+        expect(result, equals(expected));
       });
 
       test('handles genres with spaces', () {
         final result = Id3v2GenreUtils.encodeId3v24Genres(['Progressive Rock', 'New Wave', 'Indie Pop']);
-        expect(result, equals('Progressive Rock\0New Wave\0Indie Pop'));
+        final expected = 'Progressive Rock${String.fromCharCode(0)}New Wave${String.fromCharCode(0)}Indie Pop';
+        expect(result, equals(expected));
       });
 
       test('handles genres with special characters', () {
         final result = Id3v2GenreUtils.encodeId3v24Genres(['Rock & Roll', 'Hip-Hop', 'R&B']);
-        expect(result, equals('Rock & Roll\0Hip-Hop\0R&B'));
+        final expected = 'Rock & Roll${String.fromCharCode(0)}Hip-Hop${String.fromCharCode(0)}R&B';
+        expect(result, equals(expected));
       });
 
       test('handles list with only empty strings', () {
@@ -285,27 +300,32 @@ void main() {
     group('edge cases and error handling', () {
       test('handles very long genre strings', () {
         final longGenre = 'A' * 1000;
-        final result = Id3v2GenreUtils.parseId3v24Genres('$longGenre\0Rock');
+        final input = '$longGenre${String.fromCharCode(0)}Rock';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals([longGenre, 'Rock']));
       });
 
       test('handles unicode characters in genres', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres('Röck\0Alternativé\0Indië');
+        final input = 'Röck${String.fromCharCode(0)}Alternativé${String.fromCharCode(0)}Indië';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Röck', 'Alternativé', 'Indië']));
       });
 
       test('handles emoji in genre names', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres('Rock 🎸\0Pop 🎵\0Jazz 🎷');
+        final input = 'Rock 🎸${String.fromCharCode(0)}Pop 🎵${String.fromCharCode(0)}Jazz 🎷';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Rock 🎸', 'Pop 🎵', 'Jazz 🎷']));
       });
 
       test('handles genres with newlines', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres('Rock\nRoll\0Alternative');
+        final input = 'Rock\nRoll${String.fromCharCode(0)}Alternative';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Rock\nRoll', 'Alternative']));
       });
 
       test('handles genres with tabs', () {
-        final result = Id3v2GenreUtils.parseId3v24Genres('Rock\tMusic\0Alternative');
+        final input = 'Rock\tMusic${String.fromCharCode(0)}Alternative';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Rock\tMusic', 'Alternative']));
       });
 
@@ -316,7 +336,8 @@ void main() {
       });
 
       test('handles string with only delimiters', () {
-        final result1 = Id3v2GenreUtils.parseId3v24Genres('\0\0\0');
+        final input1 = '${String.fromCharCode(0)}${String.fromCharCode(0)}${String.fromCharCode(0)}';
+        final result1 = Id3v2GenreUtils.parseId3v24Genres(input1);
         expect(result1, equals([]));
 
         final result2 = Id3v2GenreUtils.parseId3v23Genres('///');
@@ -364,11 +385,13 @@ void main() {
     group('real-world scenarios', () {
       test('handles typical ID3v2.4 multi-genre scenario', () {
         // Simulates real ID3v2.4 TCON frame content
-        final result = Id3v2GenreUtils.parseId3v24Genres('Electronic\0Ambient\0Downtempo');
+        final input = 'Electronic${String.fromCharCode(0)}Ambient${String.fromCharCode(0)}Downtempo';
+        final result = Id3v2GenreUtils.parseId3v24Genres(input);
         expect(result, equals(['Electronic', 'Ambient', 'Downtempo']));
 
         final encoded = Id3v2GenreUtils.encodeId3v24Genres(result);
-        expect(encoded, equals('Electronic\0Ambient\0Downtempo'));
+        final expected = 'Electronic${String.fromCharCode(0)}Ambient${String.fromCharCode(0)}Downtempo';
+        expect(encoded, equals(expected));
       });
 
       test('handles typical ID3v2.3 multi-genre scenario', () {

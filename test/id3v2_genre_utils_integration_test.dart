@@ -14,7 +14,7 @@ void main() {
 
     test('utilities work with GenreTag for ID3v2.4 compatibility', () {
       // Test that the utilities produce results compatible with GenreTag
-      final id3v24String = 'Rock\0Alternative\0Indie';
+      final id3v24String = 'Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie';
 
       // Parse using utility
       final utilResult = Id3v2GenreUtils.parseId3v24Genres(id3v24String);
@@ -72,7 +72,7 @@ void main() {
       // Test scenarios that might occur in real ID3v2 implementations
 
       // ID3v2.4 with trailing null terminator (common in some implementations)
-      final id3v24WithTrailing = 'Electronic\0Ambient\0Downtempo\0';
+      final id3v24WithTrailing = 'Electronic${String.fromCharCode(0)}Ambient${String.fromCharCode(0)}Downtempo${String.fromCharCode(0)}';
       final result24 = Id3v2GenreUtils.parseId3v24Genres(id3v24WithTrailing);
       expect(result24, equals(['Electronic', 'Ambient', 'Downtempo']));
 
@@ -83,7 +83,7 @@ void main() {
       expect(parsed23, equals(genresWithSlashes));
 
       // Mixed delimiter detection prioritizing null terminators
-      final mixedDelimiters = 'Rock\0Alternative/Indie\0Pop';
+      final mixedDelimiters = 'Rock${String.fromCharCode(0)}Alternative/Indie${String.fromCharCode(0)}Pop';
       final resultMixed = Id3v2GenreUtils.parseGenresWithDelimiterDetection(mixedDelimiters);
       expect(resultMixed, equals(['Rock', 'Alternative/Indie', 'Pop']));
     });

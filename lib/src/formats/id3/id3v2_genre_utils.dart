@@ -47,7 +47,7 @@ class Id3v2GenreUtils {
   /// 4. Pipe (|) - Used by some legacy systems
   /// 5. Comma (,) - Human-readable format
   /// 6. Backslash (\) - Some legacy systems
-  static const List<String> _commonDelimiters = ['\0', '/', ';', '|', ',', '\\'];
+  static final List<String> _commonDelimiters = [String.fromCharCode(0), '/', ';', '|', ',', '\\'];
 
   /// Parses genre information from ID3v2.4 TCON frame data.
   ///
@@ -158,7 +158,8 @@ class Id3v2GenreUtils {
     if (genreString.trim().isEmpty) return <String>[];
 
     // Handle null-terminated strings (ID3v2.4) with highest priority
-    if (genreString.contains('\0')) {
+    final nullChar = String.fromCharCode(0);
+    if (genreString.contains(nullChar)) {
       return parseId3v24Genres(genreString);
     }
 

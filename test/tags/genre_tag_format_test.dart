@@ -13,7 +13,8 @@ void main() {
       });
 
       test('parses multiple genres with null terminators', () {
-        final tag = GenreTag.fromId3v24String('Rock\0Alternative\0Indie');
+        final input = 'Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie';
+        final tag = GenreTag.fromId3v24String(input);
         expect(tag.value, equals(['Rock', 'Alternative', 'Indie']));
       });
 
@@ -24,7 +25,8 @@ void main() {
 
       test('encodes multiple genres with null terminators', () {
         final tag = GenreTag(const ['Rock', 'Alternative', 'Indie']);
-        expect(tag.toId3v24String(), equals('Rock\0Alternative\0Indie'));
+        final expected = 'Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie';
+        expect(tag.toId3v24String(), equals(expected));
       });
 
       test('handles empty string input', () {
@@ -38,27 +40,34 @@ void main() {
       });
 
       test('filters empty values between null terminators', () {
-        final tag = GenreTag.fromId3v24String('Rock\0\0Alternative\0\0\0Indie');
+        final input =
+            'Rock${String.fromCharCode(0)}${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}${String.fromCharCode(0)}${String.fromCharCode(0)}Indie';
+        final tag = GenreTag.fromId3v24String(input);
         expect(tag.value, equals(['Rock', 'Alternative', 'Indie']));
       });
 
       test('handles leading null terminator', () {
-        final tag = GenreTag.fromId3v24String('\0Rock\0Alternative');
+        final input = '${String.fromCharCode(0)}Rock${String.fromCharCode(0)}Alternative';
+        final tag = GenreTag.fromId3v24String(input);
         expect(tag.value, equals(['Rock', 'Alternative']));
       });
 
       test('handles trailing null terminator', () {
-        final tag = GenreTag.fromId3v24String('Rock\0Alternative\0');
+        final input = 'Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}';
+        final tag = GenreTag.fromId3v24String(input);
         expect(tag.value, equals(['Rock', 'Alternative']));
       });
 
       test('handles multiple consecutive null terminators', () {
-        final tag = GenreTag.fromId3v24String('Rock\0\0\0Alternative\0\0Indie\0\0\0');
+        final input =
+            'Rock${String.fromCharCode(0)}${String.fromCharCode(0)}${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}${String.fromCharCode(0)}Indie${String.fromCharCode(0)}${String.fromCharCode(0)}${String.fromCharCode(0)}';
+        final tag = GenreTag.fromId3v24String(input);
         expect(tag.value, equals(['Rock', 'Alternative', 'Indie']));
       });
 
       test('handles unicode genres with null terminators', () {
-        final tag = GenreTag.fromId3v24String('Música Popular\0Électronique\0中文流行');
+        final input = 'Música Popular${String.fromCharCode(0)}Électronique${String.fromCharCode(0)}中文流行';
+        final tag = GenreTag.fromId3v24String(input);
         expect(tag.value, equals(['Música Popular', 'Électronique', '中文流行']));
       });
 
@@ -306,7 +315,8 @@ void main() {
 
     group('automatic format detection priority', () {
       test('prioritizes null terminators over other delimiters', () {
-        final tag = GenreTag.fromString('Rock\0Alternative\0Indie/Jazz;Blues|Pop,Electronic\\Ambient');
+        final input = 'Rock${String.fromCharCode(0)}Alternative${String.fromCharCode(0)}Indie/Jazz;Blues|Pop,Electronic\\Ambient';
+        final tag = GenreTag.fromString(input);
         expect(tag.value, equals(['Rock', 'Alternative', 'Indie/Jazz;Blues|Pop,Electronic\\Ambient']));
       });
 
@@ -640,10 +650,12 @@ void main() {
 
       test('handles mixed null terminators and other delimiters', () {
         // Null terminators should always win regardless of frequency
-        final tag1 = GenreTag.fromString('Rock\0Alternative;Jazz;Blues;Electronic;Ambient');
+        final input1 = 'Rock${String.fromCharCode(0)}Alternative;Jazz;Blues;Electronic;Ambient';
+        final tag1 = GenreTag.fromString(input1);
         expect(tag1.value, equals(['Rock', 'Alternative;Jazz;Blues;Electronic;Ambient']));
 
-        final tag2 = GenreTag.fromString('Rock;Jazz;Blues\0Alternative');
+        final input2 = 'Rock;Jazz;Blues${String.fromCharCode(0)}Alternative';
+        final tag2 = GenreTag.fromString(input2);
         expect(tag2.value, equals(['Rock;Jazz;Blues', 'Alternative']));
       });
 
