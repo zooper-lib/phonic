@@ -18,6 +18,7 @@ export 'tag_capability.dart';
 export 'tag_codec.dart';
 export 'tag_confidence.dart';
 export 'tag_key.dart';
+export 'tag_merger.dart';
 export 'tag_provenance.dart';
 export 'tag_semantics.dart';
 export 'text_encoding.dart';

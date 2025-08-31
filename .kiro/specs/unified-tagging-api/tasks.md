@@ -771,14 +771,14 @@
 
 - [x] 92. Implement CodecRegistry lookup methods
 
-
   - Add findCodec method for lookup by container kind and version
   - Implement findLocator method for lookup by container kind
   - Handle null returns when codecs/locators not found
   - Write unit tests for lookup functionality
   - _Requirements: 1.1, 1.2_
 
-- [ ] 93. Create tag merging utilities
+- [x] 93. Create tag merging utilities
+
 
   - Implement utilities for merging tags from multiple containers
   - Add precedence-based conflict resolution for single-valued tags
