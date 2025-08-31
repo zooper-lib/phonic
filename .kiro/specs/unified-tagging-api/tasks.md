@@ -918,11 +918,6 @@
 
 - [x] 109. Implement isDirty property and markClean method
 
-
-
-
-
-
   - Add isDirty getter returning current dirty state
   - Implement markClean method resetting dirty flag
 
@@ -930,12 +925,13 @@
   - Write unit tests for dirty state management
   - _Requirements: 6.3, 9.1_
 
-- [ ] 110. Create file encoding preparation utilities
+- [x] 110. Create file encoding preparation utilities
 
   - Implement utilities for preparing tags for encoding
   - Add fan-out logic selecting target containers based on format strategy
   - Create capability filtering removing unsupported tags
   - Apply normalization for each target container
+
   - Write unit tests for encoding preparation
   - _Requirements: 2.1, 2.2, 2.3, 5.1_
 

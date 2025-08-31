@@ -9,6 +9,7 @@ export 'artwork_type.dart';
 export 'codec_registry.dart';
 export 'container_kind.dart';
 export 'container_locator.dart';
+export 'encoding_preparation.dart';
 export 'format_constraints.dart';
 export 'format_strategy.dart';
 export 'media_kind.dart';
