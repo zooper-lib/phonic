@@ -249,7 +249,7 @@ void main() {
 
         // Should return a valid ID3v2.4 container
         expect(result, isA<Uint8List>());
-        expect(result.length, greaterThan(10)); // At least header size
+        expect(result.length, greaterThanOrEqualTo(10)); // At least header size
         expect(result.sublist(0, 3), equals([0x49, 0x44, 0x33])); // "ID3"
         expect(result[3], equals(0x04)); // Version 2.4
       });
@@ -265,7 +265,7 @@ void main() {
 
         // Should return a valid container (existingContainerBytes is currently ignored)
         expect(result, isA<Uint8List>());
-        expect(result.length, greaterThan(10));
+        expect(result.length, greaterThanOrEqualTo(10));
       });
     });
 

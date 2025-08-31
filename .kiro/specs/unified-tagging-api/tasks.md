@@ -935,7 +935,7 @@
   - Write unit tests for encoding preparation
   - _Requirements: 2.1, 2.2, 2.3, 5.1_
 
-- [ ] 111. Implement container rebuilding logic
+- [x] 111. Implement container rebuilding logic
 
   - Create logic for rebuilding containers with updated tags
   - Use appropriate codecs for each container type
@@ -944,7 +944,8 @@
   - Write unit tests for container rebuilding
   - _Requirements: 2.1, 2.2, 8.3_
 
-- [ ] 112. Implement file injection and assembly
+- [x] 112. Implement file injection and assembly
+
 
   - Create logic for injecting updated containers back into file
   - Use container locators for proper positioning

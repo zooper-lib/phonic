@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import '../exceptions/tag_validation_exception.dart';
 import 'codec_registry.dart';
 import 'container_kind.dart';
+import 'container_rebuilder.dart';
+import 'file_assembler.dart';
 import 'format_strategy.dart';
 import 'merge_policy.dart';
 import 'metadata_tag.dart';
@@ -609,31 +611,52 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
 
   @override
   Future<Uint8List> encode() async {
-    // TODO: Implement encoding logic
-    // This will involve:
-    // 1. Getting fan-out targets from format strategy
-    // 2. For each target container:
-    //    - Get appropriate codec from registry
-    //    - Normalize tags for target capabilities
-    //    - Encode tags to container bytes
-    //    - Inject container into file using locator
-    // 3. Return complete file bytes
+    // Import the file assembler
+    final fileAssembler = FileAssembler(
+      codecRegistry: codecRegistry,
+      containerRebuilder: const ContainerRebuilder(),
+    );
 
-    // For now, return original file bytes
-    return Uint8List.fromList(_fileBytes);
+    // Get all tags to write
+    final tagsToWrite = getAllTags();
+
+    // Assemble the file with updated metadata containers
+    final assembledFile = await fileAssembler.assembleFile(
+      originalFileBytes: _fileBytes,
+      tagsToWrite: tagsToWrite,
+      formatStrategy: formatStrategy,
+      existingContainers: loadedContainersByKindAndVersion,
+    );
+
+    return assembledFile;
   }
 
   @override
   Uint8List get audioData {
-    // TODO: Implement audio data extraction
-    // This will involve:
-    // 1. Identifying all metadata containers in the file
-    // 2. Using locators to extract container positions
-    // 3. Removing container bytes from file
-    // 4. Returning pure audio stream
+    // Extract pure audio data by removing all metadata containers
+    var audioBytes = Uint8List.fromList(_fileBytes);
 
-    // For now, return original file bytes
-    return Uint8List.fromList(_fileBytes);
+    // Process containers in reverse order to avoid offset issues
+    // Start with containers at the end of the file (ID3v1) and work backwards
+    final containerOrder = [
+      ContainerKind.id3v1, // End of file
+      ContainerKind.id3v2, // Beginning of file
+      // Note: Vorbis and MP4 containers are embedded within the format structure
+      // and cannot be simply removed without format-specific parsing
+    ];
+
+    for (final containerKind in containerOrder) {
+      final locator = codecRegistry.findLocator(containerKind);
+      if (locator == null) continue;
+
+      // Check if this container type exists in the current audio bytes
+      if (locator.fileMatches(audioBytes)) {
+        // Remove the container by injecting null (removal)
+        audioBytes = locator.inject(audioBytes, null);
+      }
+    }
+
+    return audioBytes;
   }
 
   @override
