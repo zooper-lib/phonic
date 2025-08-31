@@ -779,7 +779,6 @@
 
 - [x] 93. Create tag merging utilities
 
-
   - Implement utilities for merging tags from multiple containers
   - Add precedence-based conflict resolution for single-valued tags
   - Create multi-valued tag union logic with deduplication
@@ -790,11 +789,6 @@
 
 - [x] 94. Implement tag inference system
 
-
-
-
-
-
   - Create logic for inferring missing tags from available data
   - Add albumArtist inference from artist when missing
   - Implement date field derivation (year from dateRecorded)
@@ -802,7 +796,7 @@
   - Write unit tests for inference scenarios
   - _Requirements: 4.2, 4.3_
 
-- [ ] 95. Create rating normalization utilities
+- [x] 95. Create rating normalization utilities
 
   - Implement rating scale conversion between 0-255 and 0-100
   - Add container-specific rating scaling logic
@@ -810,7 +804,7 @@
   - Write unit tests for rating normalization
   - _Requirements: 1.3, 3.3, 5.1_
 
-- [ ] 96. Implement date normalization utilities
+- [x] 96. Implement date normalization utilities
 
   - Create date format normalization to ISO-8601 internally
   - Handle conversion from TYER/TDAT/TIME to TDRC format
@@ -818,7 +812,7 @@
   - Write unit tests for date normalization scenarios
   - _Requirements: 1.3, 3.2, 5.1_
 
-- [ ] 97. Create text normalization utilities
+- [x] 97. Create text normalization utilities
 
   - Implement text encoding normalization and trimming
   - Add constraint-based truncation for length limits
@@ -826,7 +820,8 @@
   - Write unit tests for text normalization
   - _Requirements: 1.3, 5.1, 5.2_
 
-- [ ] 98. Implement numeric value normalization
+- [x] 98. Implement numeric value normalization
+
 
   - Create value range clamping for numeric fields
   - Add validation for track numbers, disc numbers, BPM
