@@ -595,7 +595,6 @@
 
 - [x] 72. Implement Id3v23Codec writeToContainer method
 
-
   - Create writeToContainer method building ID3v2.3 tags
   - Convert date fields to TYER/TDAT/TIME frames
   - Handle UTF-16 encoding requirements
@@ -762,7 +761,7 @@
   - Write unit tests for atom encoding
   - _Requirements: 2.1, 2.2, 1.4_
 
-- [ ] 91. Create CodecRegistry class structure
+- [x] 91. Create CodecRegistry class structure
 
   - Implement CodecRegistry class managing codec and locator collections
   - Add codecList and containerLocatorList properties
@@ -770,7 +769,8 @@
   - Write unit tests for registry instantiation
   - _Requirements: 1.1, 1.2_
 
-- [ ] 92. Implement CodecRegistry lookup methods
+- [x] 92. Implement CodecRegistry lookup methods
+
 
   - Add findCodec method for lookup by container kind and version
   - Implement findLocator method for lookup by container kind
