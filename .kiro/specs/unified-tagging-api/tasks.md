@@ -788,7 +788,12 @@
   - Write unit tests for merge scenarios including GenreTag merging
   - _Requirements: 1.2, 1.3, 4.1, 4.2_
 
-- [ ] 94. Implement tag inference system
+- [x] 94. Implement tag inference system
+
+
+
+
+
 
   - Create logic for inferring missing tags from available data
   - Add albumArtist inference from artist when missing
