@@ -822,14 +822,13 @@
 
 - [x] 98. Implement numeric value normalization
 
-
   - Create value range clamping for numeric fields
   - Add validation for track numbers, disc numbers, BPM
   - Handle numeric constraint enforcement
   - Write unit tests for numeric normalization
   - _Requirements: 5.1, 5.2_
 
-- [ ] 99. Create MergePolicy class
+- [x] 99. Create MergePolicy class
 
   - Implement MergePolicy class with precedence and normalization logic
   - Add precedenceFor method returning container precedence order
@@ -838,13 +837,14 @@
   - Write unit tests for merge policy functionality
   - _Requirements: 1.2, 1.3, 5.1, 10.1, 10.2, 10.3, 10.6_
 
-- [ ] 100. Implement isMultiValued utility
+- [x] 100. Implement isMultiValued utility
 
   - Create isMultiValued method checking if TagKey supports multiple values
   - Handle artwork, genre, and other multi-valued field detection
   - Add logic to distinguish between internally multi-valued (GenreTag) and container multi-valued fields
   - Add comprehensive documentation for multi-valued behavior
   - Write unit tests for multi-valued field detection
+
   - _Requirements: 1.4, 3.4_
 
 - [ ] 101. Create PhonicAudioFileImpl class structure
