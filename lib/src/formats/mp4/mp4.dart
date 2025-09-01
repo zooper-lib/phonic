@@ -4,6 +4,8 @@
 /// including M4A, M4V, and MOV files using MP4 atom structure.
 library phonic.formats.mp4;
 
+export 'm4a_audio_file.dart';
 export 'mp4_atom_map.dart';
 export 'mp4_atoms_codec.dart';
+export 'mp4_audio_file.dart';
 export 'mp4_format_strategy.dart';

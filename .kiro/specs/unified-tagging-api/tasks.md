@@ -972,14 +972,13 @@
 
 - [x] 115. Implement dispose method
 
-
   - Create dispose method for explicit resource cleanup
   - Clear tag collections and container caches
   - Release any held resources
   - Write unit tests for disposal functionality
   - _Requirements: 7.5, 9.1_
 
-- [ ] 116. Create Mp3AudioFile class
+- [x] 116. Create Mp3AudioFile class
 
   - Implement Mp3AudioFile extending PhonicAudioFileImpl
   - Configure with Mp3FormatStrategy and appropriate codecs
@@ -988,7 +987,7 @@
   - Write unit tests for MP3-specific behavior
   - _Requirements: 10.1, 10.4_
 
-- [ ] 117. Create FlacAudioFile class
+- [x] 117. Create FlacAudioFile class
 
   - Implement FlacAudioFile extending PhonicAudioFileImpl
   - Configure with FlacFormatStrategy and Vorbis codec
@@ -996,7 +995,7 @@
   - Write unit tests for FLAC-specific behavior
   - _Requirements: 10.2_
 
-- [ ] 118. Create OggAudioFile class
+- [x] 118. Create OggAudioFile class
 
   - Implement OggAudioFile extending PhonicAudioFileImpl
   - Configure with OggFormatStrategy and Vorbis codec
@@ -1004,7 +1003,7 @@
   - Write unit tests for OGG-specific behavior
   - _Requirements: 10.3_
 
-- [ ] 119. Create OpusAudioFile class
+- [x] 119. Create OpusAudioFile class
 
   - Implement OpusAudioFile extending PhonicAudioFileImpl
   - Configure with OpusFormatStrategy and Vorbis codec
@@ -1012,14 +1011,22 @@
   - Write unit tests for Opus-specific behavior
   - _Requirements: 10.3_
 
-- [ ] 120. Create Mp4AudioFile class
+- [x] 120. Create Mp4AudioFile class
+
 
   - Implement Mp4AudioFile extending PhonicAudioFileImpl
   - Configure with Mp4FormatStrategy and MP4 atoms codec
   - Include Mp4Locator for ilst atom handling
   - Write unit tests for MP4-specific behavior
-  - _Requirements: 10.6_-
-    [ ] 121. Create M4aAudioFile class
+  - _Requirements: 10.6_
+  
+- [x] 121. Create M4aAudioFile class
+
+
+
+
+
+
   - Implement M4aAudioFile extending PhonicAudioFileImpl
   - Configure with Mp4FormatStrategy and MP4 atoms codec (same as MP4)
   - Include Mp4Locator for ilst atom handling

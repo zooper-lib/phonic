@@ -4,7 +4,9 @@
 /// used in OGG Vorbis, OGG Opus, and FLAC files.
 library phonic.formats.vorbis;
 
+export 'ogg_audio_file.dart';
 export 'ogg_format_strategy.dart';
+export 'opus_audio_file.dart';
 export 'opus_format_strategy.dart';
 export 'vorbis_comment_map.dart';
 export 'vorbis_comments_codec.dart';

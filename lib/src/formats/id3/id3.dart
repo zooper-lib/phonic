@@ -4,6 +4,7 @@
 /// commonly found in MP3 files.
 library phonic.formats.id3;
 
+export 'id3v1_codec.dart';
 export 'id3v1_genre_table.dart';
 export 'id3v22_codec.dart';
 export 'id3v23_codec.dart';
@@ -13,5 +14,8 @@ export 'id3v2_comm_frame_parser.dart';
 export 'id3v2_frame_map.dart';
 export 'id3v2_frame_parser.dart';
 export 'id3v2_genre_utils.dart';
+export 'id3v2_header_parser.dart';
 export 'id3v2_popm_frame_parser.dart';
+export 'id3v2_uslt_frame_parser.dart';
+export 'mp3_audio_file.dart';
 export 'mp3_format_strategy.dart';
