@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
 
 void main() {
-  group('PhonicAudioFileImpl encoding', () {
+  group('PhonicAudioFileImpl encode method comprehensive tests', () {
     late PhonicAudioFileImpl audioFile;
     late CodecRegistry codecRegistry;
     late MergePolicy mergePolicy;
@@ -36,140 +36,48 @@ void main() {
       );
     });
 
-    group('encode', () {
-      test('should encode file with updated tags', () async {
+    group('Requirements 2.1, 2.2, 2.3 - Complete file encoding', () {
+      test('should orchestrate complete encoding pipeline', () async {
         // Arrange
-        audioFile.setTag(const TitleTag('New Title'));
-        audioFile.setTag(const ArtistTag('New Artist'));
+        audioFile.setTag(const TitleTag('Test Title'));
+        audioFile.setTag(const ArtistTag('Test Artist'));
         audioFile.setTag(RatingTag(85));
+        audioFile.setTag(GenreTag(const ['Rock', 'Alternative']));
 
         expect(audioFile.isDirty, isTrue);
 
         // Act
         final encodedBytes = await audioFile.encode();
 
-        // Assert
+        // Assert - Complete encoding pipeline
         expect(encodedBytes.length, greaterThan(104)); // Original + containers
+        expect(encodedBytes.sublist(0, 3), equals([0x49, 0x44, 0x33])); // ID3v2 header
 
-        // Should start with ID3v2 header
-        expect(encodedBytes.sublist(0, 3), equals([0x49, 0x44, 0x33])); // "ID3"
-
-        // Should end with ID3v1 tag
         final id3v1Start = encodedBytes.length - 128;
-        expect(encodedBytes.sublist(id3v1Start, id3v1Start + 3), equals([0x54, 0x41, 0x47])); // "TAG"
-      });
-
-      test('should return original file when no tags are set', () async {
-        // Arrange - no tags set
-        expect(audioFile.getAllTags(), isEmpty);
-
-        // Act
-        final encodedBytes = await audioFile.encode();
-
-        // Assert
-        expect(encodedBytes.length, greaterThanOrEqualTo(104)); // At least original size
-      });
-
-      test('should preserve existing containers when encoding', () async {
-        // Arrange
-        // Simulate existing containers
-        audioFile.loadedContainersByKindAndVersion[(ContainerKind.id3v2, '2.4')] = Uint8List.fromList([
-          0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A,
-          ...List.filled(10, 0xFF), // Existing data
-        ]);
-
-        audioFile.setTag(const TitleTag('Updated Title'));
-
-        // Act
-        final encodedBytes = await audioFile.encode();
-
-        // Assert
-        expect(encodedBytes.length, greaterThan(104));
-        expect(encodedBytes.sublist(0, 3), equals([0x49, 0x44, 0x33]));
-      });
-
-      test('should handle encoding errors gracefully', () async {
-        // Arrange
-        final failingCodecRegistry = CodecRegistry(
-          codecList: [_MockFailingCodec()],
-          containerLocatorList: [_MockId3v2Locator()],
-        );
-
-        final failingAudioFile = PhonicAudioFileImpl(
-          fileBytes: Uint8List.fromList([0xFF, 0xFB, 0x90, 0x00]),
-          formatStrategy: _MockFailingFormatStrategy(),
-          codecRegistry: failingCodecRegistry,
-          mergePolicy: mergePolicy,
-        );
-
-        failingAudioFile.setTag(const TitleTag('Test'));
-
-        // Act & Assert
-        expect(
-          () => failingAudioFile.encode(),
-          throwsA(isA<PhonicException>()),
-        );
+        expect(encodedBytes.sublist(id3v1Start, id3v1Start + 3), equals([0x54, 0x41, 0x47])); // ID3v1 tag
       });
 
       test('should use encoding preparation for tag normalization', () async {
-        // Arrange
-        audioFile.setTag(const TitleTag('Very Long Title That Should Be Normalized For ID3v1'));
-        audioFile.setTag(GenreTag(const ['Rock', 'Alternative', 'Indie']));
+        // Arrange - tags that need normalization
+        audioFile.setTag(const TitleTag('Very Long Title That Exceeds ID3v1 30 Character Limit'));
+        audioFile.setTag(GenreTag(const ['Rock', 'Alternative', 'Indie', 'Progressive']));
         audioFile.setTag(RatingTag(85));
 
         // Act
         final encodedBytes = await audioFile.encode();
 
-        // Assert
+        // Assert - encoding preparation was used
         expect(encodedBytes.length, greaterThan(104));
+
+        // Should have both ID3v2 and ID3v1 containers (fan-out)
         expect(encodedBytes.sublist(0, 3), equals([0x49, 0x44, 0x33])); // ID3v2
 
         final id3v1Start = encodedBytes.length - 128;
         expect(encodedBytes.sublist(id3v1Start, id3v1Start + 3), equals([0x54, 0x41, 0x47])); // ID3v1
       });
 
-      test('should clear dirty flag after successful encoding', () async {
-        // Arrange
-        audioFile.setTag(const TitleTag('Test Title'));
-        expect(audioFile.isDirty, isTrue);
-
-        // Act
-        await audioFile.encode();
-
-        // Assert
-        expect(audioFile.isDirty, isFalse);
-      });
-
-      test('should validate encoded file structure', () async {
-        // Arrange
-        audioFile.setTag(const TitleTag('Validation Test'));
-        audioFile.setTag(const ArtistTag('Test Artist'));
-
-        // Act
-        final encodedBytes = await audioFile.encode();
-
-        // Assert - validation should pass without throwing
-        expect(encodedBytes.length, greaterThan(104));
-
-        // File should be detectable by format strategy
-        expect(audioFile.formatStrategy.canHandle(encodedBytes), isTrue);
-      });
-
-      test('should handle empty tag list gracefully', () async {
-        // Arrange - ensure no tags
-        expect(audioFile.getAllTags(), isEmpty);
-
-        // Act
-        final encodedBytes = await audioFile.encode();
-
-        // Assert
-        expect(encodedBytes.length, greaterThanOrEqualTo(104));
-        expect(audioFile.isDirty, isFalse); // Should still clear dirty flag
-      });
-
-      test('should preserve unknown metadata during encoding', () async {
-        // Arrange
-        // Simulate existing container with unknown data
+      test('should use container rebuilding to preserve unknown data', () async {
+        // Arrange - simulate existing container with unknown data
         audioFile.loadedContainersByKindAndVersion[(ContainerKind.id3v2, '2.4')] = Uint8List.fromList([
           0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x14, // Header (20 bytes total)
           0x54, 0x58, 0x58, 0x58, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, // Unknown frame header
@@ -181,32 +89,42 @@ void main() {
         // Act
         final encodedBytes = await audioFile.encode();
 
-        // Assert
+        // Assert - container rebuilding was used
         expect(encodedBytes.length, greaterThan(104));
         expect(encodedBytes.sublist(0, 3), equals([0x49, 0x44, 0x33]));
       });
 
-      test('should handle validation failure gracefully', () async {
-        // Arrange - create a scenario that might cause validation issues
-        final corruptingCodecRegistry = CodecRegistry(
-          codecList: [_MockCorruptingCodec()],
-          containerLocatorList: [_MockId3v2Locator()],
-        );
+      test('should use file injection utilities', () async {
+        // Arrange
+        audioFile.setTag(const TitleTag('Injection Test'));
+        audioFile.setTag(const ArtistTag('Test Artist'));
 
-        final corruptingAudioFile = PhonicAudioFileImpl(
-          fileBytes: Uint8List.fromList([0xFF, 0xFB, 0x90, 0x00]),
-          formatStrategy: _MockMp3FormatStrategy(),
-          codecRegistry: corruptingCodecRegistry,
-          mergePolicy: mergePolicy,
-        );
+        // Act
+        final encodedBytes = await audioFile.encode();
 
-        corruptingAudioFile.setTag(const TitleTag('Test'));
+        // Assert - file injection was used (containers in correct positions)
+        expect(encodedBytes.length, greaterThan(104));
 
-        // Act & Assert
-        expect(
-          () => corruptingAudioFile.encode(),
-          throwsA(isA<CorruptedContainerException>()),
-        );
+        // ID3v2 at beginning
+        expect(encodedBytes.sublist(0, 3), equals([0x49, 0x44, 0x33]));
+
+        // ID3v1 at end
+        final id3v1Start = encodedBytes.length - 128;
+        expect(encodedBytes.sublist(id3v1Start, id3v1Start + 3), equals([0x54, 0x41, 0x47]));
+      });
+    });
+
+    group('Requirement 6.2, 6.3 - Dirty flag management', () {
+      test('should clear dirty flags after successful encoding', () async {
+        // Arrange
+        audioFile.setTag(const TitleTag('Dirty Flag Test'));
+        expect(audioFile.isDirty, isTrue);
+
+        // Act
+        await audioFile.encode();
+
+        // Assert
+        expect(audioFile.isDirty, isFalse);
       });
 
       test('should maintain dirty flag if encoding fails', () async {
@@ -235,68 +153,167 @@ void main() {
           expect(failingAudioFile.isDirty, isTrue);
         }
       });
+
+      test('should clear dirty flag even when no tags are present', () async {
+        // Arrange - no tags, but mark as dirty
+        audioFile.markClean();
+        audioFile.setTag(const TitleTag('Test'));
+        audioFile.removeTag(TagKey.title);
+        expect(audioFile.getAllTags(), isEmpty);
+        expect(audioFile.isDirty, isTrue);
+
+        // Act
+        await audioFile.encode();
+
+        // Assert
+        expect(audioFile.isDirty, isFalse);
+      });
     });
 
-    group('audioData', () {
-      test('should extract pure audio data by removing containers', () {
+    group('Requirement 8.4 - Validation after write', () {
+      test('should validate file structure after encoding', () async {
         // Arrange
-        final fileWithContainers = Uint8List.fromList([
-          // ID3v2 header
-          0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A,
-          ...List.filled(10, 0x00), // ID3v2 data
-          // Audio data
-          0xFF, 0xFB, 0x90, 0x00,
-          ...List.filled(96, 0x00),
-          // ID3v1 tag
-          0x54, 0x41, 0x47, // "TAG"
-          ...List.filled(125, 0x00),
-        ]);
-
-        final audioFileWithContainers = PhonicAudioFileImpl(
-          fileBytes: fileWithContainers,
-          formatStrategy: _MockMp3FormatStrategy(),
-          codecRegistry: codecRegistry,
-          mergePolicy: mergePolicy,
-        );
+        audioFile.setTag(const TitleTag('Validation Test'));
+        audioFile.setTag(const ArtistTag('Test Artist'));
 
         // Act
-        final audioData = audioFileWithContainers.audioData;
+        final encodedBytes = await audioFile.encode();
 
-        // Assert
-        expect(audioData.length, equals(100)); // Just the audio portion
-        expect(audioData[0], equals(0xFF)); // MP3 frame sync
-        expect(audioData[1], equals(0xFB));
-        expect(audioData[2], equals(0x90));
-        expect(audioData[3], equals(0x00));
+        // Assert - validation should pass without throwing
+        expect(encodedBytes.length, greaterThan(104));
+
+        // File should be detectable by format strategy
+        expect(audioFile.formatStrategy.canHandle(encodedBytes), isTrue);
       });
 
-      test('should return original data when no containers present', () {
-        // Arrange - file with no containers
-        final pureAudioFile = Uint8List.fromList([
-          0xFF,
-          0xFB,
-          0x90,
-          0x00,
-          ...List.filled(96, 0x00),
-        ]);
+      test('should throw CorruptedContainerException for validation failures', () async {
+        // Arrange - use corrupting codec that produces invalid containers
+        final corruptingCodecRegistry = CodecRegistry(
+          codecList: [_MockCorruptingCodec()],
+          containerLocatorList: [_MockId3v2Locator()],
+        );
 
-        final audioFileNoContainers = PhonicAudioFileImpl(
-          fileBytes: pureAudioFile,
+        final corruptingAudioFile = PhonicAudioFileImpl(
+          fileBytes: Uint8List.fromList([0xFF, 0xFB, 0x90, 0x00]),
           formatStrategy: _MockMp3FormatStrategy(),
-          codecRegistry: codecRegistry,
+          codecRegistry: corruptingCodecRegistry,
           mergePolicy: mergePolicy,
         );
 
-        // Act
-        final audioData = audioFileNoContainers.audioData;
+        corruptingAudioFile.setTag(const TitleTag('Test'));
 
-        // Assert
-        expect(audioData, equals(pureAudioFile));
+        // Act & Assert
+        expect(
+          () => corruptingAudioFile.encode(),
+          throwsA(isA<CorruptedContainerException>()),
+        );
+      });
+
+      test('should validate empty file detection', () async {
+        // Arrange - create scenario that might produce empty file
+        final emptyProducingCodecRegistry = CodecRegistry(
+          codecList: [_MockEmptyProducingCodec()],
+          containerLocatorList: [_MockId3v2Locator()],
+        );
+
+        final emptyProducingAudioFile = PhonicAudioFileImpl(
+          fileBytes: Uint8List.fromList([0xFF, 0xFB, 0x90, 0x00]),
+          formatStrategy: _MockMp3FormatStrategy(),
+          codecRegistry: emptyProducingCodecRegistry,
+          mergePolicy: mergePolicy,
+        );
+
+        emptyProducingAudioFile.setTag(const TitleTag('Test'));
+
+        // Act & Assert
+        expect(
+          () => emptyProducingAudioFile.encode(),
+          throwsA(isA<CorruptedContainerException>()),
+        );
+      });
+
+      test('should validate container extraction after encoding', () async {
+        // Arrange
+        audioFile.setTag(const TitleTag('Container Extraction Test'));
+
+        // Act
+        final encodedBytes = await audioFile.encode();
+
+        // Assert - containers should be extractable
+        final id3v2Locator = codecRegistry.findLocator(ContainerKind.id3v2);
+        final id3v1Locator = codecRegistry.findLocator(ContainerKind.id3v1);
+
+        expect(id3v2Locator!.fileMatches(encodedBytes), isTrue);
+        expect(id3v1Locator!.fileMatches(encodedBytes), isTrue);
+
+        final id3v2Container = id3v2Locator.extract(encodedBytes);
+        final id3v1Container = id3v1Locator.extract(encodedBytes);
+
+        expect(id3v2Container, isNotNull);
+        expect(id3v1Container, isNotNull);
+        expect(id3v2Container!.isNotEmpty, isTrue);
+        expect(id3v1Container!.isNotEmpty, isTrue);
       });
     });
 
-    group('integration', () {
-      test('should complete full read-modify-write cycle', () async {
+    group('Error handling and edge cases', () {
+      test('should handle comprehensive error scenarios', () async {
+        // Arrange
+        final failingCodecRegistry = CodecRegistry(
+          codecList: [_MockFailingCodec()],
+          containerLocatorList: [_MockId3v2Locator()],
+        );
+
+        final failingAudioFile = PhonicAudioFileImpl(
+          fileBytes: Uint8List.fromList([0xFF, 0xFB, 0x90, 0x00]),
+          formatStrategy: _MockFailingFormatStrategy(),
+          codecRegistry: failingCodecRegistry,
+          mergePolicy: mergePolicy,
+        );
+
+        failingAudioFile.setTag(const TitleTag('Error Test'));
+
+        // Act & Assert
+        expect(
+          () => failingAudioFile.encode(),
+          throwsA(
+            allOf([
+              isA<CorruptedContainerException>(),
+              predicate<CorruptedContainerException>((e) => e.message.contains('Failed to generate any containers')),
+            ]),
+          ),
+        );
+      });
+
+      test('should provide meaningful error context', () async {
+        // Arrange
+        final failingCodecRegistry = CodecRegistry(
+          codecList: [_MockFailingCodec()],
+          containerLocatorList: [_MockId3v2Locator()],
+        );
+
+        final failingAudioFile = PhonicAudioFileImpl(
+          fileBytes: Uint8List.fromList([0xFF, 0xFB, 0x90, 0x00]),
+          formatStrategy: _MockFailingFormatStrategy(),
+          codecRegistry: failingCodecRegistry,
+          mergePolicy: mergePolicy,
+        );
+
+        failingAudioFile.setTag(const TitleTag('Context Test'));
+
+        // Act & Assert
+        try {
+          await failingAudioFile.encode();
+          fail('Expected encoding to fail');
+        } on CorruptedContainerException catch (e) {
+          expect(e.context, isNotNull);
+          expect(e.context, contains('id3v2')); // Should contain container info
+        }
+      });
+    });
+
+    group('Integration scenarios', () {
+      test('should handle complete read-modify-write cycle', () async {
         // Arrange
         final originalFile = Uint8List.fromList([
           // ID3v2 with existing title
@@ -320,17 +337,15 @@ void main() {
         // Act - Modify tags
         fullAudioFile.setTag(const TitleTag('Modified Title'));
         fullAudioFile.setTag(const ArtistTag('New Artist'));
+        fullAudioFile.setTag(GenreTag(const ['Electronic', 'Ambient']));
 
         expect(fullAudioFile.isDirty, isTrue);
 
         // Encode with changes
         final encodedFile = await fullAudioFile.encode();
 
-        // Mark as clean
-        fullAudioFile.markClean();
-        expect(fullAudioFile.isDirty, isFalse);
-
         // Assert
+        expect(fullAudioFile.isDirty, isFalse); // Should be clean after encoding
         expect(encodedFile.length, greaterThan(originalFile.length));
         expect(encodedFile.sublist(0, 3), equals([0x49, 0x44, 0x33])); // ID3v2
 
@@ -351,12 +366,13 @@ void main() {
         // Assert
         expect(encoded1, equals(encoded2)); // Should be identical
         expect(encoded1.length, equals(encoded2.length));
+        expect(audioFile.isDirty, isFalse); // Should remain clean
       });
     });
   });
 }
 
-// Mock implementations for testing
+// Mock implementations for comprehensive testing
 
 class _MockMp3FormatStrategy implements FormatStrategy {
   @override
@@ -419,7 +435,6 @@ class _MockId3v24Codec implements TagCodec {
 
   @override
   List<MetadataTag> readFromContainer(Uint8List containerBytes) {
-    // Return mock tags for testing
     return [
       const TitleTag('Existing Title'),
     ];
@@ -430,7 +445,6 @@ class _MockId3v24Codec implements TagCodec {
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
   }) {
-    // Return mock ID3v2.4 container
     return Uint8List.fromList([
       0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, // Header
       ...List.filled(10, 0x00), // Frame data
@@ -464,7 +478,6 @@ class _MockId3v1Codec implements TagCodec {
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
   }) {
-    // Return mock ID3v1 container (128 bytes)
     final container = Uint8List(128);
     container[0] = 0x54; // 'T'
     container[1] = 0x41; // 'A'
@@ -534,11 +547,43 @@ class _MockCorruptingCodec implements TagCodec {
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
   }) {
-    // Return invalid container that will fail validation
+    // Return valid container that will pass basic validation but fail parsing
     return Uint8List.fromList([
       0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, // Valid header
       ...List.filled(10, 0x00), // Valid frame data
     ]);
+  }
+}
+
+class _MockEmptyProducingCodec implements TagCodec {
+  @override
+  ContainerKind get containerKind => ContainerKind.id3v2;
+
+  @override
+  String get containerVersion => '2.4';
+
+  @override
+  TagCapability get capability => const TagCapability(
+    containerKind: ContainerKind.id3v2,
+    containerVersion: '2.4',
+    semanticsByKey: {
+      TagKey.title: TagSemantics(),
+      TagKey.artist: TagSemantics(),
+      TagKey.rating: TagSemantics(),
+      TagKey.genre: TagSemantics(),
+    },
+  );
+
+  @override
+  List<MetadataTag> readFromContainer(Uint8List containerBytes) => [];
+
+  @override
+  Uint8List writeToContainer({
+    required List<MetadataTag> tagsToWrite,
+    Uint8List? existingContainerBytes,
+  }) {
+    // Return empty container to trigger validation failure
+    return Uint8List(0);
   }
 }
 

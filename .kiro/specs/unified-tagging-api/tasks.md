@@ -946,7 +946,6 @@
 
 - [x] 112. Implement file injection and assembly
 
-
   - Create logic for injecting updated containers back into file
   - Use container locators for proper positioning
   - Handle container order requirements for each format
@@ -954,7 +953,7 @@
   - Write unit tests for file assembly
   - _Requirements: 2.1, 2.2, 6.2, 8.4_
 
-- [ ] 113. Implement encode method
+- [x] 113. Implement encode method
 
   - Create encode method orchestrating complete file encoding
   - Use encoding preparation, rebuilding, and injection utilities
@@ -963,7 +962,8 @@
   - Write comprehensive unit tests for encoding scenarios
   - _Requirements: 2.1, 2.2, 2.3, 6.2, 6.3, 8.4_
 
-- [ ] 114. Implement audioData property
+- [x] 114. Implement audioData property
+
 
   - Create audioData getter returning raw audio without containers
   - Strip all metadata containers from original file bytes

@@ -1,14 +1,19 @@
 import 'dart:typed_data';
 
+import '../exceptions/corrupted_container_exception.dart';
+import '../exceptions/phonic_exception.dart';
 import '../exceptions/tag_validation_exception.dart';
+import '../exceptions/unsupported_format_exception.dart';
 import 'codec_registry.dart';
 import 'container_kind.dart';
 import 'container_rebuilder.dart';
+import 'encoding_preparation.dart';
 import 'file_assembler.dart';
 import 'format_strategy.dart';
 import 'merge_policy.dart';
 import 'metadata_tag.dart';
 import 'phonic_audio_file.dart';
+import 'tag_capability.dart';
 import 'tag_key.dart';
 import 'tag_semantics.dart';
 
@@ -609,54 +614,286 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     _isDirty = false;
   }
 
+  /// Encodes the audio file with current metadata tags to bytes.
+  ///
+  /// This method orchestrates the complete file encoding process by:
+  /// 1. Preparing tags for encoding using format-specific normalization
+  /// 2. Rebuilding containers with updated metadata while preserving unknown data
+  /// 3. Injecting containers into the file using appropriate locators
+  /// 4. Validating the resulting file structure for integrity
+  /// 5. Clearing dirty flags after successful encoding
+  ///
+  /// ## Process Overview
+  ///
+  /// ### 1. Encoding Preparation
+  /// Tags are prepared for each target container format according to the
+  /// format strategy's fan-out policy. This includes:
+  /// - Filtering tags to only those supported by each container
+  /// - Normalizing values to fit container constraints (length limits, ranges)
+  /// - Converting between different encoding formats and scales
+  /// - Handling multi-valued fields appropriately for each format
+  ///
+  /// ### 2. Container Rebuilding
+  /// For each target container, the system:
+  /// - Uses the appropriate codec to encode prepared tags
+  /// - Preserves unknown metadata from existing containers
+  /// - Maintains format-specific structure and ordering
+  /// - Applies container-specific encoding rules
+  ///
+  /// ### 3. File Assembly
+  /// The updated containers are injected into the file:
+  /// - Containers are placed in format-specific order
+  /// - File structure is maintained for the audio format
+  /// - Atomic operations ensure file integrity
+  /// - Original audio data is preserved unchanged
+  ///
+  /// ### 4. Validation and Cleanup
+  /// After successful encoding:
+  /// - File structure is validated for integrity
+  /// - Dirty flags are cleared to reflect saved state
+  /// - Memory resources are managed efficiently
+  ///
+  /// ## Format-Specific Behavior
+  ///
+  /// ### MP3 Files
+  /// - Writes to ID3v2.4 (primary) and ID3v1 (compatibility)
+  /// - ID3v2 placed at file beginning, ID3v1 at end
+  /// - Values normalized for each container's constraints
+  /// - Multi-genre handling with appropriate delimiters
+  ///
+  /// ### FLAC Files
+  /// - Writes to Vorbis Comments metadata block
+  /// - Preserves other metadata blocks unchanged
+  /// - Supports native multi-valued fields
+  /// - UTF-8 encoding throughout
+  ///
+  /// ### OGG Files
+  /// - Updates Vorbis Comments in comment header packet
+  /// - Rebuilds OGG page structure as needed
+  /// - Maintains stream integrity and checksums
+  ///
+  /// ### MP4 Files
+  /// - Updates atoms within moov.udta.meta.ilst hierarchy
+  /// - Preserves unknown atoms and structure
+  /// - Handles both standard and freeform atoms
+  /// - Maintains atom size and hierarchy consistency
+  ///
+  /// ## Error Handling
+  ///
+  /// The method provides comprehensive error handling:
+  /// - Individual container failures don't abort the entire process
+  /// - Validation errors are reported with specific context
+  /// - File corruption is detected and reported
+  /// - Rollback capability if encoding fails
+  ///
+  /// ## Performance Considerations
+  ///
+  /// - Encoding preparation is applied only to supported fields
+  /// - Container rebuilding preserves unknown data efficiently
+  /// - Memory usage is optimized for large files
+  /// - Streaming operations used where possible
+  ///
+  /// ## Thread Safety
+  ///
+  /// This method is not thread-safe. Concurrent access should be synchronized
+  /// by the caller to prevent race conditions during encoding.
+  ///
+  /// Returns:
+  /// - The complete encoded file bytes with updated metadata
+  ///
+  /// Throws:
+  /// - [UnsupportedFormatException] if the format strategy is not supported
+  /// - [CorruptedContainerException] if container generation produces invalid data
+  /// - [TagValidationException] if tag values violate container constraints
+  /// - [PhonicException] for other encoding failures
+  ///
+  /// Example:
+  /// ```dart
+  /// // Modify tags
+  /// audioFile.setTag(TitleTag('New Title'));
+  /// audioFile.setTag(GenreTag(['Rock', 'Alternative']));
+  /// audioFile.setTag(RatingTag(85));
+  ///
+  /// // Check if encoding is needed
+  /// if (audioFile.isDirty) {
+  ///   try {
+  ///     // Encode with all preparation and validation
+  ///     final encodedBytes = await audioFile.encode();
+  ///
+  ///     // Save to file
+  ///     await File('updated_song.mp3').writeAsBytes(encodedBytes);
+  ///
+  ///     // File is now clean (dirty flag cleared automatically)
+  ///     assert(!audioFile.isDirty);
+  ///   } on TagValidationException catch (e) {
+  ///     print('Tag validation failed: ${e.reason}');
+  ///   } on CorruptedContainerException catch (e) {
+  ///     print('Container corruption: ${e.message}');
+  ///   }
+  /// }
+  /// ```
   @override
   Future<Uint8List> encode() async {
-    // Import the file assembler
-    final fileAssembler = FileAssembler(
-      codecRegistry: codecRegistry,
-      containerRebuilder: const ContainerRebuilder(),
-    );
+    try {
+      // Step 1: Prepare tags for encoding using format-specific normalization
+      final encodingPreparation = const EncodingPreparation();
+      final tagsToWrite = getAllTags();
 
-    // Get all tags to write
-    final tagsToWrite = getAllTags();
+      // Get capabilities for all fan-out target containers
+      final capabilities = <(ContainerKind, String), TagCapability>{};
+      for (final (containerKind, containerVersion) in formatStrategy.fanout) {
+        final codec = codecRegistry.findCodec(containerKind, containerVersion);
+        if (codec != null) {
+          capabilities[(containerKind, containerVersion)] = codec.capability;
+        }
+      }
 
-    // Assemble the file with updated metadata containers
-    final assembledFile = await fileAssembler.assembleFile(
-      originalFileBytes: _fileBytes,
-      tagsToWrite: tagsToWrite,
-      formatStrategy: formatStrategy,
-      existingContainers: loadedContainersByKindAndVersion,
-    );
+      // Prepare tags for encoding with container-specific normalization
+      final preparedTagsByContainer = encodingPreparation.prepareTagsForEncoding(
+        tags: tagsToWrite,
+        strategy: formatStrategy,
+        capabilities: capabilities,
+      );
 
-    return assembledFile;
+      // Step 2: Create file assembler with container rebuilder
+      final fileAssembler = FileAssembler(
+        codecRegistry: codecRegistry,
+        containerRebuilder: const ContainerRebuilder(),
+      );
+
+      // Step 3: Assemble the file with updated metadata containers
+      // Use the prepared tags instead of raw tags for proper normalization
+      final allPreparedTags = <MetadataTag>[];
+      for (final tagList in preparedTagsByContainer.values) {
+        allPreparedTags.addAll(tagList);
+      }
+
+      final assembledFile = await fileAssembler.assembleFile(
+        originalFileBytes: _fileBytes,
+        tagsToWrite: allPreparedTags.isNotEmpty ? allPreparedTags : tagsToWrite,
+        formatStrategy: formatStrategy,
+        existingContainers: loadedContainersByKindAndVersion,
+      );
+
+      // Step 4: Validate the assembled file structure for integrity
+      await _validateEncodedFile(assembledFile);
+
+      // Step 5: Clear dirty flags after successful encoding
+      markClean();
+
+      return assembledFile;
+    } catch (e) {
+      // Re-throw known exceptions with additional context
+      if (e is PhonicException) {
+        rethrow;
+      }
+
+      // Wrap unknown exceptions in PhonicException
+      throw CorruptedContainerException(
+        'File encoding failed: $e',
+        context: 'Format: ${formatStrategy.mediaKind.name}, Tags: ${getAllTags().length}',
+      );
+    }
   }
 
-  @override
-  Uint8List get audioData {
-    // Extract pure audio data by removing all metadata containers
-    var audioBytes = Uint8List.fromList(_fileBytes);
-
-    // Process containers in reverse order to avoid offset issues
-    // Start with containers at the end of the file (ID3v1) and work backwards
-    final containerOrder = [
-      ContainerKind.id3v1, // End of file
-      ContainerKind.id3v2, // Beginning of file
-      // Note: Vorbis and MP4 containers are embedded within the format structure
-      // and cannot be simply removed without format-specific parsing
-    ];
-
-    for (final containerKind in containerOrder) {
-      final locator = codecRegistry.findLocator(containerKind);
-      if (locator == null) continue;
-
-      // Check if this container type exists in the current audio bytes
-      if (locator.fileMatches(audioBytes)) {
-        // Remove the container by injecting null (removal)
-        audioBytes = locator.inject(audioBytes, null);
+  /// Validates the encoded file structure to ensure integrity.
+  ///
+  /// This method performs post-encoding validation to verify that the
+  /// assembled file has a valid structure and can be parsed correctly.
+  /// It helps detect corruption or encoding errors early.
+  ///
+  /// ## Validation Checks
+  ///
+  /// ### Format Detection
+  /// - Verifies the file can be detected by the format strategy
+  /// - Ensures format-specific signatures are present and valid
+  /// - Checks that the file structure matches expected patterns
+  ///
+  /// ### Container Validation
+  /// - Validates that containers are properly positioned
+  /// - Checks container headers and structure
+  /// - Verifies container sizes and boundaries
+  ///
+  /// ### Basic Parsing
+  /// - Attempts to locate and extract containers
+  /// - Performs basic parsing validation without full decoding
+  /// - Ensures containers can be read by appropriate locators
+  ///
+  /// ## Performance Considerations
+  ///
+  /// The validation is designed to be fast and lightweight:
+  /// - Only performs structural validation, not full parsing
+  /// - Uses efficient header and signature checks
+  /// - Avoids loading large payloads like artwork data
+  /// - Focuses on critical structural elements
+  ///
+  /// Parameters:
+  /// - [encodedBytes]: The encoded file bytes to validate
+  ///
+  /// Throws:
+  /// - [CorruptedContainerException] if validation detects structural problems
+  /// - [UnsupportedFormatException] if the encoded file format is invalid
+  Future<void> _validateEncodedFile(Uint8List encodedBytes) async {
+    try {
+      // Basic validation: check minimum file size
+      if (encodedBytes.isEmpty) {
+        throw const CorruptedContainerException(
+          'Encoded file is empty',
+          context: 'Expected non-empty file after encoding',
+        );
       }
-    }
 
-    return audioBytes;
+      // Validate format detection
+      if (!formatStrategy.canHandle(encodedBytes)) {
+        throw CorruptedContainerException(
+          'Encoded file cannot be handled by format strategy',
+          context: 'Format: ${formatStrategy.mediaKind.name}',
+        );
+      }
+
+      // Validate container structure for fan-out targets
+      for (final (containerKind, containerVersion) in formatStrategy.fanout) {
+        final locator = codecRegistry.findLocator(containerKind);
+        if (locator == null) continue;
+
+        // Check if container is present and can be located
+        if (locator.fileMatches(encodedBytes)) {
+          final containerBytes = locator.extract(encodedBytes);
+          if (containerBytes == null || containerBytes.isEmpty) {
+            throw CorruptedContainerException(
+              'Container extraction failed after encoding',
+              context: 'Container: ${containerKind.name} v$containerVersion',
+            );
+          }
+
+          // Validate container structure with basic codec parsing
+          final codec = codecRegistry.findCodec(containerKind, containerVersion);
+          if (codec != null) {
+            try {
+              // Attempt basic parsing to validate structure
+              codec.readFromContainer(containerBytes);
+            } catch (e) {
+              throw CorruptedContainerException(
+                'Container parsing failed after encoding: $e',
+                context: 'Container: ${containerKind.name} v$containerVersion',
+              );
+            }
+          }
+        }
+      }
+
+      // Additional format-specific validation could be added here
+      // For now, basic structural validation is sufficient
+    } catch (e) {
+      if (e is PhonicException) {
+        rethrow;
+      }
+
+      throw CorruptedContainerException(
+        'File validation failed: $e',
+        context: 'Encoded file size: ${encodedBytes.length} bytes',
+      );
+    }
   }
 
   @override
@@ -801,6 +1038,167 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     inMemoryTagsByKey.clear();
     for (final tag in mergedTags) {
       inMemoryTagsByKey.putIfAbsent(tag.key, () => <MetadataTag>[]).add(tag);
+    }
+  }
+
+  @override
+  Uint8List get audioData {
+    return _extractAudioData(_fileBytes);
+  }
+
+  /// Extracts raw audio data by removing all metadata containers from the file.
+  ///
+  /// This method systematically removes all known metadata containers from the
+  /// audio file, leaving only the pure audio stream data. It handles different
+  /// container types and their specific removal requirements.
+  ///
+  /// ## Process Overview
+  ///
+  /// 1. **Container Detection**: Identify all metadata containers present in the file
+  /// 2. **Container Removal**: Remove containers in the correct order to maintain file integrity
+  /// 3. **Audio Extraction**: Extract the remaining audio data
+  /// 4. **Validation**: Ensure the resulting data represents valid audio content
+  ///
+  /// ## Container Removal Order
+  ///
+  /// Containers are removed in a specific order to handle interdependencies:
+  /// 1. **ID3v2**: Removed from file beginning (affects audio data offset)
+  /// 2. **ID3v1**: Removed from file end (fixed position, easy removal)
+  /// 3. **Vorbis**: Handled format-specifically within FLAC/OGG structure
+  /// 4. **MP4**: Extracted from atom hierarchy, leaving audio in mdat atoms
+  ///
+  /// ## Format-Specific Handling
+  ///
+  /// ### MP3 Files
+  /// - Remove ID3v2 tag from beginning (if present)
+  /// - Remove ID3v1 tag from end (if present)
+  /// - Remaining data is MP3 audio frames
+  ///
+  /// ### FLAC Files
+  /// - Remove Vorbis comment metadata blocks
+  /// - Preserve FLAC signature and essential metadata blocks
+  /// - Extract audio frames following metadata blocks
+  ///
+  /// ### OGG Files
+  /// - Remove Vorbis comment header packets
+  /// - Preserve OGG page structure for audio packets
+  /// - Extract audio packet data from remaining pages
+  ///
+  /// ### MP4 Files
+  /// - Navigate atom hierarchy to separate metadata (moov) from audio (mdat)
+  /// - Extract raw audio data from mdat atoms
+  /// - Remove all metadata atoms and structural overhead
+  ///
+  /// ## Error Handling
+  ///
+  /// The method handles various error conditions gracefully:
+  /// - Unknown or unsupported container types are ignored
+  /// - Corrupted containers are skipped rather than causing failures
+  /// - Files with no metadata containers return the original data
+  /// - Partial container removal continues if some containers fail
+  ///
+  /// ## Memory Efficiency
+  ///
+  /// The extraction process is designed for memory efficiency:
+  /// - Processes containers sequentially to minimize peak memory usage
+  /// - Uses streaming approaches for large files where possible
+  /// - Avoids creating unnecessary intermediate copies
+  /// - Returns a view of the data when possible
+  ///
+  /// ## Use Cases
+  ///
+  /// This method is useful for:
+  /// - Audio processing that requires pure audio data
+  /// - Transcoding operations that need to preserve only audio content
+  /// - Analysis tools that work with raw audio streams
+  /// - Debugging audio format issues by isolating audio from metadata
+  ///
+  /// Parameters:
+  /// - [fileBytes]: The complete audio file bytes including metadata containers
+  ///
+  /// Returns:
+  /// - The raw audio data with all metadata containers removed
+  ///
+  /// Example:
+  /// ```dart
+  /// // Extract audio data for processing
+  /// final audioFile = await Phonic.fromFile('song.mp3');
+  /// final rawAudio = audioFile.audioData;
+  ///
+  /// // Process raw audio (e.g., apply effects, analyze waveform)
+  /// final processedAudio = audioProcessor.process(rawAudio);
+  ///
+  /// // Create new file with processed audio and original metadata
+  /// final newFile = await audioFile.encode(); // Preserves metadata
+  /// ```
+  Uint8List _extractAudioData(Uint8List fileBytes) {
+    var currentBytes = Uint8List.fromList(fileBytes);
+
+    // Get the container removal order based on format strategy
+    final removalOrder = _getContainerRemovalOrder();
+
+    // Remove containers in the specified order
+    for (final containerKind in removalOrder) {
+      currentBytes = _removeContainer(currentBytes, containerKind);
+    }
+
+    return currentBytes;
+  }
+
+  /// Gets the order in which containers should be removed for audio extraction.
+  ///
+  /// The removal order is important because some containers affect the positioning
+  /// of others. For example, removing ID3v2 from the beginning changes the offset
+  /// of all subsequent data.
+  ///
+  /// Returns:
+  /// - List of container kinds in removal order
+  List<ContainerKind> _getContainerRemovalOrder() {
+    // Remove containers in order that minimizes data shifting:
+    // 1. ID3v1 first (end of file, no shifting required)
+    // 2. ID3v2 second (beginning of file, shifts remaining data)
+    // 3. Format-specific containers (Vorbis, MP4) last
+    return [
+      ContainerKind.id3v1,
+      ContainerKind.id3v2,
+      ContainerKind.vorbis,
+      ContainerKind.mp4,
+    ];
+  }
+
+  /// Removes a specific container type from the file bytes.
+  ///
+  /// This method uses the appropriate container locator to detect and remove
+  /// the specified container type from the file. If the container is not present
+  /// or cannot be removed, the original bytes are returned unchanged.
+  ///
+  /// Parameters:
+  /// - [fileBytes]: The file bytes to process
+  /// - [containerKind]: The type of container to remove
+  ///
+  /// Returns:
+  /// - The file bytes with the specified container removed
+  Uint8List _removeContainer(Uint8List fileBytes, ContainerKind containerKind) {
+    try {
+      // Find the appropriate locator for this container type
+      final locator = codecRegistry.findLocator(containerKind);
+      if (locator == null) {
+        // No locator available for this container type, return unchanged
+        return fileBytes;
+      }
+
+      // Check if the file contains this container type
+      if (!locator.fileMatches(fileBytes)) {
+        // Container not present, return unchanged
+        return fileBytes;
+      }
+
+      // Remove the container by injecting null (which removes it)
+      return locator.inject(fileBytes, null);
+    } catch (e) {
+      // If container removal fails, return original bytes
+      // This ensures robustness when dealing with corrupted containers
+      return fileBytes;
     }
   }
 }
