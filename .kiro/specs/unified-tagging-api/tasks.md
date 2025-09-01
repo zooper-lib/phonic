@@ -1120,7 +1120,12 @@
   - Write unit tests for error recovery scenarios
   - _Requirements: 8.1, 8.2_
 
-- [ ] 132. Implement unknown frame/atom preservation
+- [x] 132. Implement unknown frame/atom preservation
+
+
+
+
+
 
   - Create logic for preserving unknown frames during ID3v2 writes
   - Add unknown atom preservation for MP4 containers

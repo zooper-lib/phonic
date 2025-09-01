@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/core.dart';
+import 'package:phonic/src/utils/unknown_data_preservation.dart';
 
 // Test implementation of TagCodec for testing purposes
 class TestTagCodec implements TagCodec {
@@ -27,7 +28,10 @@ class TestTagCodec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     return [
       TitleTag(
         'Test Title',
@@ -40,6 +44,7 @@ class TestTagCodec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     return Uint8List.fromList([0x01, 0x02, 0x03]);
   }
@@ -564,3 +569,4 @@ void main() {
     });
   });
 }
+

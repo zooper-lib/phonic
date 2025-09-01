@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../utils/unknown_data_preservation.dart';
 import 'container_kind.dart';
 import 'metadata_tag.dart';
 import 'tag_capability.dart';
@@ -430,10 +431,14 @@ abstract class TagCodec {
   /// - **Early termination**: Stop parsing on fatal structural errors
   ///
   /// @param containerBytes The raw bytes of the metadata container to parse
+  /// @param preservationManager Optional manager for collecting unknown data during reads
   /// @returns List of parsed [MetadataTag] instances with provenance information
   /// @throws [CorruptedContainerException] for unrecoverable parsing errors
   /// @throws [UnsupportedFormatException] if the container format is not supported
-  List<MetadataTag> readFromContainer(Uint8List containerBytes);
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  });
 
   /// Encodes metadata tags into raw container bytes.
   ///
@@ -568,11 +573,13 @@ abstract class TagCodec {
   ///
   /// @param tagsToWrite The collection of tags to encode into the container
   /// @param existingContainerBytes Optional existing container to update (preserves unknown fields)
+  /// @param preservationManager Optional manager for preserving unknown data during writes
   /// @returns Binary representation of the complete metadata container
   /// @throws [TagValidationException] for tags that cannot be normalized to fit format constraints
   /// @throws [UnsupportedFormatException] if the container format cannot be written
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   });
 }

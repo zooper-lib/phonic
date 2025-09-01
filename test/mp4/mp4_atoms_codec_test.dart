@@ -821,3 +821,4 @@ Uint8List _buildIntegerData(int value) {
   view.setUint32(0, value, Endian.big);
   return result;
 }
+

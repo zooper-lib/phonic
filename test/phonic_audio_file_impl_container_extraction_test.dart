@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
+import 'package:phonic/src/utils/unknown_data_preservation.dart';
 
 void main() {
   group('PhonicAudioFileImpl - Container Extraction and Decoding', () {
@@ -456,7 +457,10 @@ class _MockTagCodec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     readCallCount++;
 
     if (shouldThrowOnRead) {
@@ -470,8 +474,11 @@ class _MockTagCodec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     // Not needed for extraction tests
     return Uint8List.fromList([1, 2, 3]);
   }
 }
+
+

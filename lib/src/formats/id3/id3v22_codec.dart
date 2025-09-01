@@ -12,6 +12,7 @@ import '../../core/tag_provenance.dart';
 import '../../exceptions/corrupted_container_exception.dart';
 import '../../tags/tags.dart';
 import '../../utils/synchsafe_int.dart';
+import '../../utils/unknown_data_preservation.dart';
 import 'id3v2_frame_map.dart';
 import 'id3v2_frame_parser.dart';
 import 'id3v2_genre_utils.dart';
@@ -109,7 +110,10 @@ class Id3v22Codec implements TagCodec {
   TagCapability get capability => id3v22Capability;
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     if (containerBytes.isEmpty) {
       return <MetadataTag>[];
     }
@@ -195,6 +199,7 @@ class Id3v22Codec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     if (tagsToWrite.isEmpty) {
       return _buildEmptyContainer();

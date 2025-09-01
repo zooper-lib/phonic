@@ -10,6 +10,7 @@ import 'package:phonic/src/exceptions/corrupted_container_exception.dart';
 import 'package:phonic/src/exceptions/phonic_exception.dart';
 import 'package:phonic/src/exceptions/unsupported_format_exception.dart';
 import 'package:phonic/src/utils/error_recovery.dart';
+import 'package:phonic/src/utils/unknown_data_preservation.dart';
 
 void main() {
   group('ErrorRecoveryPolicy', () {
@@ -648,7 +649,10 @@ class _MockCodec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     if (_throwOnRead) {
       throw const CorruptedContainerException(
         'Mock parsing failure',
@@ -662,6 +666,7 @@ class _MockCodec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     throw UnimplementedError('Not needed for tests');
   }

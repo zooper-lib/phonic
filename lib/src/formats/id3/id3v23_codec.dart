@@ -14,6 +14,7 @@ import '../../core/text_encoding.dart';
 import '../../exceptions/corrupted_container_exception.dart';
 import '../../utils/synchsafe_int.dart';
 import '../../utils/text_encoding_utils.dart';
+import '../../utils/unknown_data_preservation.dart';
 import 'id3v2_apic_frame_parser.dart';
 import 'id3v2_comm_frame_parser.dart';
 import 'id3v2_frame_map.dart';
@@ -139,7 +140,10 @@ class Id3v23Codec implements TagCodec {
   TagCapability get capability => id3v23Capability;
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     if (containerBytes.isEmpty) {
       return <MetadataTag>[];
     }
@@ -238,6 +242,7 @@ class Id3v23Codec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     if (tagsToWrite.isEmpty) {
       // Return empty ID3v2.3 header with no frames

@@ -14,6 +14,7 @@ import '../../tags/tags.dart';
 import '../../utils/byte_reader.dart';
 import '../../utils/mp4_atom_parser.dart';
 import '../../utils/mp4_standard_atom_parser.dart';
+import '../../utils/unknown_data_preservation.dart';
 import 'mp4_atom_map.dart';
 
 /// MP4 atoms metadata codec for reading and writing MP4 ilst atom metadata.
@@ -129,7 +130,10 @@ class Mp4AtomsCodec implements TagCodec {
   TagCapability get capability => mp4Capability;
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     if (containerBytes.isEmpty) {
       return <MetadataTag>[];
     }
@@ -149,6 +153,9 @@ class Mp4AtomsCodec implements TagCodec {
         final parsedTag = _parseAtom(atom, provenance, containerBytes);
         if (parsedTag != null) {
           tags.add(parsedTag);
+        } else if (preservationManager != null) {
+          // Preserve unknown atom for round-trip compatibility
+          _preserveUnknownAtom(atom, preservationManager, containerBytes);
         }
       }
 
@@ -166,6 +173,7 @@ class Mp4AtomsCodec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     if (tagsToWrite.isEmpty) {
       // Return empty ilst atom structure
@@ -180,6 +188,12 @@ class Mp4AtomsCodec implements TagCodec {
       if (atomData != null) {
         atoms.add(atomData);
       }
+    }
+
+    // Add preserved unknown atoms if preservation is enabled
+    if (preservationManager != null) {
+      final preservedAtoms = _restorePreservedAtoms(preservationManager);
+      atoms.addAll(preservedAtoms);
     }
 
     // Combine all atoms into a single container
@@ -723,5 +737,62 @@ class Mp4AtomsCodec implements TagCodec {
     }
 
     return result;
+  }
+
+  /// Preserves an unknown atom for round-trip compatibility.
+  ///
+  /// This method stores unknown atoms in the preservation manager so they
+  /// can be restored during write operations, maintaining file integrity.
+  void _preserveUnknownAtom(
+    Mp4Atom atom,
+    UnknownDataPreservationManager preservationManager,
+    Uint8List containerBytes,
+  ) {
+    // Extract the complete atom data including header
+    final atomStart = atom.header.offset;
+    final atomEnd = atomStart + atom.header.size;
+
+    if (atomEnd <= containerBytes.length) {
+      final atomData = containerBytes.sublist(atomStart, atomEnd.toInt());
+
+      // Create preserved data for this unknown atom
+      final preservedData = PreservedUnknownData.mp4Atom(
+        atomType: atom.header.type,
+        atomData: atomData,
+        originalOffset: atomStart,
+        additionalMetadata: {
+          'atom_size': atom.header.size,
+          'data_size': atom.header.dataSize,
+          'is_extended': atom.header.isExtendedSize,
+        },
+      );
+
+      // Add to preservation manager
+      preservationManager.addPreservedData(preservedData);
+    }
+  }
+
+  /// Restores preserved unknown atoms during write operations.
+  ///
+  /// This method retrieves unknown atoms from the preservation manager
+  /// and converts them back to MP4 atom format for inclusion in
+  /// the output container.
+  List<Uint8List> _restorePreservedAtoms(
+    UnknownDataPreservationManager preservationManager,
+  ) {
+    final preservedAtoms = <Uint8List>[];
+    final preservedData = preservationManager.getPreservedData('mp4');
+
+    for (final data in preservedData) {
+      // Validate that this is safe to restore
+      if (!data.isValidForWriting()) {
+        continue; // Skip invalid data
+      }
+
+      // The preserved data already contains the complete atom with header
+      preservedAtoms.add(data.data);
+    }
+
+    return preservedAtoms;
   }
 }

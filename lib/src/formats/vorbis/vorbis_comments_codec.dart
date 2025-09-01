@@ -12,6 +12,7 @@ import '../../core/tag_key.dart';
 import '../../core/tag_provenance.dart';
 import '../../tags/tags.dart';
 import '../../utils/flac_picture_parser.dart';
+import '../../utils/unknown_data_preservation.dart';
 import '../../utils/vorbis_comment_parser.dart';
 import 'vorbis_comment_map.dart';
 
@@ -115,7 +116,10 @@ class VorbisCommentsCodec implements TagCodec {
   TagCapability get capability => vorbisCapability;
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     if (containerBytes.isEmpty) {
       return [];
     }
@@ -307,6 +311,7 @@ class VorbisCommentsCodec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     if (tagsToWrite.isEmpty) {
       // Create minimal Vorbis comment block with just vendor string

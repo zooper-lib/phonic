@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
+import 'package:phonic/src/utils/unknown_data_preservation.dart';
 
 void main() {
   group('FileAssembler', () {
@@ -363,12 +364,16 @@ class _MockId3v24Codec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) => [];
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) => [];
 
   @override
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     // Return mock ID3v2.4 container
     return Uint8List.fromList([
@@ -393,12 +398,16 @@ class _MockId3v1Codec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) => [];
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) => [];
 
   @override
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     // Return mock ID3v1 container (128 bytes)
     final container = Uint8List(128);
@@ -424,12 +433,16 @@ class _MockVorbisCodec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) => [];
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) => [];
 
   @override
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     // Return mock Vorbis comment block
     return Uint8List.fromList([
@@ -531,3 +544,5 @@ class _MockVorbisLocator extends ContainerLocator {
     return Uint8List.fromList([...containerBytes, ...fileBytes]);
   }
 }
+
+

@@ -325,11 +325,3 @@ void _writeSynchsafeInt(Uint8List bytes, int offset, int value) {
   bytes[offset + 2] = (value >> 7) & 0x7F;
   bytes[offset + 3] = value & 0x7F;
 }
-
-/// Formats bytes in a human-readable format.
-String _formatBytes(int bytes) {
-  if (bytes < 1024) return '${bytes}B';
-  if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)}KB';
-  if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)}MB';
-  return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)}GB';
-}

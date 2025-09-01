@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
+import 'package:phonic/src/utils/unknown_data_preservation.dart';
 
 void main() {
   group('PhonicAudioFileImpl encode method comprehensive tests', () {
@@ -434,7 +435,10 @@ class _MockId3v24Codec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     return [
       const TitleTag('Existing Title'),
     ];
@@ -444,6 +448,7 @@ class _MockId3v24Codec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     return Uint8List.fromList([
       0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, // Header
@@ -471,12 +476,16 @@ class _MockId3v1Codec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) => [];
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) => [];
 
   @override
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     final container = Uint8List(128);
     container[0] = 0x54; // 'T'
@@ -506,12 +515,16 @@ class _MockFailingCodec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) => [];
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) => [];
 
   @override
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     throw Exception('Mock codec failure');
   }
@@ -537,7 +550,10 @@ class _MockCorruptingCodec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     // Simulate parsing failure during validation
     throw Exception('Corrupted container data');
   }
@@ -546,6 +562,7 @@ class _MockCorruptingCodec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     // Return valid container that will pass basic validation but fail parsing
     return Uint8List.fromList([
@@ -575,12 +592,16 @@ class _MockEmptyProducingCodec implements TagCodec {
   );
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) => [];
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) => [];
 
   @override
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     // Return empty container to trigger validation failure
     return Uint8List(0);
@@ -649,3 +670,5 @@ class _MockId3v1Locator extends ContainerLocator {
     return Uint8List.fromList([...result, ...containerBytes]);
   }
 }
+
+

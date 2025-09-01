@@ -11,6 +11,7 @@ import '../../core/tag_confidence.dart';
 import '../../core/tag_key.dart';
 import '../../core/tag_provenance.dart';
 import '../../exceptions/corrupted_container_exception.dart';
+import '../../utils/unknown_data_preservation.dart';
 import 'id3v1_genre_table.dart';
 
 /// ID3v1 metadata codec for reading and writing ID3v1 tags.
@@ -109,7 +110,10 @@ class Id3v1Codec implements TagCodec {
   TagCapability get capability => id3v1Capability;
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     // Validate container size and structure
     if (containerBytes.length != ID3v1Constraints.tagSize) {
       throw CorruptedContainerException(
@@ -191,6 +195,7 @@ class Id3v1Codec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     // Create a new 128-byte container initialized with zeros
     final container = Uint8List(ID3v1Constraints.tagSize);

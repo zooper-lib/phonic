@@ -7,6 +7,7 @@ import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/tag_capability.dart';
 import 'package:phonic/src/core/tag_codec.dart';
 import 'package:phonic/src/formats/id3/id3v24_codec.dart';
+import 'package:phonic/src/utils/unknown_data_preservation.dart';
 
 void main() {
   group('ContainerRebuilder', () {
@@ -144,7 +145,10 @@ class _MockCodec implements TagCodec {
   TagCapability get capability => throw UnimplementedError();
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     return [];
   }
 
@@ -152,6 +156,7 @@ class _MockCodec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     return expectedOutput;
   }
@@ -168,7 +173,10 @@ class _ThrowingCodec implements TagCodec {
   TagCapability get capability => throw UnimplementedError();
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     throw Exception('Test exception');
   }
 
@@ -176,7 +184,10 @@ class _ThrowingCodec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     throw Exception('Test exception');
   }
 }
+
+

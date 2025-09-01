@@ -14,6 +14,7 @@ import '../../core/text_encoding.dart';
 import '../../exceptions/corrupted_container_exception.dart';
 import '../../utils/synchsafe_int.dart';
 import '../../utils/text_encoding_utils.dart';
+import '../../utils/unknown_data_preservation.dart';
 import 'id3v2_apic_frame_parser.dart';
 import 'id3v2_comm_frame_parser.dart';
 import 'id3v2_frame_map.dart';
@@ -121,7 +122,10 @@ class Id3v24Codec implements TagCodec {
   TagCapability get capability => id3v24Capability;
 
   @override
-  List<MetadataTag> readFromContainer(Uint8List containerBytes) {
+  List<MetadataTag> readFromContainer(
+    Uint8List containerBytes, {
+    UnknownDataPreservationManager? preservationManager,
+  }) {
     if (containerBytes.isEmpty) {
       return <MetadataTag>[];
     }
@@ -185,6 +189,9 @@ class Id3v24Codec implements TagCodec {
           final tag = _frameToMetadataTag(frame, processedData);
           if (tag != null) {
             tags.add(tag);
+          } else if (preservationManager != null) {
+            // Preserve unknown frame for round-trip compatibility
+            _preserveUnknownFrame(frame, processedData, preservationManager, currentOffset);
           }
 
           // Move to next frame
@@ -220,6 +227,7 @@ class Id3v24Codec implements TagCodec {
   Uint8List writeToContainer({
     required List<MetadataTag> tagsToWrite,
     Uint8List? existingContainerBytes,
+    UnknownDataPreservationManager? preservationManager,
   }) {
     if (tagsToWrite.isEmpty) {
       // Return empty ID3v2.4 header with no frames
@@ -235,6 +243,12 @@ class Id3v24Codec implements TagCodec {
         if (frame != null) {
           frames.add(frame);
         }
+      }
+
+      // Add preserved unknown frames if preservation is enabled
+      if (preservationManager != null) {
+        final preservedFrames = _restorePreservedFrames(preservationManager);
+        frames.addAll(preservedFrames);
       }
 
       // Build complete ID3v2.4 container
@@ -645,6 +659,62 @@ class Id3v24Codec implements TagCodec {
       0x00, // No flags
       0x00, 0x00, 0x00, 0x00, // Size: 0 bytes (no frames)
     ]);
+  }
+
+  /// Preserves an unknown frame for round-trip compatibility.
+  ///
+  /// This method stores unknown frames in the preservation manager so they
+  /// can be restored during write operations, maintaining file integrity.
+  void _preserveUnknownFrame(
+    Id3v2Frame frame,
+    Uint8List frameData,
+    UnknownDataPreservationManager preservationManager,
+    int originalOffset,
+  ) {
+    // Create preserved data for this unknown frame
+    final preservedData = PreservedUnknownData.id3v2Frame(
+      frameId: frame.id,
+      frameData: frameData,
+      frameFlags: frame.flags.statusFlags | (frame.flags.formatFlags << 8),
+      originalOffset: originalOffset,
+      additionalMetadata: {
+        'frame_version': '2.4',
+        'frame_size': frame.size,
+        'total_frame_size': frame.totalSize,
+      },
+    );
+
+    // Add to preservation manager
+    preservationManager.addPreservedData(preservedData);
+  }
+
+  /// Restores preserved unknown frames during write operations.
+  ///
+  /// This method retrieves unknown frames from the preservation manager
+  /// and converts them back to ID3v2.4 frame format for inclusion in
+  /// the output container.
+  List<_Id3v24Frame> _restorePreservedFrames(
+    UnknownDataPreservationManager preservationManager,
+  ) {
+    final preservedFrames = <_Id3v24Frame>[];
+    final preservedData = preservationManager.getPreservedData('id3v2');
+
+    for (final data in preservedData) {
+      // Validate that this is safe to restore
+      if (!data.isValidForWriting()) {
+        continue; // Skip invalid data
+      }
+
+      // Convert preserved data back to frame format
+      final frame = _Id3v24Frame(
+        id: data.type,
+        data: data.data,
+      );
+
+      preservedFrames.add(frame);
+    }
+
+    return preservedFrames;
   }
 }
 
