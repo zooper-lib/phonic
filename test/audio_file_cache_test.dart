@@ -259,7 +259,7 @@ void main() {
         // For testing, we'll simulate this by checking the behavior
 
         // The cache should handle null weak references gracefully
-        final retrieved = cache.get('temp_path');
+        cache.get('temp_path');
         // Retrieved might be null if GC occurred, or the same object if not
         // Both are valid behaviors for weak references
       });
