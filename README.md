@@ -180,6 +180,124 @@ String? title = audioFile?.title;
 5. File I/O utilities
 6. Comprehensive testing suite
 
+## � Test File Generation
+
+To avoid distributing copyrighted audio content, we provide a script that generates minimal-duration "silenced" versions of audio files while preserving all original metadata. This allows developers to create test files from their own music collection without copyright concerns.
+
+### 📋 Prerequisites
+
+**Required Tools** (install via Windows Package Manager):
+
+```powershell
+# Install FFmpeg for audio processing
+winget install "FFmpeg (Essentials Build)"
+
+# Install ExifTool for metadata verification
+winget install ExifTool
+```
+
+**Alternative Installation**:
+
+- **FFmpeg**: Download from [ffmpeg.org](https://ffmpeg.org/download.html)
+- **ExifTool**: Download from [exiftool.org](https://exiftool.org/)
+
+### 🚀 Usage
+
+1. **Copy the Script**: Copy `tools/silence_audio.ps1` to a directory containing your audio files
+
+2. **Run the Script**:
+
+   ```powershell
+   cd path/to/your/audio/files
+   .\silence_audio.ps1
+   ```
+
+3. **Copy Generated Files**: Move the `.silenced.*` files to the appropriate test directory:
+
+   ```powershell
+   # Copy to test fixtures organized by format
+   Copy-Item *.silenced.mp3 path/to/phonic/test/fixtures/mp3/
+   Copy-Item *.silenced.flac path/to/phonic/test/fixtures/flac/
+   Copy-Item *.silenced.m4a path/to/phonic/test/fixtures/m4a/
+   ```
+
+4. **Output**: Creates `.silenced.*` versions of each input file (e.g., `song.mp3` → `song.silenced.mp3`)
+
+### ✨ What the Script Does
+
+- **Preserves ALL metadata**: ID3v1/v2 tags, album artwork, custom fields, etc.
+- **Minimizes file size**: Reduces audio to 0.5 seconds of silence
+- **Maintains format properties**: Sample rate, bit depth, channel layout
+- **Binary-level precision**: Byte-for-byte metadata copying for MP3 files
+- **Multi-format support**: MP3, M4A, AAC, FLAC, OGG, OPUS, WAV
+
+### 📊 Results Example
+
+```
+Original file:  6.7 MB with 158 KB of metadata
+Generated file: 181 KB (158 KB metadata + 23 KB audio)
+Metadata preservation: 100% identical (verified with ExifTool)
+```
+
+### 🎯 Supported Formats
+
+| Format   | Metadata Preservation       | Notes                         |
+| -------- | --------------------------- | ----------------------------- |
+| **MP3**  | Binary-level identical      | Perfect ID3v1/v2 preservation |
+| **M4A**  | FFmpeg metadata mapping     | iTunes/MP4 tags preserved     |
+| **FLAC** | Vorbis comment preservation | Native FLAC metadata          |
+| **OGG**  | Vorbis/Opus tags            | Format-specific handling      |
+| **WAV**  | LIST/INFO chunks            | Broadcast Wave metadata       |
+
+### 🔍 Verification Commands
+
+```powershell
+# Compare metadata between original and silenced files
+exiftool "original.mp3" | Select-String "ID3|Title|Artist"
+exiftool "original.silenced.mp3" | Select-String "ID3|Title|Artist"
+
+# Check file sizes
+Get-ChildItem *.silenced.* | Select-Object Name, Length
+```
+
+### ⚠️ Important Notes
+
+- **No Copyright Issues**: Generated files contain only silence + metadata (factual information), no copyrighted audio content
+- **Test Files Only**: Generated files are for development/testing purposes
+- **Backup Originals**: Script doesn't modify original files
+- **Metadata Verification**: Always verify metadata preservation for your specific use cases
+
+### 🛠️ Troubleshooting
+
+**PowerShell Execution Policy** (if script fails to run):
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**Missing Dependencies**:
+
+```powershell
+# Verify installations
+ffmpeg -version
+exiftool -ver
+```
+
+**Script Location**: The silence audio script is located in `tools/silence_audio.ps1`
+
+### 💡 Developer Workflow
+
+1. **Copy Script**: Copy `tools/silence_audio.ps1` to a directory with diverse audio files
+2. **Generate Test Files**: Run the script to create silenced versions
+3. **Organize by Format**: Move generated files to `test/fixtures/mp3/`, `test/fixtures/flac/`, etc.
+4. **Use in Tests**: Reference the organized test files in your test suite
+5. **Version Control**: The silenced files are small enough to commit safely
+6. **CI/CD Ready**: No external dependencies needed for tests
+7. **Version Control**: The silenced files are small enough to commit safely
+8. **CI/CD Ready**: No external dependencies needed for tests
+
+This approach allows the Phonic library to maintain a comprehensive test suite without distributing copyrighted material, making it safe for open-source development and CI/CD pipelines.
+
 ## 🤝 Contributing
 
 We welcome contributions! Areas where help is needed:
