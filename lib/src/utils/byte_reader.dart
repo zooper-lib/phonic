@@ -64,7 +64,25 @@ class ByteReader {
 
   /// Reads a single unsigned 8-bit integer.
   ///
-  /// Throws [RangeError] if there are insufficient bytes remaining.
+  /// Reads one byte from the current position and returns it as an unsigned
+  /// integer value (0-255). The position is advanced by 1 byte after reading.
+  ///
+  /// This method is commonly used for:
+  /// - Reading single byte values and flags
+  /// - Processing byte-oriented data structures
+  /// - Reading length prefixes in variable-length encodings
+  /// - Parsing binary protocol headers
+  ///
+  /// @returns An unsigned 8-bit integer (0-255)
+  /// @throws RangeError if there are insufficient bytes remaining
+  ///
+  /// Example:
+  /// ```dart
+  /// final reader = ByteReader(Uint8List.fromList([0x48, 0x65, 0x6C]));
+  /// final firstByte = reader.readUint8(); // 0x48 (72)
+  /// final secondByte = reader.readUint8(); // 0x65 (101)
+  /// print('Position: ${reader.position}'); // 2
+  /// ```
   int readUint8() {
     _checkBounds(1);
     return _bytes[_position++];
@@ -188,9 +206,49 @@ class ByteReader {
 
   /// Reads a string of the specified [length] using the given [encoding].
   ///
-  /// If [encoding] is not provided, UTF-8 is used by default.
-  /// Throws [RangeError] if there are insufficient bytes remaining.
-  /// Throws [FormatException] if the bytes cannot be decoded with the specified encoding.
+  /// Reads the specified number of bytes from the current position and
+  /// decodes them as a string using the provided encoding. The position
+  /// is advanced by [length] bytes after reading.
+  ///
+  /// ## Encoding Support
+  ///
+  /// Common encodings used in audio metadata:
+  /// - **UTF-8**: Universal encoding, used by Vorbis Comments and MP4
+  /// - **UTF-16**: Used by ID3v2 for international text
+  /// - **ISO-8859-1** (Latin-1): Used by ID3v2 for basic ASCII text
+  /// - **ASCII**: Basic 7-bit encoding for simple text
+  ///
+  /// ## Error Handling
+  ///
+  /// The method handles encoding errors gracefully:
+  /// - Invalid byte sequences throw [FormatException]
+  /// - Insufficient bytes throw [RangeError]
+  /// - The error message includes the encoding name for debugging
+  ///
+  /// @param length The number of bytes to read and decode
+  /// @param encoding The text encoding to use (defaults to UTF-8)
+  /// @returns The decoded string
+  /// @throws RangeError if there are insufficient bytes remaining
+  /// @throws FormatException if the bytes cannot be decoded with the specified encoding
+  ///
+  /// Example:
+  /// ```dart
+  /// // Read UTF-8 string (default encoding)
+  /// final reader = ByteReader(Uint8List.fromList([0x48, 0x65, 0x6C, 0x6C, 0x6F]));
+  /// final text = reader.readString(5); // "Hello"
+  ///
+  /// // Read with specific encoding
+  /// final latin1Reader = ByteReader(Uint8List.fromList([0xC9, 0x6C, 0x69, 0x74, 0x65]));
+  /// final latin1Text = reader.readString(5, latin1); // "Élite"
+  ///
+  /// // Handle encoding errors
+  /// try {
+  ///   final invalidUtf8 = ByteReader(Uint8List.fromList([0xFF, 0xFE]));
+  ///   final text = invalidUtf8.readString(2, utf8);
+  /// } on FormatException catch (e) {
+  ///   print('Encoding error: $e');
+  /// }
+  /// ```
   String readString(int length, [Encoding? encoding]) {
     encoding ??= utf8;
     final bytes = readBytes(length);
@@ -203,10 +261,62 @@ class ByteReader {
 
   /// Reads a null-terminated string using the given [encoding].
   ///
-  /// If [encoding] is not provided, UTF-8 is used by default.
-  /// If [maxLength] is specified, reading stops at the null terminator or max length.
-  /// Throws [RangeError] if no null terminator is found within the remaining bytes.
-  /// Throws [FormatException] if the bytes cannot be decoded with the specified encoding.
+  /// Reads bytes from the current position until a null terminator (0x00)
+  /// is found, then decodes the bytes as a string using the specified encoding.
+  /// The position is advanced past the null terminator after reading.
+  ///
+  /// ## Null Terminator Handling
+  ///
+  /// - Searches for the first 0x00 byte from the current position
+  /// - Reads all bytes up to (but not including) the null terminator
+  /// - Automatically skips over the null terminator byte
+  /// - If [maxLength] is specified, limits the search range
+  ///
+  /// ## Length Limiting
+  ///
+  /// When [maxLength] is provided:
+  /// - Search stops at null terminator OR max length, whichever comes first
+  /// - If no null terminator is found within max length, reads exactly [maxLength] bytes
+  /// - Useful for parsing fixed-size string fields that may or may not be null-terminated
+  ///
+  /// ## Common Use Cases
+  ///
+  /// - Reading C-style strings from binary data
+  /// - Parsing null-terminated fields in audio metadata
+  /// - Processing variable-length string data
+  /// - Reading strings from legacy file formats
+  ///
+  /// @param encoding The text encoding to use (defaults to UTF-8)
+  /// @param maxLength Optional maximum number of bytes to search for null terminator
+  /// @returns The decoded string (without the null terminator)
+  /// @throws RangeError if no null terminator is found within the remaining bytes (when maxLength is not specified)
+  /// @throws FormatException if the bytes cannot be decoded with the specified encoding
+  ///
+  /// Example:
+  /// ```dart
+  /// // Read null-terminated UTF-8 string
+  /// final data = Uint8List.fromList([0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x00, 0x57, 0x6F, 0x72, 0x6C, 0x64]);
+  /// final reader = ByteReader(data);
+  /// final text = reader.readNullTerminatedString(); // "Hello"
+  /// print('Position after read: ${reader.position}'); // 6 (past the null terminator)
+  ///
+  /// // Read with maximum length limit
+  /// final limitedReader = ByteReader(Uint8List.fromList([0x48, 0x65, 0x6C, 0x6C, 0x6F]));
+  /// final limitedText = limitedReader.readNullTerminatedString(utf8, 5); // "Hello" (no null found, reads 5 bytes)
+  ///
+  /// // Read with specific encoding
+  /// final latin1Data = Uint8List.fromList([0xC9, 0x6C, 0x69, 0x74, 0x65, 0x00]);
+  /// final latin1Reader = ByteReader(latin1Data);
+  /// final latin1Text = latin1Reader.readNullTerminatedString(latin1); // "Élite"
+  ///
+  /// // Handle missing null terminator
+  /// try {
+  ///   final noNullReader = ByteReader(Uint8List.fromList([0x48, 0x65, 0x6C, 0x6C, 0x6F]));
+  ///   final text = noNullReader.readNullTerminatedString(); // Throws RangeError
+  /// } on RangeError catch (e) {
+  ///   print('No null terminator found: $e');
+  /// }
+  /// ```
   String readNullTerminatedString([Encoding? encoding, int? maxLength]) {
     encoding ??= utf8;
     final searchLimit = maxLength != null ? (_position + maxLength).clamp(0, _bytes.length) : _bytes.length;

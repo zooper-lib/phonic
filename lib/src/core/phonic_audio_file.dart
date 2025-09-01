@@ -84,17 +84,48 @@ abstract class PhonicAudioFile {
   /// if no tag exists for that key. For multi-valued tags, this returns
   /// the first value according to the format's precedence rules.
   ///
-  /// Parameters:
-  /// - [key]: The tag key to retrieve
+  /// ## Precedence Rules
   ///
-  /// Returns:
-  /// - The metadata tag for the key, or null if not found
+  /// When multiple containers contain the same tag field, precedence is
+  /// determined by the format strategy:
+  /// - **MP3**: ID3v2.4 > ID3v2.3 > ID3v2.2 > ID3v1
+  /// - **FLAC/OGG/Opus**: Vorbis Comments only
+  /// - **MP4/M4A**: MP4 atoms only
+  ///
+  /// ## Multi-valued Tag Behavior
+  ///
+  /// For tags that can contain multiple values (like genre or artwork),
+  /// this method returns the first value from the highest-precedence
+  /// container. Use [getTags] to retrieve all values.
+  ///
+  /// ## Performance Notes
+  ///
+  /// - This method is optimized for single-value access
+  /// - Artwork data is loaded lazily and won't impact performance
+  /// - Repeated calls for the same key are efficient due to internal caching
+  ///
+  /// @param key The tag key to retrieve
+  /// @returns The metadata tag for the key, or null if not found
   ///
   /// Example:
   /// ```dart
+  /// // Basic tag retrieval
   /// final titleTag = audioFile.getTag(TagKey.title);
   /// if (titleTag != null) {
   ///   print('Title: ${titleTag.value}');
+  ///   print('Source: ${titleTag.provenance}');
+  /// }
+  ///
+  /// // Handling different tag types
+  /// final ratingTag = audioFile.getTag(TagKey.rating) as RatingTag?;
+  /// if (ratingTag != null) {
+  ///   print('Rating: ${ratingTag.value}/100');
+  /// }
+  ///
+  /// // Multi-valued tag (returns first value)
+  /// final genreTag = audioFile.getTag(TagKey.genre) as GenreTag?;
+  /// if (genreTag != null) {
+  ///   print('Primary genre: ${genreTag.value.first}');
   /// }
   /// ```
   MetadataTag? getTag(TagKey key);
@@ -106,17 +137,60 @@ abstract class PhonicAudioFile {
   /// returns a list with one element. For multi-valued tags like
   /// genre or artwork, this returns all available values.
   ///
-  /// Parameters:
-  /// - [key]: The tag key to retrieve
+  /// ## Ordering and Precedence
   ///
-  /// Returns:
-  /// - List of all metadata tags for the key (may be empty)
+  /// The returned list is ordered by container precedence:
+  /// 1. **Highest precedence** containers appear first
+  /// 2. **Multiple values** from the same container maintain their original order
+  /// 3. **Cross-container** values are merged according to format strategy rules
+  ///
+  /// ## Use Cases
+  ///
+  /// - **Multi-valued tags**: Get all genre entries, artwork images, etc.
+  /// - **Provenance analysis**: Examine which containers provide each value
+  /// - **Conflict resolution**: Compare values from different sources
+  /// - **Comprehensive display**: Show all available metadata for a field
+  ///
+  /// ## Performance Considerations
+  ///
+  /// - For artwork tags, image data is loaded lazily
+  /// - Large collections of tags are returned efficiently
+  /// - Consider using [getTag] for single-value access when appropriate
+  ///
+  /// @param key The tag key to retrieve all values for
+  /// @returns List of all metadata tags for the key (may be empty if no tags exist)
   ///
   /// Example:
   /// ```dart
+  /// // Get all genre tags (may include multiple genres)
   /// final genreTags = audioFile.getTags(TagKey.genre);
   /// for (final tag in genreTags) {
-  ///   print('Genre: ${tag.value} from ${tag.provenance}');
+  ///   final genres = (tag as GenreTag).value;
+  ///   print('Genres from ${tag.provenance.containerKind}: ${genres.join(', ')}');
+  /// }
+  ///
+  /// // Get all artwork images
+  /// final artworkTags = audioFile.getTags(TagKey.artwork);
+  /// for (final tag in artworkTags) {
+  ///   final artwork = (tag as ArtworkTag).value;
+  ///   print('${artwork.type}: ${artwork.mimeType}');
+  ///   // Load image data only when needed
+  ///   final imageData = await artwork.data;
+  /// }
+  ///
+  /// // Compare values across containers
+  /// final titleTags = audioFile.getTags(TagKey.title);
+  /// if (titleTags.length > 1) {
+  ///   print('Title conflicts detected:');
+  ///   for (final tag in titleTags) {
+  ///     print('  ${tag.provenance.containerKind}: "${tag.value}"');
+  ///   }
+  /// }
+  ///
+  /// // Check if any tags exist for a key
+  /// final commentTags = audioFile.getTags(TagKey.comment);
+  /// if (commentTags.isEmpty) {
+  ///   print('No comments found in any container');
   /// }
   /// ```
   List<MetadataTag> getTags(TagKey key);
@@ -146,13 +220,77 @@ abstract class PhonicAudioFile {
   /// existing tag with the same key. The tag will be written to
   /// appropriate containers based on the format's fan-out policy.
   ///
-  /// Parameters:
-  /// - [tag]: The metadata tag to set
+  /// ## Fan-out Behavior
+  ///
+  /// The tag is written to containers according to the format strategy:
+  /// - **MP3**: Written to ID3v2.4 and optionally ID3v1 (if supported)
+  /// - **FLAC/OGG/Opus**: Written to Vorbis Comments
+  /// - **MP4/M4A**: Written to MP4 atoms
+  ///
+  /// ## Container Compatibility
+  ///
+  /// - Tags are automatically validated against container capabilities
+  /// - Values are normalized to fit container constraints (length limits, ranges)
+  /// - Unsupported tags are skipped for containers that don't support them
+  /// - Multi-valued tags are encoded appropriately for each container format
+  ///
+  /// ## Validation and Normalization
+  ///
+  /// The library automatically handles:
+  /// - **Text truncation** for length-limited containers (e.g., ID3v1)
+  /// - **Value clamping** for numeric ranges (e.g., rating 0-100 to 0-255)
+  /// - **Encoding selection** based on container capabilities
+  /// - **Format-specific encoding** (e.g., genre delimiters)
+  ///
+  /// ## State Changes
+  ///
+  /// - Sets the [isDirty] flag to indicate unsaved changes
+  /// - Replaces any existing tag with the same key
+  /// - Preserves other tags and metadata
+  ///
+  /// @param tag The metadata tag to set
+  /// @throws TagValidationException if the tag value violates constraints
+  /// @throws UnsupportedFormatException if the tag type is not supported by any target container
   ///
   /// Example:
   /// ```dart
+  /// // Set basic text tags
   /// audioFile.setTag(TitleTag('New Song Title'));
-  /// audioFile.setTag(GenreTag(['Rock', 'Alternative']));
+  /// audioFile.setTag(ArtistTag('Artist Name'));
+  /// audioFile.setTag(AlbumTag('Album Title'));
+  ///
+  /// // Set numeric tags with validation
+  /// audioFile.setTag(RatingTag(85)); // 0-100 scale
+  /// audioFile.setTag(TrackNumberTag(3));
+  /// audioFile.setTag(YearTag(2023));
+  ///
+  /// // Set multi-valued tags
+  /// audioFile.setTag(GenreTag(['Rock', 'Alternative', 'Indie']));
+  ///
+  /// // Set artwork with lazy loading
+  /// final artworkData = ArtworkData(
+  ///   mimeType: 'image/jpeg',
+  ///   type: ArtworkType.frontCover,
+  ///   description: 'Album cover',
+  ///   dataLoader: () async => await File('cover.jpg').readAsBytes(),
+  /// );
+  /// audioFile.setTag(ArtworkTag(artworkData));
+  ///
+  /// // Handle validation errors
+  /// try {
+  ///   audioFile.setTag(RatingTag(150)); // Invalid: exceeds 100
+  /// } on TagValidationException catch (e) {
+  ///   print('Validation failed: ${e.reason}');
+  ///   // Correct the value
+  ///   audioFile.setTag(RatingTag(100));
+  /// }
+  ///
+  /// // Check if changes need saving
+  /// if (audioFile.isDirty) {
+  ///   final updatedBytes = await audioFile.encode();
+  ///   await File('updated.mp3').writeAsBytes(updatedBytes);
+  ///   audioFile.markClean();
+  /// }
   /// ```
   void setTag(MetadataTag tag);
 
@@ -213,19 +351,107 @@ abstract class PhonicAudioFile {
   /// The returned bytes can be written to storage to persist
   /// the changes.
   ///
-  /// Returns:
-  /// - Future containing the complete encoded audio file bytes
+  /// ## Encoding Process
   ///
-  /// Throws:
-  /// - [TagValidationException] if tag values are invalid
-  /// - [UnsupportedFormatException] if format cannot be written
+  /// The encoding process involves several steps:
+  /// 1. **Validation**: All tags are validated against container capabilities
+  /// 2. **Normalization**: Values are normalized to fit container constraints
+  /// 3. **Container Building**: Each target container is rebuilt with new metadata
+  /// 4. **File Assembly**: Containers are injected into the audio file structure
+  /// 5. **Verification**: Optional post-write validation ensures file integrity
+  ///
+  /// ## Container Updates
+  ///
+  /// Only containers with changes are rebuilt:
+  /// - **Modified containers** are completely reconstructed
+  /// - **Unchanged containers** are preserved as-is for efficiency
+  /// - **New containers** are created if tags require them
+  /// - **Empty containers** may be removed to reduce file size
+  ///
+  /// ## Memory Efficiency
+  ///
+  /// - Large artwork data is streamed rather than loaded entirely into memory
+  /// - Original audio data is preserved without copying when possible
+  /// - Temporary buffers are used for container construction
+  /// - Memory usage scales with metadata size, not audio file size
+  ///
+  /// ## Error Recovery
+  ///
+  /// If encoding fails partway through:
+  /// - The original file data remains unchanged
+  /// - No partial writes occur
+  /// - The audio file instance remains in a consistent state
+  /// - Specific error information is provided for debugging
+  ///
+  /// ## Performance Considerations
+  ///
+  /// - **Small files**: Encoding is typically very fast (< 1ms)
+  /// - **Large files**: Time scales with file size and metadata complexity
+  /// - **Artwork**: Large images may impact encoding time
+  /// - **Multiple containers**: More containers require more processing
+  ///
+  /// @returns Future containing the complete encoded audio file bytes
+  /// @throws TagValidationException if any tag values violate container constraints
+  /// @throws UnsupportedFormatException if the format cannot be written
+  /// @throws CorruptedContainerException if existing container data is corrupted
+  /// @throws FileSystemException if temporary file operations fail
   ///
   /// Example:
   /// ```dart
+  /// // Basic encoding and saving
   /// if (audioFile.isDirty) {
+  ///   try {
+  ///     final bytes = await audioFile.encode();
+  ///     await File('updated_song.mp3').writeAsBytes(bytes);
+  ///     audioFile.markClean();
+  ///     print('File saved successfully');
+  ///   } catch (e) {
+  ///     print('Failed to save file: $e');
+  ///   }
+  /// }
+  ///
+  /// // Encoding with error handling
+  /// try {
   ///   final bytes = await audioFile.encode();
-  ///   await File('updated_song.mp3').writeAsBytes(bytes);
+  ///
+  ///   // Verify the encoded file size is reasonable
+  ///   if (bytes.length > 100 * 1024 * 1024) { // 100MB
+  ///     print('Warning: Encoded file is very large (${bytes.length} bytes)');
+  ///   }
+  ///
+  ///   await File('output.mp3').writeAsBytes(bytes);
   ///   audioFile.markClean();
+  ///
+  /// } on TagValidationException catch (e) {
+  ///   print('Tag validation failed: ${e.tagKey} - ${e.reason}');
+  ///   // Fix the problematic tag and retry
+  ///
+  /// } on UnsupportedFormatException catch (e) {
+  ///   print('Format not supported for writing: ${e.message}');
+  ///
+  /// } on CorruptedContainerException catch (e) {
+  ///   print('Container corruption detected at byte ${e.byteOffset}: ${e.message}');
+  ///
+  /// } catch (e) {
+  ///   print('Unexpected error during encoding: $e');
+  /// }
+  ///
+  /// // Batch processing with progress tracking
+  /// final files = ['song1.mp3', 'song2.mp3', 'song3.mp3'];
+  /// for (int i = 0; i < files.length; i++) {
+  ///   final audioFile = await Phonic.fromFile(files[i]);
+  ///
+  ///   // Make some changes...
+  ///   audioFile.setTag(AlbumTag('Remastered Collection'));
+  ///
+  ///   if (audioFile.isDirty) {
+  ///     final bytes = await audioFile.encode();
+  ///     await File('remastered_${files[i]}').writeAsBytes(bytes);
+  ///     audioFile.markClean();
+  ///   }
+  ///
+  ///   audioFile.dispose();
+  ///   print('Progress: ${i + 1}/${files.length} files processed');
   /// }
   /// ```
   Future<Uint8List> encode();

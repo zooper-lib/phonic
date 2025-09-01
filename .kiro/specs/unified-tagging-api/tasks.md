@@ -1112,7 +1112,6 @@
 
 - [x] 131. Create error recovery utilities
 
-
   - Implement graceful handling of corrupted containers
   - Add detailed error logging with byte offsets
   - Create container skip logic when parsing fails
@@ -1121,11 +1120,6 @@
   - _Requirements: 8.1, 8.2_
 
 - [x] 132. Implement unknown frame/atom preservation
-
-
-
-
-
 
   - Create logic for preserving unknown frames during ID3v2 writes
   - Add unknown atom preservation for MP4 containers
@@ -1136,11 +1130,6 @@
 
 - [x] 133. Implement post-write validation
 
-
-
-
-
-
   - Create validation logic that parses written files for consistency
   - Add quick integrity checks after write operations
   - Implement rollback capabilities when validation fails
@@ -1148,7 +1137,7 @@
   - Write unit tests for validation scenarios
   - _Requirements: 8.4_
 
-- [ ] 134. Add comprehensive method documentation
+- [x] 134. Add comprehensive method documentation
 
   - Document all public methods with detailed descriptions
   - Add parameter documentation with types and constraints
@@ -1157,9 +1146,15 @@
   - Create usage examples for complex methods
   - _Requirements: 9.1, 9.2, 9.3_
 
-- [ ] 135. Add class-level documentation
+- [x] 135. Add class-level documentation
+
+
+
+
+
 
   - Create comprehensive class documentation with purpose and usage
+
   - Add memory management guidance for each class
   - Include performance considerations and best practices
   - Create architectural overview documentation
@@ -1168,6 +1163,7 @@
 
 - [ ] 136. Create API usage examples
 
+  - Create a dart project in /example/ with basic usage examples
   - Write comprehensive examples for common use cases
   - Create examples for each supported audio format
   - Add examples for error handling and edge cases
@@ -1180,7 +1176,7 @@
   - Create tests that read → modify → write → read for all formats
   - Test tag preservation across write operations
   - Verify provenance information is maintained correctly
-  - Test with real-world audio file samples
+  - Test with real-world audio file samples from directory test/fixtures/
   - Include edge cases and boundary conditions
   - _Requirements: 1.1, 1.2, 2.1, 2.2, 4.1_
 

@@ -19,75 +19,288 @@ import 'tag_capability.dart';
 import 'tag_key.dart';
 import 'tag_semantics.dart';
 
-/// Concrete implementation of the PhonicAudioFile interface.
+/// Concrete implementation of the PhonicAudioFile interface providing comprehensive metadata operations.
 ///
-/// PhonicAudioFileImpl provides the core functionality for reading and writing
-/// metadata tags across different audio container formats. It uses a strategy
-/// pattern with format-specific strategies, codec registry for container
-/// parsing, and merge policies for handling multiple containers.
+/// PhonicAudioFileImpl serves as the primary implementation of the unified tagging API,
+/// orchestrating the interaction between format strategies, codec registries, merge policies,
+/// and container locators to provide seamless metadata operations across different audio
+/// container formats.
 ///
-/// The implementation maintains an in-memory representation of tags organized
-/// by key, with caching of loaded containers to minimize file I/O operations.
-/// Changes are tracked through dirty flags to optimize write operations.
+/// This implementation maintains an in-memory representation of metadata tags with efficient
+/// caching and change tracking to minimize file I/O operations while ensuring data integrity
+/// and optimal performance for both single-file operations and batch processing scenarios.
 ///
-/// ## Architecture
+/// ## Architecture Overview
 ///
-/// The implementation uses several key components:
-/// - [FormatStrategy]: Determines format detection and container precedence
-/// - [CodecRegistry]: Provides access to container-specific codecs
-/// - [MergePolicy]: Handles tag merging and normalization
-/// - In-memory tag storage: Efficient access to current tag state
-/// - Container caching: Minimizes redundant parsing operations
+/// The implementation follows a layered architecture with clear separation of concerns:
 ///
-/// ## Memory Management
+/// ```
+/// ┌─────────────────────────────────────────────────────────────┐
+/// │                    Public API Layer                         │
+/// │           (getTag, setTag, encode, etc.)                   │
+/// └─────────────────────────────────────────────────────────────┘
+///                                │
+/// ┌─────────────────────────────────────────────────────────────┐
+/// │                 Tag Management Layer                        │
+/// │        (in-memory storage, change tracking)                │
+/// └─────────────────────────────────────────────────────────────┘
+///                                │
+/// ┌─────────────────────────────────────────────────────────────┐
+/// │                Format Strategy Layer                        │
+/// │     (precedence rules, fan-out policy, normalization)     │
+/// └─────────────────────────────────────────────────────────────┘
+///                                │
+/// ┌─────────────────────────────────────────────────────────────┐
+/// │                Container Processing Layer                   │
+/// │         (codec registry, locators, merge policy)          │
+/// └─────────────────────────────────────────────────────────────┘
+/// ```
 ///
-/// The implementation is designed for efficient memory usage:
-/// - Tags are stored in memory for fast access
-/// - Container bytes are cached only when needed for writing
-/// - Artwork and large payloads use lazy loading patterns
-/// - Dispose method releases all cached resources
+/// ## Core Components
 ///
-/// ## Change Tracking
+/// ### Format Strategy
+/// - **Purpose**: Defines format-specific behavior and policies
+/// - **Responsibilities**: Container precedence, fan-out targets, format detection
+/// - **Examples**: Mp3FormatStrategy, FlacFormatStrategy, Mp4FormatStrategy
 ///
-/// Changes are tracked at multiple levels:
-/// - Global dirty flag indicates any modifications
-/// - Per-tag dirty tracking for selective updates
-/// - Container-level change detection for optimized writes
+/// ### Codec Registry
+/// - **Purpose**: Provides access to container-specific parsers and encoders
+/// - **Responsibilities**: Codec discovery, container locator management
+/// - **Thread Safety**: Immutable after construction, safe for concurrent access
 ///
-/// ## Thread Safety
+/// ### Merge Policy
+/// - **Purpose**: Handles tag merging and value normalization
+/// - **Responsibilities**: Precedence-based conflict resolution, constraint application
+/// - **Extensibility**: Supports custom merge rules and normalization strategies
 ///
-/// This implementation is not thread-safe. Concurrent access should be
-/// synchronized by the caller.
+/// ### In-Memory Tag Storage
+/// - **Structure**: Map<TagKey, List<MetadataTag>> for efficient access
+/// - **Benefits**: O(1) tag lookup, support for multi-valued fields, provenance preservation
+/// - **Memory Efficiency**: Lazy loading for large payloads, string interning for common values
 ///
-/// ## Usage Example
+/// ## Memory Management Strategy
+///
+/// The implementation employs several memory optimization techniques:
+///
+/// ### Efficient Tag Storage
+/// - **Primary Storage**: Tags organized by key for O(1) access patterns
+/// - **Multi-Value Support**: Native support for fields like genre and artwork
+/// - **Provenance Preservation**: Lightweight tracking of tag origins and confidence
+/// - **String Interning**: Common values shared across instances to reduce memory footprint
+///
+/// ### Lazy Loading Patterns
+/// - **Artwork Data**: Images loaded on-demand using LazyArtworkLoader
+/// - **Container Caching**: Raw container bytes cached only when needed for writes
+/// - **Streaming Support**: Large files processed incrementally where possible
+///
+/// ### Resource Management
+/// - **Dispose Pattern**: Explicit resource cleanup for memory-constrained environments
+/// - **Weak References**: Cached data eligible for garbage collection under memory pressure
+/// - **Batch Processing**: Optimized memory usage for large collection operations
+///
+/// ## Change Tracking and Dirty State Management
+///
+/// ### Multi-Level Tracking
+/// - **Global Dirty Flag**: Indicates any unsaved changes to the file
+/// - **Tag-Level Changes**: Tracks modifications to individual metadata fields
+/// - **Container-Level Deltas**: Optimizes write operations by updating only changed containers
+///
+/// ### Write Optimization
+/// - **Selective Updates**: Only modified containers are rebuilt and written
+/// - **Atomic Operations**: File integrity maintained through transactional writes
+/// - **Rollback Support**: Failed operations can be reverted to previous state
+///
+/// ## Thread Safety Considerations
+///
+/// **Important**: This implementation is **not thread-safe**. Concurrent access requires
+/// external synchronization:
 ///
 /// ```dart
-/// // Create from file bytes
+/// // Thread-safe usage pattern
+/// final lock = Mutex();
+///
+/// await lock.acquire();
+/// try {
+///   audioFile.setTag(TitleTag('New Title'));
+///   final encoded = await audioFile.encode();
+/// } finally {
+///   lock.release();
+/// }
+/// ```
+///
+/// ### Shared Resources
+/// - **Format Strategy**: Immutable, safe for sharing across instances
+/// - **Codec Registry**: Immutable, safe for concurrent access
+/// - **Merge Policy**: Stateless, safe for sharing
+/// - **File Instance**: Mutable state requires synchronization
+///
+/// ## Performance Characteristics
+///
+/// ### Read Operations
+/// - **Tag Access**: O(1) lookup time for individual tags
+/// - **Multi-Value Fields**: O(n) where n is number of values for the field
+/// - **Container Parsing**: Cached results avoid redundant parsing
+/// - **Memory Usage**: Proportional to metadata size, not file size
+///
+/// ### Write Operations
+/// - **Encoding Preparation**: O(m) where m is number of tags to write
+/// - **Container Rebuilding**: O(c) where c is number of target containers
+/// - **File Assembly**: O(f) where f is total file size
+/// - **Validation**: Optional post-write integrity checking
+///
+/// ## Usage Patterns and Examples
+///
+/// ### Basic Metadata Operations
+/// ```dart
+/// // Create from file bytes with automatic format detection
 /// final audioFile = PhonicAudioFileImpl(
-///   fileBytes: audioBytes,
+///   fileBytes: await File('song.mp3').readAsBytes(),
 ///   formatStrategy: Mp3FormatStrategy(),
 ///   codecRegistry: registry,
 ///   mergePolicy: MergePolicy.fromStrategy(Mp3FormatStrategy()),
 /// );
 ///
-/// // Read tags
+/// // Read metadata with provenance information
 /// final title = audioFile.getTag(TagKey.title);
+/// print('Title: ${title?.value}');
+/// print('Source: ${title?.provenance.containerKind} ${title?.provenance.containerVersion}');
+///
+/// // Handle multi-valued fields
 /// final genres = audioFile.getTags(TagKey.genre);
+/// for (final genre in genres) {
+///   print('Genre: ${genre.value} from ${genre.provenance.containerKind}');
+/// }
+/// ```
 ///
-/// // Modify tags
-/// audioFile.setTag(TitleTag('New Title'));
-/// audioFile.setTag(GenreTag(['Rock', 'Alternative']));
-///
-/// // Save changes
-/// if (audioFile.isDirty) {
-///   final updatedBytes = await audioFile.encode();
-///   // Write updatedBytes to file...
-///   audioFile.markClean();
+/// ### Advanced Tag Management
+/// ```dart
+/// // Set tags with automatic validation
+/// try {
+///   audioFile.setTag(TitleTag('New Song Title'));
+///   audioFile.setTag(ArtistTag('New Artist'));
+///   audioFile.setTag(GenreTag(['Rock', 'Alternative', 'Indie']));
+///   audioFile.setTag(RatingTag(85)); // 0-100 scale
+///   audioFile.setTag(TrackNumberTag(5));
+/// } on TagValidationException catch (e) {
+///   print('Validation failed for ${e.tagKey}: ${e.reason}');
 /// }
 ///
-/// // Cleanup
-/// audioFile.dispose();
+/// // Remove specific tag values
+/// audioFile.removeTagValue(TagKey.genre, 'Alternative');
+///
+/// // Remove entire tag fields
+/// audioFile.removeTag(TagKey.comment);
 /// ```
+///
+/// ### Batch Processing and Memory Management
+/// ```dart
+/// // Process large collections efficiently
+/// final files = ['song1.mp3', 'song2.flac', 'song3.m4a'];
+///
+/// for (final filePath in files) {
+///   PhonicAudioFile? audioFile;
+///   try {
+///     audioFile = await Phonic.fromFile(filePath);
+///
+///     // Process metadata
+///     final title = audioFile.getTag(TagKey.title);
+///     await processMetadata(title?.value);
+///
+///     // Modify if needed
+///     if (needsUpdate(audioFile)) {
+///       audioFile.setTag(TitleTag(generateNewTitle()));
+///
+///       if (audioFile.isDirty) {
+///         final encoded = await audioFile.encode();
+///         await File(filePath).writeAsBytes(encoded);
+///         audioFile.markClean();
+///       }
+///     }
+///   } finally {
+///     // Always dispose to free resources
+///     audioFile?.dispose();
+///   }
+/// }
+/// ```
+///
+/// ### Error Handling and Recovery
+/// ```dart
+/// try {
+///   // Attempt to encode with validation
+///   final encodedBytes = await audioFile.encode();
+///   await saveToFile(encodedBytes);
+///   audioFile.markClean();
+/// } on TagValidationException catch (e) {
+///   // Handle validation errors
+///   print('Tag validation failed: ${e.tagKey} - ${e.reason}');
+///   // Optionally fix the problematic tag
+///   audioFile.removeTag(e.tagKey);
+///   retry();
+/// } on CorruptedContainerException catch (e) {
+///   // Handle container corruption
+///   print('Container corruption at offset ${e.byteOffset}: ${e.message}');
+///   // Attempt recovery or skip this container
+/// } on UnsupportedFormatException catch (e) {
+///   // Handle unsupported formats
+///   print('Format not supported: ${e.message}');
+/// }
+/// ```
+///
+/// ## Integration with Format Strategies
+///
+/// The implementation works seamlessly with different format strategies:
+///
+/// ### MP3 Files (Multiple Containers)
+/// ```dart
+/// // MP3 strategy handles ID3v2.4, ID3v2.3, ID3v2.2, and ID3v1
+/// final mp3File = PhonicAudioFileImpl(
+///   fileBytes: mp3Bytes,
+///   formatStrategy: Mp3FormatStrategy(),
+///   codecRegistry: registry,
+///   mergePolicy: MergePolicy.fromStrategy(Mp3FormatStrategy()),
+/// );
+///
+/// // Reads with precedence: ID3v2.4 > ID3v2.3 > ID3v2.2 > ID3v1
+/// // Writes to: ID3v2.4 (primary) + ID3v1 (compatibility)
+/// ```
+///
+/// ### FLAC Files (Single Container)
+/// ```dart
+/// // FLAC strategy handles Vorbis Comments only
+/// final flacFile = PhonicAudioFileImpl(
+///   fileBytes: flacBytes,
+///   formatStrategy: FlacFormatStrategy(),
+///   codecRegistry: registry,
+///   mergePolicy: MergePolicy.fromStrategy(FlacFormatStrategy()),
+/// );
+///
+/// // Native multi-valued field support, UTF-8 encoding throughout
+/// ```
+///
+/// ## Best Practices
+///
+/// ### Memory Efficiency
+/// - Always call `dispose()` when finished with an audio file instance
+/// - Use batch processing patterns for large collections
+/// - Consider memory monitoring for long-running applications
+/// - Leverage lazy loading for artwork and large payloads
+///
+/// ### Error Handling
+/// - Wrap operations in try-catch blocks for specific exception types
+/// - Validate tags before setting to avoid encoding failures
+/// - Use dirty flag checking to avoid unnecessary encoding operations
+/// - Implement retry logic for transient failures
+///
+/// ### Performance Optimization
+/// - Cache PhonicAudioFileImpl instances for repeated access to the same file
+/// - Use appropriate format strategies for known file types
+/// - Batch tag modifications before encoding
+/// - Consider streaming operations for very large files
+///
+/// ### Thread Safety
+/// - Synchronize access when using instances across multiple threads
+/// - Consider using separate instances per thread for better performance
+/// - Be aware that format strategies and registries are thread-safe for sharing
 class PhonicAudioFileImpl implements PhonicAudioFile {
   /// The format strategy used for this audio file.
   ///
