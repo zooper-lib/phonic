@@ -18,6 +18,7 @@ export 'media_kind.dart';
 export 'merge_policy.dart';
 export 'metadata_tag.dart';
 export 'mime_type.dart';
+export 'phonic.dart';
 export 'phonic_audio_file.dart';
 export 'phonic_audio_file_impl.dart';
 export 'tag_capability.dart';

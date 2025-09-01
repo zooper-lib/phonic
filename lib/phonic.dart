@@ -17,6 +17,30 @@
 /// ```dart
 /// import 'package:phonic/phonic.dart';
 ///
+/// // Load audio file and read metadata
+/// final audioFile = await Phonic.fromFile('song.mp3');
+/// final title = audioFile.getTag(TagKey.title);
+/// final artist = audioFile.getTag(TagKey.artist);
+/// final genres = audioFile.getTags(TagKey.genre);
+///
+/// print('Title: ${title?.value}');
+/// print('Artist: ${artist?.value}');
+/// print('Genres: ${genres.map((g) => g.value).join(', ')}');
+///
+/// // Modify metadata
+/// audioFile.setTag(TitleTag('New Title'));
+/// audioFile.setTag(GenreTag(['Rock', 'Alternative']));
+///
+/// // Save changes
+/// if (audioFile.isDirty) {
+///   final updatedBytes = await audioFile.encode();
+///   await File('updated_song.mp3').writeAsBytes(updatedBytes);
+///   audioFile.markClean();
+/// }
+///
+/// // Cleanup
+/// audioFile.dispose();
+///
 /// // Create artwork with type-safe MIME type
 /// final artwork = ArtworkData(
 ///   mimeType: MimeType.jpeg.standardName,
@@ -30,11 +54,6 @@
 /// if (capability.semantics(TagKey.title).supportsEncoding(TextEncoding.utf8)) {
 ///   // UTF-8 is supported for titles in ID3v2.4
 /// }
-///
-/// // Access format properties
-/// print('MIME type: ${artwork.mimeType}');
-/// print('Supports transparency: ${artwork.supportsTransparency}');
-/// print('File extension: ${artwork.fileExtension}');
 /// ```
 library phonic;
 
