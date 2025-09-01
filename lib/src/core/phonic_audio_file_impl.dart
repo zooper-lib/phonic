@@ -896,6 +896,132 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     }
   }
 
+  /// Releases resources and cleans up memory used by this audio file instance.
+  ///
+  /// This method performs explicit resource cleanup to free memory and release
+  /// any cached data held by the audio file instance. After calling dispose(),
+  /// the instance should not be used for any further operations.
+  ///
+  /// ## Cleanup Operations
+  ///
+  /// The dispose method performs the following cleanup operations:
+  /// 1. **Tag Collection Cleanup**: Clears all in-memory metadata tags
+  /// 2. **Container Cache Cleanup**: Releases cached container bytes
+  /// 3. **State Reset**: Resets dirty flags and internal state
+  /// 4. **Memory Release**: Frees memory used by internal data structures
+  ///
+  /// ## Memory Management
+  ///
+  /// This method is particularly important for memory management when working
+  /// with large audio collections. Each audio file instance caches metadata
+  /// and container data in memory for performance. Calling dispose() ensures
+  /// this memory is released when the instance is no longer needed.
+  ///
+  /// ## Usage Patterns
+  ///
+  /// ### Single File Processing
+  /// ```dart
+  /// final audioFile = await Phonic.fromFile('song.mp3');
+  /// try {
+  ///   // Work with the audio file
+  ///   audioFile.setTag(TitleTag('New Title'));
+  ///   final bytes = await audioFile.encode();
+  ///   await File('updated_song.mp3').writeAsBytes(bytes);
+  /// } finally {
+  ///   // Always dispose when done
+  ///   audioFile.dispose();
+  /// }
+  /// ```
+  ///
+  /// ### Batch Processing
+  /// ```dart
+  /// for (final filePath in audioFiles) {
+  ///   final audioFile = await Phonic.fromFile(filePath);
+  ///   try {
+  ///     // Process the file
+  ///     processAudioFile(audioFile);
+  ///   } finally {
+  ///     // Dispose each file to prevent memory accumulation
+  ///     audioFile.dispose();
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ### Collection Management
+  /// ```dart
+  /// final audioFiles = <PhonicAudioFile>[];
+  /// try {
+  ///   // Load multiple files
+  ///   for (final path in filePaths) {
+  ///     audioFiles.add(await Phonic.fromFile(path));
+  ///   }
+  ///   // Work with collection...
+  /// } finally {
+  ///   // Dispose all files
+  ///   for (final file in audioFiles) {
+  ///     file.dispose();
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ## Thread Safety
+  ///
+  /// This method is not thread-safe. If the audio file instance is being
+  /// accessed from multiple threads, synchronization should be handled by
+  /// the caller before calling dispose().
+  ///
+  /// ## Multiple Calls
+  ///
+  /// This method can be called multiple times safely. Subsequent calls after
+  /// the first will have no effect, as the resources will already be released.
+  ///
+  /// ## Post-Disposal Behavior
+  ///
+  /// After dispose() is called:
+  /// - All tag collections will be empty
+  /// - Container caches will be cleared
+  /// - The dirty flag will be reset to false
+  /// - The instance should not be used for further operations
+  /// - Calling other methods may result in unexpected behavior
+  ///
+  /// ## Performance Impact
+  ///
+  /// - Time complexity: O(n) where n is the number of cached tags and containers
+  /// - Space complexity: Frees O(m) memory where m is the size of cached data
+  /// - The operation completes synchronously and should be fast
+  ///
+  /// ## Requirements Compliance
+  ///
+  /// This method fulfills the following requirements:
+  /// - **Requirement 7.5**: Provides explicit memory management for large collections
+  /// - **Requirement 9.1**: Exposes clean resource management in public API
+  ///
+  /// Example:
+  /// ```dart
+  /// // Create and use audio file
+  /// final audioFile = PhonicAudioFileImpl(
+  ///   fileBytes: audioBytes,
+  ///   formatStrategy: Mp3FormatStrategy(),
+  ///   codecRegistry: registry,
+  ///   mergePolicy: mergePolicy,
+  /// );
+  ///
+  /// // Load and modify tags
+  /// await audioFile.extractContainers();
+  /// audioFile.setTag(TitleTag('New Title'));
+  ///
+  /// // Verify state before disposal
+  /// expect(audioFile.inMemoryTagsByKey, isNotEmpty);
+  /// expect(audioFile.isDirty, isTrue);
+  ///
+  /// // Dispose resources
+  /// audioFile.dispose();
+  ///
+  /// // Verify cleanup
+  /// expect(audioFile.inMemoryTagsByKey, isEmpty);
+  /// expect(audioFile.loadedContainersByKindAndVersion, isEmpty);
+  /// expect(audioFile.isDirty, isFalse);
+  /// ```
   @override
   void dispose() {
     // Clear all cached data to free memory

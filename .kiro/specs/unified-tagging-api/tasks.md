@@ -964,14 +964,14 @@
 
 - [x] 114. Implement audioData property
 
-
   - Create audioData getter returning raw audio without containers
   - Strip all metadata containers from original file bytes
   - Handle different container removal for each format
   - Write unit tests for audio data extraction
   - _Requirements: 7.3_
 
-- [ ] 115. Implement dispose method
+- [x] 115. Implement dispose method
+
 
   - Create dispose method for explicit resource cleanup
   - Clear tag collections and container caches
