@@ -24,6 +24,8 @@ export 'optimized_artwork_data.dart';
 export 'phonic.dart';
 export 'phonic_audio_file.dart';
 export 'phonic_audio_file_impl.dart';
+export 'post_write_validator.dart';
+export 'rollback_manager.dart';
 export 'tag_capability.dart';
 export 'tag_codec.dart';
 export 'tag_confidence.dart';

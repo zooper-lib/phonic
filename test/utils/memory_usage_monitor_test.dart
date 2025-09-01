@@ -36,21 +36,19 @@ void main() {
         expect(report.hasMemoryLeak, isFalse);
       });
 
-      test('should generate report with checkpoints', () {
+      test('should generate report with checkpoints', () async {
         monitor.recordBaseline('start');
 
         // Add some delay to ensure different timestamps
-        Future.delayed(const Duration(milliseconds: 10), () {
-          monitor.recordCheckpoint('middle');
-        });
+        await Future.delayed(const Duration(milliseconds: 10));
+        monitor.recordCheckpoint('middle');
 
-        Future.delayed(const Duration(milliseconds: 20), () {
-          monitor.recordCheckpoint('end');
+        await Future.delayed(const Duration(milliseconds: 20));
+        monitor.recordCheckpoint('end');
 
-          final report = monitor.generateReport();
-          expect(report.checkpoints.length, equals(2));
-          expect(report.totalDuration.inMilliseconds, greaterThan(0));
-        });
+        final report = monitor.generateReport();
+        expect(report.checkpoints.length, equals(2));
+        expect(report.totalDuration.inMilliseconds, greaterThan(0));
       });
 
       test('should clear all data', () {

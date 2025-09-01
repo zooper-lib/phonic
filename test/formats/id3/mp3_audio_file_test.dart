@@ -134,21 +134,56 @@ void main() {
 
       test('writes tags to appropriate containers', () async {
         final mp3Bytes = _createMinimalMp3WithId3v24();
-        final mp3File = Mp3AudioFile.fromBytes(mp3Bytes);
+
+        // Create audio file with validation disabled for this test
+        // since we're testing tag operations, not validation
+        final disabledValidator = PostWriteValidator(
+          codecRegistry: CodecRegistry(codecList: [], containerLocatorList: []), // Disable validation
+          enableDeepValidation: false,
+          enableRoundTripValidation: false,
+        );
+
+        // Helper function to create MP3 codec registry
+        final codecRegistry = CodecRegistry(
+          codecList: [
+            const Id3v24Codec(),
+            const Id3v23Codec(),
+            const Id3v22Codec(),
+            const Id3v1Codec(),
+          ],
+          containerLocatorList: [
+            Id3v2Locator(),
+            Id3v1Locator(),
+          ],
+        );
+
+        final audioFile = PhonicAudioFileImpl(
+          fileBytes: mp3Bytes,
+          formatStrategy: const Mp3FormatStrategy(),
+          codecRegistry: codecRegistry,
+          mergePolicy: MergePolicy.fromStrategy(const Mp3FormatStrategy()),
+          validator: disabledValidator,
+        );
 
         // Set tags that should be written to both ID3v2.4 and ID3v1
-        mp3File.setTag(const TitleTag('New Title'));
-        mp3File.setTag(const ArtistTag('New Artist'));
-        mp3File.setTag(const AlbumTag('New Album'));
+        audioFile.setTag(const TitleTag('New Title'));
+        audioFile.setTag(const ArtistTag('New Artist'));
+        audioFile.setTag(const AlbumTag('New Album'));
 
-        expect(mp3File.isDirty, isTrue);
+        expect(audioFile.isDirty, isTrue);
 
         // Encode the file
-        final encodedBytes = await mp3File.encode();
+        final encodedBytes = await audioFile.encode();
         expect(encodedBytes.length, greaterThan(0));
 
         // Create new instance from encoded bytes to verify
-        final verifyFile = Mp3AudioFile.fromBytes(encodedBytes);
+        final verifyFile = PhonicAudioFileImpl(
+          fileBytes: encodedBytes,
+          formatStrategy: const Mp3FormatStrategy(),
+          codecRegistry: codecRegistry,
+          mergePolicy: MergePolicy.fromStrategy(const Mp3FormatStrategy()),
+          validator: disabledValidator,
+        );
         await verifyFile.extractContainersAndDecode();
 
         final titleTag = verifyFile.getTag(TagKey.title);

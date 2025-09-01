@@ -34,6 +34,11 @@ void main() {
         formatStrategy: mockFormatStrategy,
         codecRegistry: mockCodecRegistry,
         mergePolicy: mockMergePolicy,
+        validator: PostWriteValidator(
+          codecRegistry: mockCodecRegistry,
+          enableDeepValidation: false,
+          enableRoundTripValidation: false,
+        ),
       );
     });
 

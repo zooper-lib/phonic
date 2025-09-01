@@ -34,6 +34,11 @@ void main() {
         formatStrategy: _MockMp3FormatStrategy(),
         codecRegistry: codecRegistry,
         mergePolicy: mergePolicy,
+        validator: PostWriteValidator(
+          codecRegistry: codecRegistry,
+          enableDeepValidation: false,
+          enableRoundTripValidation: false,
+        ),
       );
     });
 
@@ -313,6 +318,11 @@ void main() {
           formatStrategy: _MockMp3FormatStrategy(),
           codecRegistry: codecRegistry,
           mergePolicy: mergePolicy,
+          validator: PostWriteValidator(
+            codecRegistry: codecRegistry,
+            enableDeepValidation: false,
+            enableRoundTripValidation: false,
+          ),
         );
 
         // Simulate loading existing tags
@@ -621,5 +631,3 @@ class _MockId3v1Locator extends ContainerLocator {
     return Uint8List.fromList([...result, ...containerBytes]);
   }
 }
-
-

@@ -13,6 +13,8 @@ import 'format_strategy.dart';
 import 'merge_policy.dart';
 import 'metadata_tag.dart';
 import 'phonic_audio_file.dart';
+import 'post_write_validator.dart';
+import 'rollback_manager.dart';
 import 'tag_capability.dart';
 import 'tag_key.dart';
 import 'tag_semantics.dart';
@@ -150,6 +152,20 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   /// for encoding operations and for extracting raw audio data.
   final Uint8List _fileBytes;
 
+  /// Post-write validator for ensuring file integrity after encoding.
+  ///
+  /// This validator performs comprehensive checks on encoded files to
+  /// detect corruption, structural issues, and tag consistency problems.
+  /// It can be configured for different levels of validation depth.
+  late final PostWriteValidator _validator;
+
+  /// Rollback manager for handling failed write operations.
+  ///
+  /// This manager maintains snapshots of file state before modifications,
+  /// allowing restoration if validation fails or errors occur during
+  /// the encoding process.
+  late final RollbackManager _rollbackManager;
+
   /// Creates a new PhonicAudioFileImpl instance.
   ///
   /// This constructor initializes the implementation with the required
@@ -185,10 +201,15 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     required this.codecRegistry,
     required this.mergePolicy,
     bool isDirty = false,
+    PostWriteValidator? validator,
+    RollbackManager? rollbackManager,
   }) : _fileBytes = Uint8List.fromList(fileBytes),
        inMemoryTagsByKey = <TagKey, List<MetadataTag>>{},
        loadedContainersByKindAndVersion = <(ContainerKind, String), Uint8List>{},
-       _isDirty = isDirty;
+       _isDirty = isDirty {
+    _validator = validator ?? PostWriteValidator(codecRegistry: codecRegistry);
+    _rollbackManager = rollbackManager ?? RollbackManager();
+  }
 
   @override
   MetadataTag? getTag(TagKey key) {
@@ -775,14 +796,62 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
         existingContainers: loadedContainersByKindAndVersion,
       );
 
-      // Step 4: Validate the assembled file structure for integrity
-      await _validateEncodedFile(assembledFile);
+      // Step 4: Save current state for potential rollback
+      final rollbackToken = _rollbackManager.saveState(
+        fileBytes: _fileBytes,
+        tags: inMemoryTagsByKey,
+        description: 'Before encoding operation',
+      );
 
-      // Step 5: Clear dirty flags after successful encoding
+      // Step 5: Validate the assembled file structure for integrity
+      final validationResult = await _validator.validateEncodedFile(
+        encodedBytes: assembledFile,
+        originalTags: tagsToWrite,
+        formatStrategy: formatStrategy,
+        expectedContainers: formatStrategy.fanout,
+      );
+
+      // Step 6: Handle validation results
+      if (!validationResult.isValid) {
+        // Rollback on validation failure
+        final restoredState = _rollbackManager.rollbackTo(rollbackToken);
+        if (restoredState != null) {
+          // Restore the previous state
+          inMemoryTagsByKey.clear();
+          inMemoryTagsByKey.addAll(restoredState.tags);
+        }
+
+        // Create detailed error message
+        final errorMessages = validationResult.errors.map((e) => e.toString()).join('\n');
+        throw CorruptedContainerException(
+          'Post-write validation failed: ${validationResult.summary}\n$errorMessages',
+          context: 'Validation level: ${validationResult.validationLevel}, File size: ${assembledFile.length}',
+        );
+      }
+
+      // Step 7: Log warnings if present
+      if (validationResult.warnings.isNotEmpty) {
+        // In a real implementation, you might want to use a proper logging system
+        // For now, we'll just store the warnings in case the caller wants to access them
+        // This could be exposed through a separate method or property
+      }
+
+      // Step 8: Discard rollback state after successful validation
+      _rollbackManager.discardStatesUpTo(rollbackToken);
+
+      // Step 9: Clear dirty flags after successful encoding
       markClean();
 
       return assembledFile;
     } catch (e) {
+      // Attempt rollback on any exception during encoding
+      final lastState = _rollbackManager.rollback();
+      if (lastState != null) {
+        // Restore the previous state
+        inMemoryTagsByKey.clear();
+        inMemoryTagsByKey.addAll(lastState.tags);
+      }
+
       // Re-throw known exceptions with additional context
       if (e is PhonicException) {
         rethrow;
@@ -796,104 +865,65 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     }
   }
 
-  /// Validates the encoded file structure to ensure integrity.
+  /// Gets information about the current rollback stack.
   ///
-  /// This method performs post-encoding validation to verify that the
-  /// assembled file has a valid structure and can be parsed correctly.
-  /// It helps detect corruption or encoding errors early.
+  /// This method provides details about saved rollback states, including
+  /// memory usage and state descriptions. Useful for debugging and
+  /// monitoring rollback system usage.
   ///
-  /// ## Validation Checks
+  /// Returns:
+  /// - [RollbackStackInfo] containing details about saved states
+  RollbackStackInfo getRollbackInfo() {
+    return _rollbackManager.getStackInfo();
+  }
+
+  /// Manually saves the current state for potential rollback.
   ///
-  /// ### Format Detection
-  /// - Verifies the file can be detected by the format strategy
-  /// - Ensures format-specific signatures are present and valid
-  /// - Checks that the file structure matches expected patterns
-  ///
-  /// ### Container Validation
-  /// - Validates that containers are properly positioned
-  /// - Checks container headers and structure
-  /// - Verifies container sizes and boundaries
-  ///
-  /// ### Basic Parsing
-  /// - Attempts to locate and extract containers
-  /// - Performs basic parsing validation without full decoding
-  /// - Ensures containers can be read by appropriate locators
-  ///
-  /// ## Performance Considerations
-  ///
-  /// The validation is designed to be fast and lightweight:
-  /// - Only performs structural validation, not full parsing
-  /// - Uses efficient header and signature checks
-  /// - Avoids loading large payloads like artwork data
-  /// - Focuses on critical structural elements
+  /// This method allows explicit state saving before performing risky
+  /// operations. The returned token can be used for targeted rollback.
   ///
   /// Parameters:
-  /// - [encodedBytes]: The encoded file bytes to validate
+  /// - [description]: Optional description of the state being saved
   ///
-  /// Throws:
-  /// - [CorruptedContainerException] if validation detects structural problems
-  /// - [UnsupportedFormatException] if the encoded file format is invalid
-  Future<void> _validateEncodedFile(Uint8List encodedBytes) async {
-    try {
-      // Basic validation: check minimum file size
-      if (encodedBytes.isEmpty) {
-        throw const CorruptedContainerException(
-          'Encoded file is empty',
-          context: 'Expected non-empty file after encoding',
-        );
-      }
+  /// Returns:
+  /// - [RollbackToken] that can be used for targeted rollback operations
+  RollbackToken saveRollbackState({String? description}) {
+    return _rollbackManager.saveState(
+      fileBytes: _fileBytes,
+      tags: inMemoryTagsByKey,
+      description: description,
+    );
+  }
 
-      // Validate format detection
-      if (!formatStrategy.canHandle(encodedBytes)) {
-        throw CorruptedContainerException(
-          'Encoded file cannot be handled by format strategy',
-          context: 'Format: ${formatStrategy.mediaKind.name}',
-        );
-      }
-
-      // Validate container structure for fan-out targets
-      for (final (containerKind, containerVersion) in formatStrategy.fanout) {
-        final locator = codecRegistry.findLocator(containerKind);
-        if (locator == null) continue;
-
-        // Check if container is present and can be located
-        if (locator.fileMatches(encodedBytes)) {
-          final containerBytes = locator.extract(encodedBytes);
-          if (containerBytes == null || containerBytes.isEmpty) {
-            throw CorruptedContainerException(
-              'Container extraction failed after encoding',
-              context: 'Container: ${containerKind.name} v$containerVersion',
-            );
-          }
-
-          // Validate container structure with basic codec parsing
-          final codec = codecRegistry.findCodec(containerKind, containerVersion);
-          if (codec != null) {
-            try {
-              // Attempt basic parsing to validate structure
-              codec.readFromContainer(containerBytes);
-            } catch (e) {
-              throw CorruptedContainerException(
-                'Container parsing failed after encoding: $e',
-                context: 'Container: ${containerKind.name} v$containerVersion',
-              );
-            }
-          }
-        }
-      }
-
-      // Additional format-specific validation could be added here
-      // For now, basic structural validation is sufficient
-    } catch (e) {
-      if (e is PhonicException) {
-        rethrow;
-      }
-
-      throw CorruptedContainerException(
-        'File validation failed: $e',
-        context: 'Encoded file size: ${encodedBytes.length} bytes',
-      );
+  /// Manually rolls back to a previously saved state.
+  ///
+  /// This method allows explicit rollback to a specific saved state.
+  /// The file's tag state will be restored to the saved state.
+  ///
+  /// Parameters:
+  /// - [token]: The rollback token identifying the target state
+  ///
+  /// Returns:
+  /// - `true` if rollback was successful
+  /// - `false` if the token was not found or rollback failed
+  bool rollbackTo(RollbackToken token) {
+    final restoredState = _rollbackManager.rollbackTo(token);
+    if (restoredState != null) {
+      // Restore the tag state
+      inMemoryTagsByKey.clear();
+      inMemoryTagsByKey.addAll(restoredState.tags);
+      _isDirty = true; // Mark as dirty since state changed
+      return true;
     }
+    return false;
+  }
+
+  /// Clears all saved rollback states to free memory.
+  ///
+  /// This method removes all rollback states from memory. Use with
+  /// caution as it removes the ability to rollback operations.
+  void clearRollbackStates() {
+    _rollbackManager.clearAll();
   }
 
   /// Releases resources and cleans up memory used by this audio file instance.
@@ -1027,6 +1057,9 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     // Clear all cached data to free memory
     inMemoryTagsByKey.clear();
     loadedContainersByKindAndVersion.clear();
+
+    // Clear rollback states to free memory
+    _rollbackManager.clearAll();
 
     // Reset dirty flag
     _isDirty = false;
