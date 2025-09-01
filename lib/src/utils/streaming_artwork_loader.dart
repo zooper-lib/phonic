@@ -198,6 +198,9 @@ class StreamingArtworkLoader {
         currentOffset + chunkLength,
       );
 
+      // Update bytes processed to include current chunk
+      bytesProcessed += chunkLength;
+
       yield StreamingChunk(
         data: chunk,
         chunkIndex: chunkIndex,
@@ -208,7 +211,6 @@ class StreamingArtworkLoader {
 
       currentOffset += chunkLength;
       remainingBytes -= chunkLength;
-      bytesProcessed += chunkLength;
       chunkIndex++;
     }
   }

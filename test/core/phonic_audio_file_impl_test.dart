@@ -22,7 +22,7 @@ void main() {
       // Create mock codec registry
       mockCodecRegistry = CodecRegistry(
         codecList: [_MockTagCodec()],
-        containerLocatorList: [],
+        containerLocatorList: [_MockContainerLocator()],
       );
 
       // Create mock merge policy
@@ -1143,8 +1143,30 @@ class _MockTagCodec implements TagCodec {
     Uint8List? existingContainerBytes,
     UnknownDataPreservationManager? preservationManager,
   }) {
-    return Uint8List(0);
+    // Return a minimal valid container with some dummy data
+    // This simulates a basic container structure for testing
+    return Uint8List.fromList([0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
   }
 }
 
+/// Mock container locator for testing
+class _MockContainerLocator implements ContainerLocator {
+  @override
+  ContainerKind get containerKind => ContainerKind.id3v2;
 
+  @override
+  bool fileMatches(Uint8List fileBytes) => true;
+
+  @override
+  Uint8List? extract(Uint8List fileBytes) {
+    // Return some dummy container bytes for extraction
+    return Uint8List.fromList([0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+  }
+
+  @override
+  Uint8List inject(Uint8List fileBytes, Uint8List? containerBytes) {
+    // For testing, just return the original file bytes
+    // This simulates the case where injection doesn't modify the file structure
+    return Uint8List.fromList(fileBytes);
+  }
+}

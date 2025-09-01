@@ -97,7 +97,7 @@ void main() {
 
       test('eviction prioritizes large, old entries', () async {
         final cache = ArtworkCache(
-          maxMemoryBytes: 2 * 1024 * 1024, // 2MB limit
+          maxMemoryBytes: 5 * 1024 * 1024, // 5MB limit - enough for small + 2 large artworks
         );
 
         // Add small artwork first

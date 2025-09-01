@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'artwork_data.dart';
@@ -296,9 +297,10 @@ class ArtworkCache {
 
   /// Ensures there's enough capacity for a new entry of the specified size.
   Future<void> _ensureCapacity(int requiredBytes) async {
-    final targetSize = _maxMemoryBytes - requiredBytes;
-    if (_currentMemoryBytes > targetSize) {
-      await evictToSize(targetSize);
+    final wouldExceedLimit = _currentMemoryBytes + requiredBytes > _maxMemoryBytes;
+    if (wouldExceedLimit) {
+      final targetSize = _maxMemoryBytes - requiredBytes;
+      await evictToSize(math.max(0, targetSize));
     }
   }
 
