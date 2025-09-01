@@ -7,6 +7,7 @@ library phonic.utils;
 export 'byte_reader.dart';
 export 'date_normalization.dart';
 export 'flac_picture_parser.dart';
+export 'format_detection.dart';
 export 'lazy_artwork_loader.dart';
 export 'locators/locators.dart';
 export 'mp4_atom_parser.dart';
