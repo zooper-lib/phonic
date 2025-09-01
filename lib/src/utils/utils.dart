@@ -16,6 +16,7 @@ export 'mp4_atom_parser.dart';
 export 'numeric_normalization.dart';
 export 'rating_normalization.dart';
 export 'streaming_artwork_loader.dart';
+export 'streaming_operations.dart';
 export 'string_interning.dart';
 export 'synchsafe_int.dart';
 export 'text_encoding_utils.dart';
