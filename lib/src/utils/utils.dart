@@ -13,6 +13,7 @@ export 'locators/locators.dart';
 export 'mp4_atom_parser.dart';
 export 'numeric_normalization.dart';
 export 'rating_normalization.dart';
+export 'streaming_artwork_loader.dart';
 export 'synchsafe_int.dart';
 export 'text_encoding_utils.dart';
 export 'text_normalization.dart';

@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'dart:typed_data';
+
+import 'streaming_artwork_loader.dart';
 
 /// A lazy loader for artwork data that extracts image bytes from container data on demand.
 ///
@@ -214,6 +217,81 @@ class LazyArtworkLoader {
     return _containerBytes.sublist(_offset, _offset + _length);
   }
 
+  /// Loads the artwork data with compression if beneficial.
+  ///
+  /// This method attempts to compress the artwork data using gzip compression
+  /// and returns the compressed data if it results in significant space savings.
+  /// Otherwise, it returns the original uncompressed data.
+  ///
+  /// Parameters:
+  /// - [compressionThreshold]: Minimum compression ratio to use compressed data (default: 0.9)
+  ///
+  /// Returns:
+  /// - A future that completes with compressed artwork data and compression info
+  ///
+  /// The compression is only applied if it reduces the data size by at least
+  /// the specified threshold percentage.
+  Future<CompressedArtworkData> loadWithCompression({
+    double compressionThreshold = 0.9,
+  }) async {
+    final originalData = await load();
+
+    try {
+      final compressedBytes = gzip.encode(originalData);
+      final compressionRatio = compressedBytes.length / originalData.length;
+
+      if (compressionRatio < compressionThreshold) {
+        return CompressedArtworkData(
+          data: Uint8List.fromList(compressedBytes),
+          originalSize: originalData.length,
+          compressedSize: compressedBytes.length,
+          isCompressed: true,
+        );
+      }
+    } catch (e) {
+      // Compression failed, fall back to original data
+    }
+
+    return CompressedArtworkData(
+      data: originalData,
+      originalSize: originalData.length,
+      compressedSize: originalData.length,
+      isCompressed: false,
+    );
+  }
+
+  /// Creates a streaming loader for this artwork data.
+  ///
+  /// Parameters:
+  /// - [chunkSize]: The size of each chunk for streaming (default: 64KB)
+  ///
+  /// Returns:
+  /// - A StreamingArtworkLoader for processing this artwork in chunks
+  ///
+  /// This is useful for very large artwork that should not be loaded
+  /// entirely into memory at once.
+  StreamingArtworkLoader createStreamingLoader({
+    int chunkSize = 64 * 1024,
+  }) {
+    return StreamingArtworkLoader(
+      containerBytes: _containerBytes,
+      offset: _offset,
+      length: _length,
+      chunkSize: chunkSize,
+    );
+  }
+
+  /// Determines if this artwork should use streaming based on size.
+  ///
+  /// Parameters:
+  /// - [streamingThreshold]: Size threshold for recommending streaming (default: 5MB)
+  ///
+  /// Returns:
+  /// - true if the artwork size exceeds the streaming threshold
+  bool shouldUseStreaming({int streamingThreshold = 5 * 1024 * 1024}) {
+    return _length > streamingThreshold;
+  }
+
   /// Gets the byte offset where artwork data begins in the container.
   ///
   /// This getter provides read-only access to the offset for debugging,
@@ -253,5 +331,61 @@ class LazyArtworkLoader {
   @override
   String toString() {
     return 'LazyArtworkLoader(offset: $_offset, length: $_length, containerSize: ${_containerBytes.length})';
+  }
+}
+
+/// Represents artwork data that may be compressed to save memory.
+class CompressedArtworkData {
+  /// The artwork data (compressed or uncompressed).
+  final Uint8List data;
+
+  /// The original size of the artwork data in bytes.
+  final int originalSize;
+
+  /// The size of the data after compression (or same as original if not compressed).
+  final int compressedSize;
+
+  /// Whether the data is compressed.
+  final bool isCompressed;
+
+  /// Creates a new CompressedArtworkData instance.
+  const CompressedArtworkData({
+    required this.data,
+    required this.originalSize,
+    required this.compressedSize,
+    required this.isCompressed,
+  });
+
+  /// Gets the compression ratio (compressed size / original size).
+  double get compressionRatio => compressedSize / originalSize;
+
+  /// Gets the bytes saved through compression.
+  int get bytesSaved => originalSize - compressedSize;
+
+  /// Gets the compression percentage (0-100).
+  double get compressionPercent => (1.0 - compressionRatio) * 100.0;
+
+  /// Decompresses the data if it's compressed, otherwise returns the data as-is.
+  Future<Uint8List> decompress() async {
+    if (!isCompressed) {
+      return data;
+    }
+
+    try {
+      final decompressed = gzip.decode(data);
+      return Uint8List.fromList(decompressed);
+    } catch (e) {
+      // If decompression fails, return original data
+      return data;
+    }
+  }
+
+  @override
+  String toString() {
+    return 'CompressedArtworkData('
+        'originalSize: $originalSize, '
+        'compressedSize: $compressedSize, '
+        'isCompressed: $isCompressed, '
+        'compressionRatio: ${compressionRatio.toStringAsFixed(3)})';
   }
 }

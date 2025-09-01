@@ -4,6 +4,7 @@
 /// classes that form the foundation of the Phonic library.
 library phonic.core;
 
+export 'artwork_cache.dart';
 export 'artwork_data.dart';
 export 'artwork_type.dart';
 export 'audio_file_cache.dart';
@@ -19,6 +20,7 @@ export 'media_kind.dart';
 export 'merge_policy.dart';
 export 'metadata_tag.dart';
 export 'mime_type.dart';
+export 'optimized_artwork_data.dart';
 export 'phonic.dart';
 export 'phonic_audio_file.dart';
 export 'phonic_audio_file_impl.dart';
