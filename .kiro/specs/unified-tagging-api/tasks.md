@@ -1040,7 +1040,6 @@
 
 - [x] 123. Create Phonic factory class structure
 
-
   - Implement Phonic class with static factory methods
   - Add comprehensive class documentation
   - Include usage examples in documentation
@@ -1048,11 +1047,6 @@
   - _Requirements: 1.1, 9.1_
 
 - [x] 124. Implement Phonic.fromFile method
-
-
-
-
-
 
   - Create fromFile static method reading file and detecting format
   - Use format detection utilities to determine audio type
@@ -1063,11 +1057,6 @@
 
 - [x] 125. Implement Phonic.fromBytes method
 
-
-
-
-
-
   - Create fromBytes static method with optional filename hint
   - Use format detection on byte content
   - Support filename extension as format hint when detection fails
@@ -1075,7 +1064,7 @@
   - Write unit tests for byte-based creation
   - _Requirements: 1.1, 8.1, 9.1_
 
-- [ ] 126. Create AudioFileCache class structure
+- [x] 126. Create AudioFileCache class structure
 
   - Implement AudioFileCache with WeakReference-based storage
   - Add maxCacheSize configuration
@@ -1083,10 +1072,16 @@
   - Write unit tests for cache structure
   - _Requirements: 7.4, 7.5_
 
-- [ ] 127. Implement AudioFileCache methods
+- [x] 127. Implement AudioFileCache methods
+
+
+
+
+
 
   - Add get method for cache retrieval with weak reference handling
   - Implement put method with cache size management
+
   - Create eviction logic for oldest entries when cache is full
   - Add clear method for cache cleanup
   - Write unit tests for cache operations

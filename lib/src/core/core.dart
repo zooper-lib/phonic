@@ -6,6 +6,7 @@ library phonic.core;
 
 export 'artwork_data.dart';
 export 'artwork_type.dart';
+export 'audio_file_cache.dart';
 export 'codec_registry.dart';
 export 'container_kind.dart';
 export 'container_locator.dart';
