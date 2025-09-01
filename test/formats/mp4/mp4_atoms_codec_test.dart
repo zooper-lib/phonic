@@ -1,19 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../lib/src/capabilities/mp4_capability.dart';
-import '../../lib/src/core/artwork_data.dart';
-import '../../lib/src/core/artwork_type.dart';
-import '../../lib/src/core/container_kind.dart';
-import '../../lib/src/core/metadata_tag.dart';
-import '../../lib/src/core/tag_capability.dart';
-import '../../lib/src/core/tag_codec.dart';
-import '../../lib/src/core/tag_confidence.dart';
-import '../../lib/src/core/tag_key.dart';
-import '../../lib/src/exceptions/corrupted_container_exception.dart';
-import '../../lib/src/formats/mp4/mp4_atoms_codec.dart';
-import '../../lib/src/tags/tags.dart';
+import 'package:phonic/phonic.dart';
 
 void main() {
   group('Mp4AtomsCodec', () {
@@ -821,4 +809,3 @@ Uint8List _buildIntegerData(int value) {
   view.setUint32(0, value, Endian.big);
   return result;
 }
-

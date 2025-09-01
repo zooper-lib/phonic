@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/src/core/tag_key.dart';
-import '../lib/src/utils/vorbis_comment_parser.dart';
+import 'package:phonic/src/core/core.dart';
+import 'package:phonic/src/utils/utils.dart';
 
 void main() {
   group('VorbisCommentParser', () {

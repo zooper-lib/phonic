@@ -2,13 +2,8 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/src/core/artwork_cache.dart';
-import '../lib/src/core/artwork_data.dart';
-import '../lib/src/core/artwork_type.dart';
-import '../lib/src/core/optimized_artwork_data.dart';
-import '../lib/src/utils/lazy_artwork_loader.dart';
-import '../lib/src/utils/streaming_artwork_loader.dart';
+import 'package:phonic/src/core/core.dart';
+import 'package:phonic/src/utils/utils.dart';
 
 void main() {
   group('Artwork Optimization Tests', () {

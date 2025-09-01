@@ -1,12 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/src/core/container_kind.dart';
-import '../lib/src/core/tag_codec.dart';
-import '../lib/src/core/tag_key.dart';
-import '../lib/src/exceptions/corrupted_container_exception.dart';
-import '../lib/src/formats/id3/id3v22_codec.dart';
+import 'package:phonic/phonic.dart';
 
 void main() {
   group('Id3v22Codec', () {
@@ -373,4 +368,3 @@ void main() {
     });
   });
 }
-

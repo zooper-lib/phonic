@@ -1,10 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/src/core/artwork_type.dart';
-import '../lib/src/exceptions/corrupted_container_exception.dart';
-import '../lib/src/formats/id3/id3v2_apic_frame_parser.dart';
+import 'package:phonic/phonic.dart';
 
 void main() {
   group('Id3v2ApicFrameParser', () {

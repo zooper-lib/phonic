@@ -1,10 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/src/exceptions/corrupted_container_exception.dart';
-import '../lib/src/formats/id3/id3v2_header_parser.dart';
-import '../lib/src/utils/synchsafe_int.dart';
+import 'package:phonic/phonic.dart';
 
 void main() {
   group('Id3v2HeaderFlags', () {
