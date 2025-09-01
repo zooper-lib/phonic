@@ -9,6 +9,7 @@
     "Move-Item": true,
     "Remove-Item": true,
     "Get-ChildItem": true,
-    "dart": true
+    "dart": true,
+    "flutter": true
   }
 }

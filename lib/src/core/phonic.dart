@@ -379,12 +379,18 @@ class Phonic {
     final mergePolicy = MergePolicy.fromStrategy(formatStrategy);
 
     // Create and return the implementation
-    return PhonicAudioFileImpl(
+    final audioFile = PhonicAudioFileImpl(
       fileBytes: bytes,
       formatStrategy: formatStrategy,
       codecRegistry: codecRegistry,
       mergePolicy: mergePolicy,
     );
+
+    // Automatically load tags from the file for user convenience
+    // This makes tags immediately available after factory creation
+    audioFile.extractContainersAndDecode();
+
+    return audioFile;
   }
 
   /// Detects the appropriate format strategy for the given audio data.

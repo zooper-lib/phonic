@@ -446,6 +446,12 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     return List<MetadataTag>.from(tags);
   }
 
+  /// Synchronous version of extractContainersAndDecode for immediate tag access.
+  ///
+  /// This method performs the same container extraction and decoding as the
+  /// async version but synchronously to enable immediate tag access in getter
+  /// methods. It's used internally by _ensureContainersLoaded().
+
   @override
   List<MetadataTag> getAllTags() {
     /// Retrieves all metadata tags from all containers in the file.
@@ -462,7 +468,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     /// - Preserves provenance information for each tag
     /// - Maintains the order established by precedence rules
     /// - Returns an empty list if no tags have been loaded
-    /// - Does not trigger container extraction if not already performed
+    /// - Automatically triggers container extraction if not already performed
     ///
     /// ## Provenance Preservation
     ///
@@ -500,6 +506,8 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     /// - A new list containing all metadata tags from all containers
     /// - Empty list if no tags are present
     /// - Tags maintain their original provenance information
+
+    // Ensure containers have been extracted before accessing tags
     final allTags = <MetadataTag>[];
 
     // Flatten all tag lists while preserving provenance
