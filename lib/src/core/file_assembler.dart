@@ -198,11 +198,17 @@ class FileAssembler {
         return Uint8List.fromList(originalFileBytes);
       }
 
+      // Adjust fanout targets to preserve existing container versions
+      final adjustedTargets = _adjustFanoutForExistingContainers(
+        fanoutTargets,
+        existingContainers,
+      );
+
       // Generate updated containers for each fan-out target
       final updatedContainers = <(ContainerKind, String), Uint8List>{};
       final containerGenerationErrors = <String>[];
 
-      for (final (containerKind, containerVersion) in fanoutTargets) {
+      for (final (containerKind, containerVersion) in adjustedTargets) {
         try {
           final containerBytes = await _generateContainer(
             containerKind: containerKind,
@@ -441,6 +447,44 @@ class FileAssembler {
       ContainerKind.mp4, // MP4 atoms (within moov structure)
       ContainerKind.id3v1, // Always inject ID3v1 last (end of file)
     ];
+  }
+
+  /// Adjusts the fanout targets to preserve existing container versions.
+  ///
+  /// This method ensures that when existing containers are present, their versions
+  /// are preserved instead of using the format strategy's default fanout versions.
+  /// This is crucial for maintaining ID3v2 version consistency during round-trip operations.
+  ///
+  /// Parameters:
+  /// - [fanoutTargets]: The default fanout targets from the format strategy
+  /// - [existingContainers]: Map of existing containers found in the original file
+  ///
+  /// Returns:
+  /// - Adjusted list of fanout targets with existing container versions preserved
+  List<(ContainerKind, String)> _adjustFanoutForExistingContainers(
+    List<(ContainerKind, String)> fanoutTargets,
+    Map<(ContainerKind, String), Uint8List>? existingContainers,
+  ) {
+    if (existingContainers == null || existingContainers.isEmpty) {
+      return fanoutTargets;
+    }
+
+    final adjustedTargets = <(ContainerKind, String)>[];
+
+    for (final (containerKind, defaultVersion) in fanoutTargets) {
+      // Check if we have an existing container of this kind
+      final existingContainer = existingContainers.entries.where((entry) => entry.key.$1 == containerKind).firstOrNull;
+
+      if (existingContainer != null) {
+        // Use the existing container's version to preserve it
+        adjustedTargets.add((containerKind, existingContainer.key.$2));
+      } else {
+        // No existing container, use the default fanout version
+        adjustedTargets.add((containerKind, defaultVersion));
+      }
+    }
+
+    return adjustedTargets;
   }
 
   /// Validates that container bytes are structurally valid.

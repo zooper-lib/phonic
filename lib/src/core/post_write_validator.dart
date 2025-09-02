@@ -450,17 +450,30 @@ class PostWriteValidator {
       // Extract all tags from the encoded file
       final extractedTags = <MetadataTag>[];
 
-      for (final (containerKind, containerVersion) in formatStrategy.precedence) {
+      for (final (containerKind, _) in formatStrategy.precedence) {
         final locator = codecRegistry.findLocator(containerKind);
-        final codec = codecRegistry.findCodec(containerKind, containerVersion);
 
-        if (locator == null || codec == null) continue;
+        if (locator == null) continue;
 
         if (locator.fileMatches(encodedBytes)) {
           final containerBytes = locator.extract(encodedBytes);
           if (containerBytes != null && containerBytes.isNotEmpty) {
-            final tags = codec.readFromContainer(containerBytes);
-            extractedTags.addAll(tags);
+            // Detect the actual container version instead of using precedence version
+            String detectedVersion;
+
+            if (containerKind == ContainerKind.id3v2) {
+              // For ID3v2, detect the actual version from the container
+              detectedVersion = _detectId3v2Version(containerBytes);
+            } else {
+              // For other container types, use empty string as default
+              detectedVersion = '';
+            }
+
+            final codec = codecRegistry.findCodec(containerKind, detectedVersion);
+            if (codec != null) {
+              final tags = codec.readFromContainer(containerBytes);
+              extractedTags.addAll(tags);
+            }
           }
         }
       }
@@ -479,6 +492,28 @@ class PostWriteValidator {
     }
 
     return ValidationResult(isValid: errors.isEmpty, errors: errors, warnings: warnings, validationLevel: 'round-trip');
+  }
+
+  /// Detects the actual ID3v2 version from container bytes.
+  String _detectId3v2Version(Uint8List containerBytes) {
+    if (containerBytes.length < 10) {
+      return '2.4'; // Default fallback
+    }
+
+    // ID3v2 header structure:
+    // Bytes 0-2: "ID3"
+    // Byte 3: Major version
+    // Byte 4: Revision
+    // Bytes 5-9: Flags and size
+
+    if (containerBytes[0] == 0x49 && containerBytes[1] == 0x44 && containerBytes[2] == 0x33) {
+      final majorVersion = containerBytes[3];
+      // The codec registry expects version format like "2.4", not "4.0"
+      // The major version in the header is the second part (e.g., 4 for ID3v2.4)
+      return '2.$majorVersion';
+    }
+
+    return '2.4'; // Default fallback
   }
 
   /// Validates individual tag structure and values.
@@ -885,7 +920,20 @@ class PostWriteValidator {
 
   bool _allowsValueDifferences(TagKey tagKey) {
     // Some tags may have acceptable differences due to format limitations
-    return const {TagKey.rating, TagKey.genre, TagKey.comment}.contains(tagKey);
+    // ID3v1 has strict character limits that cause truncation:
+    // - Title, Artist, Album: 30 characters
+    // - Comment: 30 characters (or 28 with track number)
+    // - Year: 4 characters
+    // These differences should be warnings, not errors
+    return const {
+      TagKey.rating,
+      TagKey.genre,
+      TagKey.comment,
+      TagKey.title, // ID3v1 30-char limit
+      TagKey.artist, // ID3v1 30-char limit
+      TagKey.album, // ID3v1 30-char limit
+      TagKey.year, // ID3v1 4-char limit
+    }.contains(tagKey);
   }
 
   bool _allowsValueNormalization(TagKey tagKey) {
