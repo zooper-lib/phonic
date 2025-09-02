@@ -7,9 +7,11 @@ import '../exceptions/unsupported_format_exception.dart';
 import 'codec_registry.dart';
 import 'container_kind.dart';
 import 'container_rebuilder.dart';
+import 'encoding_options.dart';
 import 'encoding_preparation.dart';
 import 'file_assembler.dart';
 import 'format_strategy.dart';
+import 'media_kind.dart';
 import 'merge_policy.dart';
 import 'metadata_tag.dart';
 import 'phonic_audio_file.dart';
@@ -968,15 +970,21 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   /// }
   /// ```
   @override
-  Future<Uint8List> encode() async {
+  Future<Uint8List> encode([EncodingOptions? options]) async {
+    // Use preserveExisting strategy by default for maximum compatibility
+    final encodingOptions = options ?? const EncodingOptions.preserveExisting();
+
     try {
-      // Step 1: Prepare tags for encoding using format-specific normalization
+      // Step 1: Determine target containers based on encoding strategy
+      final targetContainers = _determineTargetContainers(encodingOptions);
+
+      // Step 2: Prepare tags for encoding using format-specific normalization
       final encodingPreparation = const EncodingPreparation();
       final tagsToWrite = getAllTags();
 
-      // Get capabilities for all fan-out target containers
+      // Get capabilities for target containers (not all fan-out containers)
       final capabilities = <(ContainerKind, String), TagCapability>{};
-      for (final (containerKind, containerVersion) in formatStrategy.fanout) {
+      for (final (containerKind, containerVersion) in targetContainers) {
         final codec = codecRegistry.findCodec(containerKind, containerVersion);
         if (codec != null) {
           capabilities[(containerKind, containerVersion)] = codec.capability;
@@ -1018,11 +1026,12 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
       );
 
       // Step 5: Validate the assembled file structure for integrity
+      // Use custom target containers instead of default fan-out
       final validationResult = await _validator.validateEncodedFile(
         encodedBytes: assembledFile,
         originalTags: tagsToWrite,
         formatStrategy: formatStrategy,
-        expectedContainers: formatStrategy.fanout,
+        expectedContainers: targetContainers,
       );
 
       // Step 6: Handle validation results
@@ -1572,6 +1581,85 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
       // If container removal fails, return original bytes
       // This ensures robustness when dealing with corrupted containers
       return fileBytes;
+    }
+  }
+
+  /// Determines which containers to write to based on the encoding strategy.
+  ///
+  /// This method implements the core logic for container target selection,
+  /// taking into account the encoding strategy, existing containers, and
+  /// user preferences.
+  ///
+  /// Parameters:
+  /// - [options]: The encoding options specifying strategy and targets
+  ///
+  /// Returns:
+  /// - List of container kinds and versions to write metadata to
+  List<(ContainerKind, String)> _determineTargetContainers(EncodingOptions options) {
+    switch (options.strategy) {
+      case EncodingStrategy.preserveExisting:
+        // Use containers that already exist in the file
+        final existingContainers = loadedContainersByKindAndVersion.keys.toList();
+
+        // If no containers exist, fall back to format's default fan-out
+        if (existingContainers.isEmpty) {
+          return formatStrategy.fanout;
+        }
+
+        return existingContainers;
+
+      case EncodingStrategy.optimized:
+        // Use optimized modern formats for this media kind
+        return _getOptimizedTargetsForFormat(formatStrategy.mediaKind);
+
+      case EncodingStrategy.explicit:
+        // Use user-specified target containers
+        if (options.targetContainers != null && options.targetContainers!.isNotEmpty) {
+          // Target containers are already (ContainerKind, String) tuples
+          return options.targetContainers!;
+        }
+
+        // If no explicit targets specified, fall back to preserveExisting behavior
+        return _determineTargetContainers(
+          const EncodingOptions(strategy: EncodingStrategy.preserveExisting),
+        );
+    }
+  }
+
+  /// Gets the optimized container targets for a specific media format.
+  ///
+  /// This method returns the most modern and feature-complete container
+  /// types for each media format, prioritizing compatibility with current
+  /// software while providing maximum metadata capability.
+  ///
+  /// Parameters:
+  /// - [mediaKind]: The media format to get optimized targets for
+  ///
+  /// Returns:
+  /// - List of optimized container targets for the format
+  List<(ContainerKind, String)> _getOptimizedTargetsForFormat(MediaKind mediaKind) {
+    switch (mediaKind) {
+      case MediaKind.mp3:
+        // For MP3, use ID3v2 as the primary modern standard
+        // ID3v1 is omitted in optimized mode as it's very limited
+        return [(ContainerKind.id3v2, '2.4')];
+
+      case MediaKind.flac:
+        // FLAC uses Vorbis Comments as the standard metadata container
+        return [(ContainerKind.vorbis, '')];
+
+      case MediaKind.ogg:
+        // OGG Vorbis uses Vorbis Comments
+        return [(ContainerKind.vorbis, '')];
+
+      case MediaKind.opus:
+        // Opus uses Vorbis Comments (in Ogg container)
+        return [(ContainerKind.vorbis, '')];
+
+      case MediaKind.mp4:
+      case MediaKind.m4a:
+        // MP4/M4A uses MP4 atoms for metadata
+        return [(ContainerKind.mp4, '')];
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'encoding_options.dart';
 import 'metadata_tag.dart';
 import 'tag_key.dart';
 
@@ -390,11 +391,57 @@ abstract class PhonicAudioFile {
   /// - **Artwork**: Large images may impact encoding time
   /// - **Multiple containers**: More containers require more processing
   ///
+  /// ## Encoding Options
+  ///
+  /// The optional [options] parameter controls encoding behavior:
+  ///
+  /// - **Default strategy**: Uses [EncodingOptions.preserveExisting()] to maintain
+  ///   compatibility with existing containers and metadata
+  /// - **Optimized strategy**: Uses [EncodingOptions.optimized()] to target modern
+  ///   container formats for best compatibility and feature support
+  /// - **Explicit strategy**: Uses [EncodingOptions.explicit()] to specify exact
+  ///   target containers and validation levels
+  ///
+  /// ### Encoding Strategies
+  ///
+  /// - [EncodingStrategy.preserveExisting] (default): Safest option, writes to
+  ///   existing container types to maintain file compatibility
+  /// - [EncodingStrategy.optimized]: Targets modern formats (ID3v2.4, latest specs)
+  ///   for best metadata support and future compatibility
+  /// - [EncodingStrategy.explicit]: Uses user-specified target containers
+  ///
+  /// ### Validation Levels
+  ///
+  /// - [ValidationLevel.basic]: Minimal validation, fastest encoding
+  /// - [ValidationLevel.standard] (default): Reasonable validation with good performance
+  /// - [ValidationLevel.strict]: Comprehensive validation including round-trip verification
+  ///
+  /// @param options Encoding configuration options (uses preserveExisting if null)
   /// @returns Future containing the complete encoded audio file bytes
   /// @throws TagValidationException if any tag values violate container constraints
   /// @throws UnsupportedFormatException if the format cannot be written
   /// @throws CorruptedContainerException if existing container data is corrupted
   /// @throws FileSystemException if temporary file operations fail
+  ///
+  /// Example:
+  /// ```dart
+  /// // Basic encoding with default options
+  /// final bytes = await audioFile.encode();
+  ///
+  /// // Preserve existing containers (safest)
+  /// final safeBytes = await audioFile.encode(EncodingOptions.preserveExisting());
+  ///
+  /// // Use optimized modern formats
+  /// final modernBytes = await audioFile.encode(EncodingOptions.optimized());
+  ///
+  /// // Custom encoding with specific validation
+  /// final customBytes = await audioFile.encode(
+  ///   EncodingOptions.explicit(
+  ///     targetContainers: [ContainerKind.id3v24],
+  ///     validationLevel: ValidationLevel.strict,
+  ///   ),
+  /// );
+  /// ```
   ///
   /// Example:
   /// ```dart
@@ -420,41 +467,8 @@ abstract class PhonicAudioFile {
   ///   }
   ///
   ///   await File('output.mp3').writeAsBytes(bytes);
-  ///   audioFile.markClean();
-  ///
-  /// } on TagValidationException catch (e) {
-  ///   print('Tag validation failed: ${e.tagKey} - ${e.reason}');
-  ///   // Fix the problematic tag and retry
-  ///
-  /// } on UnsupportedFormatException catch (e) {
-  ///   print('Format not supported for writing: ${e.message}');
-  ///
-  /// } on CorruptedContainerException catch (e) {
-  ///   print('Container corruption detected at byte ${e.byteOffset}: ${e.message}');
-  ///
-  /// } catch (e) {
-  ///   print('Unexpected error during encoding: $e');
-  /// }
-  ///
-  /// // Batch processing with progress tracking
-  /// final files = ['song1.mp3', 'song2.mp3', 'song3.mp3'];
-  /// for (int i = 0; i < files.length; i++) {
-  ///   final audioFile = await Phonic.fromFile(files[i]);
-  ///
-  ///   // Make some changes...
-  ///   audioFile.setTag(AlbumTag('Remastered Collection'));
-  ///
-  ///   if (audioFile.isDirty) {
-  ///     final bytes = await audioFile.encode();
-  ///     await File('remastered_${files[i]}').writeAsBytes(bytes);
-  ///     audioFile.markClean();
-  ///   }
-  ///
-  ///   audioFile.dispose();
-  ///   print('Progress: ${i + 1}/${files.length} files processed');
-  /// }
   /// ```
-  Future<Uint8List> encode();
+  Future<Uint8List> encode([EncodingOptions? options]);
 
   /// Gets the raw audio data without metadata containers.
   ///

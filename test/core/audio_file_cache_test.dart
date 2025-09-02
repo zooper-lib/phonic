@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/audio_file_cache.dart';
+import 'package:phonic/src/core/encoding_options.dart';
 import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/phonic_audio_file.dart';
 import 'package:phonic/src/core/tag_key.dart';
@@ -51,7 +52,7 @@ class MockPhonicAudioFile implements PhonicAudioFile {
   }
 
   @override
-  Future<Uint8List> encode() async {
+  Future<Uint8List> encode([EncodingOptions? options]) async {
     return Uint8List.fromList([1, 2, 3, 4]); // Mock encoded data
   }
 
