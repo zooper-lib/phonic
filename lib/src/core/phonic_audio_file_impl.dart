@@ -446,67 +446,60 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     return List<MetadataTag>.from(tags);
   }
 
-  /// Synchronous version of extractContainersAndDecode for immediate tag access.
+  /// Retrieves all metadata tags from all containers in the file.
   ///
-  /// This method performs the same container extraction and decoding as the
-  /// async version but synchronously to enable immediate tag access in getter
-  /// methods. It's used internally by _ensureContainersLoaded().
-
+  /// This method returns a flattened collection of all metadata tags
+  /// that have been loaded from the file's containers, preserving
+  /// provenance information for each tag. The tags are returned in
+  /// the order they appear in the internal storage, which reflects
+  /// the precedence rules applied during container extraction.
+  ///
+  /// ## Behavior
+  ///
+  /// - Returns all tags from all tag keys in a single flat list
+  /// - Preserves provenance information for each tag
+  /// - Maintains the order established by precedence rules
+  /// - Returns an empty list if no tags have been loaded
+  /// - Automatically triggers container extraction if not already performed
+  ///
+  /// ## Provenance Preservation
+  ///
+  /// Each returned tag maintains its original provenance information,
+  /// including:
+  /// - Container kind (ID3v2, ID3v1, Vorbis, MP4)
+  /// - Container version (e.g., "2.4", "v1")
+  /// - Confidence level (certain, inferred, derived)
+  ///
+  /// ## Performance Considerations
+  ///
+  /// This method creates a new list containing all tags, so it has
+  /// O(n) time and space complexity where n is the total number of
+  /// tags. For large collections, consider using getTags() for
+  /// specific keys when possible.
+  ///
+  /// ## Usage Example
+  ///
+  /// ```dart
+  /// // Get all tags for comprehensive metadata display
+  /// final allTags = audioFile.getAllTags();
+  ///
+  /// for (final tag in allTags) {
+  ///   print('${tag.key}: ${tag.value}');
+  ///   print('  Source: ${tag.provenance.containerKind} ${tag.provenance.containerVersion}');
+  ///   print('  Confidence: ${tag.provenance.confidence}');
+  /// }
+  ///
+  /// // Filter by provenance
+  /// final id3v2Tags = allTags.where((tag) =>
+  ///   tag.provenance.containerKind == ContainerKind.id3v2).toList();
+  /// ```
+  ///
+  /// Returns:
+  /// - A new list containing all metadata tags from all containers
+  /// - Empty list if no tags are present
+  /// - Tags maintain their original provenance information
   @override
   List<MetadataTag> getAllTags() {
-    /// Retrieves all metadata tags from all containers in the file.
-    ///
-    /// This method returns a flattened collection of all metadata tags
-    /// that have been loaded from the file's containers, preserving
-    /// provenance information for each tag. The tags are returned in
-    /// the order they appear in the internal storage, which reflects
-    /// the precedence rules applied during container extraction.
-    ///
-    /// ## Behavior
-    ///
-    /// - Returns all tags from all tag keys in a single flat list
-    /// - Preserves provenance information for each tag
-    /// - Maintains the order established by precedence rules
-    /// - Returns an empty list if no tags have been loaded
-    /// - Automatically triggers container extraction if not already performed
-    ///
-    /// ## Provenance Preservation
-    ///
-    /// Each returned tag maintains its original provenance information,
-    /// including:
-    /// - Container kind (ID3v2, ID3v1, Vorbis, MP4)
-    /// - Container version (e.g., "2.4", "v1")
-    /// - Confidence level (certain, inferred, derived)
-    ///
-    /// ## Performance Considerations
-    ///
-    /// This method creates a new list containing all tags, so it has
-    /// O(n) time and space complexity where n is the total number of
-    /// tags. For large collections, consider using getTags() for
-    /// specific keys when possible.
-    ///
-    /// ## Usage Example
-    ///
-    /// ```dart
-    /// // Get all tags for comprehensive metadata display
-    /// final allTags = audioFile.getAllTags();
-    ///
-    /// for (final tag in allTags) {
-    ///   print('${tag.key}: ${tag.value}');
-    ///   print('  Source: ${tag.provenance.containerKind} ${tag.provenance.containerVersion}');
-    ///   print('  Confidence: ${tag.provenance.confidence}');
-    /// }
-    ///
-    /// // Filter by provenance
-    /// final id3v2Tags = allTags.where((tag) =>
-    ///   tag.provenance.containerKind == ContainerKind.id3v2).toList();
-    /// ```
-    ///
-    /// Returns:
-    /// - A new list containing all metadata tags from all containers
-    /// - Empty list if no tags are present
-    /// - Tags maintain their original provenance information
-
     // Ensure containers have been extracted before accessing tags
     final allTags = <MetadataTag>[];
 
