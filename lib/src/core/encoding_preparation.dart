@@ -1,6 +1,7 @@
 import 'container_kind.dart';
 import 'format_strategy.dart';
 import 'metadata_tag.dart';
+import 'semantic_tag_converter.dart';
 import 'tag_capability.dart';
 import 'tag_confidence.dart';
 import 'tag_key.dart';
@@ -112,11 +113,19 @@ import 'tag_semantics.dart';
 /// The [EncodingPreparation] class is stateless and thread-safe. Multiple
 /// threads can safely use the same instance concurrently for tag preparation.
 class EncodingPreparation {
+  /// Semantic tag converter for handling frame mapping conflicts.
+  final SemanticTagConverter _semanticConverter;
+
+  /// Gets the semantic tag converter used by this preparation instance.
+  SemanticTagConverter get semanticConverter => _semanticConverter;
+
   /// Creates a new encoding preparation utility instance.
   ///
   /// The utility is stateless and can be reused across multiple operations
   /// and threads safely.
-  const EncodingPreparation();
+  const EncodingPreparation({
+    SemanticTagConverter? semanticConverter,
+  }) : _semanticConverter = semanticConverter ?? const SemanticTagConverter();
 
   /// Prepares tags for encoding based on format strategy and container capabilities,
   /// including async preparation for tags that require it.
@@ -124,13 +133,16 @@ class EncodingPreparation {
   /// This method applies the complete preparation pipeline with async support:
   /// 1. Determines target containers using format strategy fan-out
   /// 2. Performs async preparation for tags that require it (e.g., artwork loading)
-  /// 3. Filters tags based on container capabilities
-  /// 4. Normalizes values for each target container
-  /// 5. Returns a map of prepared tags by container
+  /// 3. Applies semantic conversions to resolve frame mapping conflicts
+  /// 4. Filters tags based on container capabilities
+  /// 5. Normalizes values for each target container
+  /// 6. Returns a map of prepared tags by container
   ///
   /// The preparation process ensures that each container receives only the
   /// tags it supports, with values properly normalized for its constraints
-  /// and async data (like artwork) fully loaded.
+  /// and async data (like artwork) fully loaded. Additionally, it resolves
+  /// semantic conflicts like Year/DateRecorded tags both mapping to the same
+  /// TDRC frame in ID3v2.4.
   ///
   /// ## Parameters
   ///
@@ -195,9 +207,10 @@ class EncodingPreparation {
   ///
   /// This method applies the complete preparation pipeline:
   /// 1. Determines target containers using format strategy fan-out
-  /// 2. Filters tags based on container capabilities
-  /// 3. Normalizes values for each target container
-  /// 4. Returns a map of prepared tags by container
+  /// 2. Applies semantic conversions to resolve frame mapping conflicts
+  /// 3. Filters tags based on container capabilities
+  /// 4. Normalizes values for each target container
+  /// 5. Returns a map of prepared tags by container
   ///
   /// Note: This is the synchronous version that expects tags to already have
   /// any async data loaded. For tags with async requirements (e.g., artwork),
@@ -205,6 +218,8 @@ class EncodingPreparation {
   ///
   /// The preparation process ensures that each container receives only the
   /// tags it supports, with values properly normalized for its constraints.
+  /// Additionally, it resolves semantic conflicts like Year/DateRecorded tags
+  /// both mapping to the same TDRC frame in ID3v2.4.
   ///
   /// ## Parameters
   ///
@@ -254,6 +269,9 @@ class EncodingPreparation {
     required FormatStrategy strategy,
     required Map<(ContainerKind, String), TagCapability> capabilities,
   }) {
+    // Step 1: Apply semantic conversions to resolve frame mapping conflicts
+    final convertedTags = _semanticConverter.convertForTargetVersion(tags, strategy.fanout);
+
     final result = <(ContainerKind, String), List<MetadataTag>>{};
 
     // Process each fan-out target from the format strategy
@@ -264,7 +282,7 @@ class EncodingPreparation {
       if (capability != null) {
         // Prepare tags for this specific container
         final preparedTags = prepareTagsForContainer(
-          tags: tags,
+          tags: convertedTags,
           containerKind: containerKind,
           containerVersion: containerVersion,
           capability: capability,

@@ -17,6 +17,7 @@ import 'metadata_tag.dart';
 import 'phonic_audio_file.dart';
 import 'post_write_validator.dart';
 import 'rollback_manager.dart';
+import 'semantic_tag_converter.dart';
 import 'tag_capability.dart';
 import 'tag_key.dart';
 import 'tag_semantics.dart';
@@ -422,7 +423,10 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
        inMemoryTagsByKey = <TagKey, List<MetadataTag>>{},
        loadedContainersByKindAndVersion = <(ContainerKind, String), Uint8List>{},
        _isDirty = isDirty {
-    _validator = validator ?? PostWriteValidator(codecRegistry: codecRegistry);
+    _validator = validator ?? PostWriteValidator(
+      codecRegistry: codecRegistry,
+      semanticConverter: const SemanticTagConverter(),
+    );
     _rollbackManager = rollbackManager ?? RollbackManager();
   }
 
@@ -1034,6 +1038,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
         enableDeepValidation: validationLevel != ValidationLevel.basic,
         enableRoundTripValidation: validationLevel == ValidationLevel.strict,
         maxValidationFileSize: _validator.maxValidationFileSize,
+        semanticConverter: encodingPreparation.semanticConverter,
       );
       
       // Use custom target containers instead of default fan-out

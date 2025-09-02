@@ -5,6 +5,7 @@ import 'codec_registry.dart';
 import 'container_kind.dart';
 import 'format_strategy.dart';
 import 'metadata_tag.dart';
+import 'semantic_tag_converter.dart';
 import 'tag_key.dart';
 
 /// Comprehensive validation system for post-write file integrity checks.
@@ -68,6 +69,9 @@ class PostWriteValidator {
   /// Registry of available codecs and container locators.
   final CodecRegistry codecRegistry;
 
+  /// Semantic tag converter for round-trip validation equivalence checking.
+  final SemanticTagConverter _semanticConverter;
+
   /// Whether to perform deep container structure validation.
   ///
   /// When enabled, performs detailed parsing of container structures
@@ -93,12 +97,14 @@ class PostWriteValidator {
   /// - [enableDeepValidation]: Whether to perform deep structure validation
   /// - [enableRoundTripValidation]: Whether to perform round-trip validation
   /// - [maxValidationFileSize]: Maximum file size for full validation
+  /// - [semanticConverter]: Optional semantic converter for equivalence checking
   const PostWriteValidator({
     required this.codecRegistry,
     this.enableDeepValidation = true,
     this.enableRoundTripValidation = true,
     this.maxValidationFileSize = 100 * 1024 * 1024, // 100MB default
-  });
+    SemanticTagConverter? semanticConverter,
+  }) : _semanticConverter = semanticConverter ?? const SemanticTagConverter();
 
   /// Validates an encoded file for structural integrity and tag consistency.
   ///
@@ -792,6 +798,10 @@ class PostWriteValidator {
   }
 
   /// Compares original tags with extracted tags for round-trip validation.
+  ///
+  /// This method performs semantic-aware comparison, recognizing that tags
+  /// converted during encoding (e.g., YearTag → DateRecordedTag for ID3v2.4)
+  /// should not be reported as lost if they are semantically equivalent.
   void _compareTagSets(
     List<MetadataTag> originalTags,
     List<MetadataTag> extractedTags,
@@ -809,35 +819,87 @@ class PostWriteValidator {
       extractedByKey.putIfAbsent(tag.key, () => []).add(tag);
     }
 
-    // Check for missing tags
+    // Check for missing tags with semantic equivalence awareness
     for (final key in originalByKey.keys) {
       if (!extractedByKey.containsKey(key)) {
-        errors.add(
-          ValidationError(
-            severity: ValidationSeverity.error,
-            message: 'Tag was lost during round-trip',
-            context: 'Tag: ${key.name}',
-            errorCode: 'TAG_LOST',
-          ),
-        );
+        // Tag key is missing - check if there's a semantically equivalent tag
+        final originalTagsForKey = originalByKey[key]!;
+        bool foundSemanticEquivalent = false;
+
+        // Search for semantic equivalents in extracted tags
+        for (final extractedKey in extractedByKey.keys) {
+          if (extractedKey != key) {
+            // Don't check the same key
+            final extractedTagsForKey = extractedByKey[extractedKey]!;
+
+            // Check if any original tag is semantically equivalent to any extracted tag
+            for (final originalTag in originalTagsForKey) {
+              for (final extractedTag in extractedTagsForKey) {
+                if (_semanticConverter.areTagsSemanticallyEquivalent(originalTag, extractedTag)) {
+                  foundSemanticEquivalent = true;
+                  break;
+                }
+              }
+              if (foundSemanticEquivalent) break;
+            }
+          }
+          if (foundSemanticEquivalent) break;
+        }
+
+        if (!foundSemanticEquivalent) {
+          errors.add(
+            ValidationError(
+              severity: ValidationSeverity.error,
+              message: 'Tag was lost during round-trip (Tag: ${key.name})',
+              context: 'Tag: ${key.name}',
+              errorCode: 'TAG_LOST',
+            ),
+          );
+        }
       }
     }
 
     // Check for unexpected tags
     for (final key in extractedByKey.keys) {
       if (!originalByKey.containsKey(key)) {
-        warnings.add(
-          ValidationError(
-            severity: ValidationSeverity.warning,
-            message: 'Unexpected tag found after round-trip',
-            context: 'Tag: ${key.name}',
-            errorCode: 'UNEXPECTED_TAG',
-          ),
-        );
+        // Tag key is new - check if this is a semantic conversion result
+        final extractedTagsForKey = extractedByKey[key]!;
+        bool isSemanticConversion = false;
+
+        // Search for semantic equivalents in original tags
+        for (final originalKey in originalByKey.keys) {
+          if (originalKey != key) {
+            // Don't check the same key
+            final originalTagsForKey = originalByKey[originalKey]!;
+
+            // Check if any extracted tag is semantically equivalent to any original tag
+            for (final extractedTag in extractedTagsForKey) {
+              for (final originalTag in originalTagsForKey) {
+                if (_semanticConverter.areTagsSemanticallyEquivalent(originalTag, extractedTag)) {
+                  isSemanticConversion = true;
+                  break;
+                }
+              }
+              if (isSemanticConversion) break;
+            }
+          }
+          if (isSemanticConversion) break;
+        }
+
+        if (!isSemanticConversion) {
+          warnings.add(
+            ValidationError(
+              severity: ValidationSeverity.warning,
+              message: 'Unexpected tag found after round-trip',
+              context: 'Tag: ${key.name}',
+              errorCode: 'UNEXPECTED_TAG',
+            ),
+          );
+        }
       }
     }
 
-    // Compare tag values
+    // Compare tag values for matching keys
     for (final key in originalByKey.keys) {
       final originalTagsForKey = originalByKey[key]!;
       final extractedTagsForKey = extractedByKey[key];
