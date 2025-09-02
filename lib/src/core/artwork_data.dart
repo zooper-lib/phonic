@@ -171,13 +171,87 @@ class ArtworkData extends Equatable {
   /// Note: The loader is excluded from equality comparisons, so two
   /// ArtworkData instances with the same metadata but different loaders
   /// are considered equal.
-  final Future<Uint8List> Function() _dataLoader;
+  final Future<Uint8List> Function()? _dataLoader;
 
-  /// Creates a new ArtworkData instance with the specified metadata and loader.
+  /// Immediate image data for synchronous operations.
+  ///
+  /// When artwork data has been pre-loaded for encoding operations,
+  /// this field contains the actual image bytes. This enables synchronous
+  /// access to artwork data during container encoding while maintaining
+  /// the lazy loading pattern for memory-efficient file scanning.
+  ///
+  /// This field is mutually exclusive with [_dataLoader] - artwork data
+  /// is either lazy-loaded or immediately available, not both.
+  final Uint8List? _immediateData;
+
+  /// Creates a new ArtworkData instance with lazy loading capability.
+  ///
+  /// This constructor is used during file parsing operations to defer
+  /// image data loading until needed, maintaining memory efficiency when
+  /// scanning large audio collections.
   ///
   /// All parameters except [description] are required to ensure complete
   /// artwork metadata. The [dataLoader] function will be called lazily
   /// when the actual image data is needed.
+  ///
+  /// @param mimeType The MIME type of the image (e.g., 'image/jpeg').
+  ///                 Consider using [MimeType] enum values for type safety.
+  /// @param type The classification of this artwork image
+  /// @param description Optional human-readable description
+  /// @param dataLoader Function that returns the image data when called
+  ///
+  /// Example:
+  /// ```dart
+  /// final artworkData = ArtworkData.lazy(
+  ///   mimeType: 'image/jpeg',
+  ///   type: ArtworkType.frontCover,
+  ///   description: 'Album cover art',
+  ///   dataLoader: () async => await File('cover.jpg').readAsBytes(),
+  /// );
+  /// ```
+  const ArtworkData.lazy({
+    required this.mimeType,
+    required this.type,
+    this.description,
+    required Future<Uint8List> Function() dataLoader,
+  }) : _dataLoader = dataLoader,
+       _immediateData = null;
+
+  /// Creates a new ArtworkData instance with immediately available data.
+  ///
+  /// This constructor is used during encoding operations where image data
+  /// has been pre-loaded and needs to be written synchronously to the
+  /// container. This approach maintains memory efficiency by only loading
+  /// data for files that are actually being encoded.
+  ///
+  /// @param mimeType The MIME type of the image (e.g., 'image/jpeg')
+  /// @param type The classification of this artwork image
+  /// @param description Optional human-readable description
+  /// @param data The actual image bytes, already loaded into memory
+  ///
+  /// Example:
+  /// ```dart
+  /// final imageBytes = await loadImageFromFile('cover.jpg');
+  /// final artworkData = ArtworkData.immediate(
+  ///   mimeType: 'image/jpeg',
+  ///   type: ArtworkType.frontCover,
+  ///   description: 'Album cover art',
+  ///   data: imageBytes,
+  /// );
+  /// ```
+  const ArtworkData.immediate({
+    required this.mimeType,
+    required this.type,
+    this.description,
+    required Uint8List data,
+  }) : _immediateData = data,
+       _dataLoader = null;
+
+  /// Creates a new ArtworkData instance with the specified metadata and loader.
+  ///
+  /// This is the legacy constructor that creates lazy-loaded artwork data.
+  /// Consider using [ArtworkData.lazy] for new code as it makes the
+  /// lazy loading behavior more explicit.
   ///
   /// @param mimeType The MIME type of the image (e.g., 'image/jpeg').
   ///                 Consider using [MimeType] enum values for type safety.
@@ -208,18 +282,21 @@ class ArtworkData extends Equatable {
     required this.type,
     this.description,
     required Future<Uint8List> Function() dataLoader,
-  }) : _dataLoader = dataLoader;
+  }) : _dataLoader = dataLoader,
+       _immediateData = null;
 
-  /// Gets the actual image data by calling the lazy loader.
+  /// Gets the actual image data by calling the appropriate loader.
   ///
   /// This getter triggers the loading of the artwork image data from
-  /// its source (file, container bytes, network, etc.). The data is
-  /// returned as a [Future<Uint8List>] containing the raw image bytes.
+  /// its source (file, container bytes, network, etc.) or returns
+  /// immediately available data. The data is returned as a [Future<Uint8List>]
+  /// containing the raw image bytes.
   ///
   /// ## Performance Notes
   ///
-  /// - This may be an expensive operation depending on the data source
-  /// - No caching is performed - each call may reload the data
+  /// - For lazy-loaded data, this may be an expensive operation depending on the source
+  /// - For immediate data, this returns a completed future with the bytes
+  /// - No caching is performed for lazy-loaded data - each call may reload
   /// - Consider caching the result at the application level if needed
   /// - Large images may cause memory pressure
   ///
@@ -230,6 +307,7 @@ class ArtworkData extends Equatable {
   /// - Network requests fail (for remote artwork)
   /// - Insufficient memory for large images
   /// - Permission issues accessing the data source
+  /// - No data source is available (neither lazy loader nor immediate data)
   ///
   /// Example:
   /// ```dart
@@ -245,7 +323,36 @@ class ArtworkData extends Equatable {
   ///
   /// @returns A future that completes with the raw image data
   /// @throws Various exceptions depending on the loader implementation
-  Future<Uint8List> get data => _dataLoader();
+  Future<Uint8List> get data async {
+    if (_immediateData != null) {
+      return _immediateData;
+    }
+    if (_dataLoader != null) {
+      return await _dataLoader();
+    }
+    throw StateError('No data source available for artwork - neither immediate data nor lazy loader provided');
+  }
+
+  /// Gets immediately available image data for synchronous operations.
+  ///
+  /// Returns the image bytes if available synchronously, or null if the
+  /// data requires async loading. Used during encoding operations where
+  /// synchronous access to artwork data is required.
+  ///
+  /// This method enables the codec to determine whether artwork can be
+  /// encoded synchronously or if async preparation is required.
+  ///
+  /// @returns The image bytes if immediately available, null otherwise
+  Uint8List? get immediateData => _immediateData;
+
+  /// Whether image data is available without async loading.
+  ///
+  /// Returns true if the data can be accessed synchronously, false if
+  /// it requires awaiting the lazy loader. This is used by the encoding
+  /// pipeline to determine if async preparation is needed.
+  ///
+  /// @returns true if data is immediately available, false if lazy loading is required
+  bool get hasImmediateData => _immediateData != null;
 
   /// Returns the [MimeType] enum value for this artwork's MIME type.
   ///

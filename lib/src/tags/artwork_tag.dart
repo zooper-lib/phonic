@@ -98,13 +98,51 @@ final class ArtworkTag extends MetadataTag<ArtworkData> {
   ///
   /// Example:
   /// ```dart
-  /// final originalTag = ArtworkTag(artworkData);
-  /// final tagWithProvenance = originalTag.withProvenance(
+  /// final updatedTag = artworkTag.withProvenance(
   ///   TagProvenance(ContainerKind.id3v2, '2.4', TagConfidence.certain),
   /// );
   /// ```
   @override
   ArtworkTag withProvenance(TagProvenance newProvenance) {
     return ArtworkTag(value, provenance: newProvenance);
+  }
+
+  /// Whether this artwork tag requires async data loading before encoding.
+  ///
+  /// Returns true if the artwork data needs to be loaded asynchronously
+  /// before it can be encoded synchronously. This allows the encoding
+  /// pipeline to identify artwork tags that need special preparation.
+  ///
+  /// @returns true if async preparation is needed, false if data is immediately available
+  @override
+  bool get requiresAsyncPreparation => !value.hasImmediateData;
+
+  /// Prepares the artwork tag for synchronous encoding by loading image data.
+  ///
+  /// If the artwork data is already immediately available, returns the tag unchanged.
+  /// Otherwise, loads the async artwork data and creates a new tag with immediate
+  /// data that can be encoded synchronously.
+  ///
+  /// This method is called by the encoding pipeline when [requiresAsyncPreparation]
+  /// returns true, ensuring that all artwork data is ready for synchronous encoding.
+  ///
+  /// @returns A future that completes with an ArtworkTag ready for synchronous encoding
+  @override
+  Future<ArtworkTag> prepareForEncoding() async {
+    if (value.hasImmediateData) {
+      // Data is already available synchronously
+      return this;
+    }
+
+    // Load the async data and create immediate artwork
+    final imageData = await value.data;
+    final immediateArtwork = ArtworkData.immediate(
+      mimeType: value.mimeType,
+      type: value.type,
+      description: value.description,
+      data: imageData,
+    );
+
+    return ArtworkTag(immediateArtwork, provenance: provenance);
   }
 }

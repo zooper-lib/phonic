@@ -161,6 +161,7 @@ class PostWriteValidator {
           encodedBytes: encodedBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
+          expectedContainers: expectedContainers,
         );
         errors.addAll(roundTripResult.errors);
         warnings.addAll(roundTripResult.warnings);
@@ -442,6 +443,7 @@ class PostWriteValidator {
     required Uint8List encodedBytes,
     required List<MetadataTag> originalTags,
     required FormatStrategy formatStrategy,
+    List<(ContainerKind, String)>? expectedContainers,
   }) async {
     final errors = <ValidationError>[];
     final warnings = <ValidationError>[];
@@ -450,7 +452,10 @@ class PostWriteValidator {
       // Extract all tags from the encoded file
       final extractedTags = <MetadataTag>[];
 
-      for (final (containerKind, _) in formatStrategy.precedence) {
+      // Use expected containers if provided, otherwise fall back to precedence
+      final containersToCheck = expectedContainers ?? formatStrategy.precedence;
+
+      for (final (containerKind, containerVersion) in containersToCheck) {
         final locator = codecRegistry.findLocator(containerKind);
 
         if (locator == null) continue;
@@ -458,15 +463,13 @@ class PostWriteValidator {
         if (locator.fileMatches(encodedBytes)) {
           final containerBytes = locator.extract(encodedBytes);
           if (containerBytes != null && containerBytes.isNotEmpty) {
-            // Detect the actual container version instead of using precedence version
-            String detectedVersion;
+            // For expected containers, use the expected version
+            // For precedence fallback, detect the actual version
+            String detectedVersion = containerVersion;
 
-            if (containerKind == ContainerKind.id3v2) {
-              // For ID3v2, detect the actual version from the container
+            if (expectedContainers == null && containerKind == ContainerKind.id3v2) {
+              // Only detect version when falling back to precedence
               detectedVersion = _detectId3v2Version(containerBytes);
-            } else {
-              // For other container types, use empty string as default
-              detectedVersion = '';
             }
 
             final codec = codecRegistry.findCodec(containerKind, detectedVersion);
@@ -924,6 +927,7 @@ class PostWriteValidator {
     // - Title, Artist, Album: 30 characters
     // - Comment: 30 characters (or 28 with track number)
     // - Year: 4 characters
+    // - DateRecorded: Not supported (year extracted to year field)
     // These differences should be warnings, not errors
     return const {
       TagKey.rating,
@@ -933,12 +937,13 @@ class PostWriteValidator {
       TagKey.artist, // ID3v1 30-char limit
       TagKey.album, // ID3v1 30-char limit
       TagKey.year, // ID3v1 4-char limit
+      TagKey.dateRecorded, // ID3v1 vs ID3v2.4 year/date conversion
     }.contains(tagKey);
   }
 
   bool _allowsValueNormalization(TagKey tagKey) {
     // Some tags may be normalized during encoding/decoding
-    return const {TagKey.rating, TagKey.bpm, TagKey.year, TagKey.genre}.contains(tagKey);
+    return const {TagKey.rating, TagKey.bpm, TagKey.year, TagKey.genre, TagKey.dateRecorded}.contains(tagKey);
   }
 
   bool _deepEquals(dynamic value1, dynamic value2) {

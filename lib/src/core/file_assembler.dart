@@ -154,6 +154,7 @@ class FileAssembler {
   /// - [originalFileBytes]: The original audio file data
   /// - [tagsToWrite]: The metadata tags to write to the file
   /// - [formatStrategy]: Strategy defining fan-out targets and container ordering
+  /// - [targetContainers]: Optional explicit list of containers to target (overrides formatStrategy fanout)
   /// - [existingContainers]: Optional map of existing container data for preservation
   ///
   /// Returns:
@@ -187,22 +188,24 @@ class FileAssembler {
     required Uint8List originalFileBytes,
     required List<MetadataTag> tagsToWrite,
     required FormatStrategy formatStrategy,
+    List<(ContainerKind, String)>? targetContainers,
     Map<(ContainerKind, String), Uint8List>? existingContainers,
   }) async {
     try {
-      // Get fan-out targets from format strategy
-      final fanoutTargets = formatStrategy.fanout;
+      // Use explicit target containers if provided, otherwise get from format strategy
+      final fanoutTargets = targetContainers ?? formatStrategy.fanout;
 
       if (fanoutTargets.isEmpty) {
         // No containers to write, return original file
         return Uint8List.fromList(originalFileBytes);
       }
 
-      // Adjust fanout targets to preserve existing container versions
-      final adjustedTargets = _adjustFanoutForExistingContainers(
-        fanoutTargets,
-        existingContainers,
-      );
+      // Only adjust fanout targets for existing containers if no explicit targets were provided
+      // This preserves the existing behavior for preserve/existing strategies while allowing
+      // optimized/explicit strategies to specify exact containers
+      final adjustedTargets = targetContainers != null
+          ? fanoutTargets // Use explicit targets as-is
+          : _adjustFanoutForExistingContainers(fanoutTargets, existingContainers);
 
       // Generate updated containers for each fan-out target
       final updatedContainers = <(ContainerKind, String), Uint8List>{};
@@ -240,6 +243,7 @@ class FileAssembler {
         originalFileBytes: originalFileBytes,
         updatedContainers: updatedContainers,
         formatStrategy: formatStrategy,
+        existingContainers: existingContainers,
       );
 
       // Validate the assembled file structure
@@ -390,6 +394,7 @@ class FileAssembler {
     required Uint8List originalFileBytes,
     required Map<(ContainerKind, String), Uint8List> updatedContainers,
     required FormatStrategy formatStrategy,
+    Map<(ContainerKind, String), Uint8List>? existingContainers,
   }) async {
     // Start with original file bytes
     var currentFileBytes = Uint8List.fromList(originalFileBytes);
@@ -402,22 +407,25 @@ class FileAssembler {
       // Find matching container in updated containers
       final containerEntry = updatedContainers.entries.where((entry) => entry.key.$1 == containerKind).firstOrNull;
 
-      if (containerEntry == null) {
-        continue; // No container of this type to inject
-      }
-
-      final containerBytes = containerEntry.value;
-
       // Find appropriate locator for this container type
       final locator = codecRegistry.findLocator(containerKind);
       if (locator == null) {
-        throw UnsupportedFormatException(
-          'No locator available for ${containerKind.name}',
-        );
+        continue; // Skip if no locator available
       }
 
-      // Inject the container using the locator
-      currentFileBytes = locator.inject(currentFileBytes, containerBytes);
+      if (containerEntry != null) {
+        // Inject the updated container
+        final containerBytes = containerEntry.value;
+        currentFileBytes = locator.inject(currentFileBytes, containerBytes);
+      } else if (existingContainers != null) {
+        // Check if this container type existed in the original file
+        final existingContainerOfType = existingContainers.entries.where((entry) => entry.key.$1 == containerKind).firstOrNull;
+
+        if (existingContainerOfType != null) {
+          // Container existed but is not in updated containers, so remove it
+          currentFileBytes = locator.inject(currentFileBytes, null);
+        }
+      }
     }
 
     return currentFileBytes;

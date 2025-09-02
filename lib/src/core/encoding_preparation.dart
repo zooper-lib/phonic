@@ -118,6 +118,79 @@ class EncodingPreparation {
   /// and threads safely.
   const EncodingPreparation();
 
+  /// Prepares tags for encoding based on format strategy and container capabilities,
+  /// including async preparation for tags that require it.
+  ///
+  /// This method applies the complete preparation pipeline with async support:
+  /// 1. Determines target containers using format strategy fan-out
+  /// 2. Performs async preparation for tags that require it (e.g., artwork loading)
+  /// 3. Filters tags based on container capabilities
+  /// 4. Normalizes values for each target container
+  /// 5. Returns a map of prepared tags by container
+  ///
+  /// The preparation process ensures that each container receives only the
+  /// tags it supports, with values properly normalized for its constraints
+  /// and async data (like artwork) fully loaded.
+  ///
+  /// ## Parameters
+  ///
+  /// - [tags]: The input tags to prepare for encoding
+  /// - [strategy]: Format strategy defining fan-out targets
+  /// - [capabilities]: Map of container capabilities by (kind, version)
+  ///
+  /// ## Returns
+  ///
+  /// A map where keys are (ContainerKind, String) tuples representing
+  /// container type and version, and values are lists of prepared tags
+  /// ready for encoding to that specific container.
+  ///
+  /// ## Example
+  ///
+  /// ```dart
+  /// final prepared = await preparation.prepareTagsForEncodingAsync(
+  ///   tags: [
+  ///     TitleTag('Long Title That Needs Truncation'),
+  ///     GenreTag(['Rock', 'Alternative']),
+  ///     ArtworkTag(lazyArtworkData), // Will be loaded async
+  ///     RatingTag(85),
+  ///   ],
+  ///   strategy: Mp3FormatStrategy(),
+  ///   capabilities: {
+  ///     (ContainerKind.id3v2, '2.4'): id3v24Capability,
+  ///     (ContainerKind.id3v1, 'v1'): id3v1Capability,
+  ///   },
+  /// );
+  ///
+  /// // Access prepared tags for each container
+  /// final id3v24Tags = prepared[(ContainerKind.id3v2, '2.4')];
+  /// final id3v1Tags = prepared[(ContainerKind.id3v1, 'v1')];
+  /// ```
+  Future<Map<(ContainerKind, String), List<MetadataTag>>> prepareTagsForEncodingAsync({
+    required List<MetadataTag> tags,
+    required FormatStrategy strategy,
+    required Map<(ContainerKind, String), TagCapability> capabilities,
+  }) async {
+    // Step 1: Perform async preparation for tags that require it
+    final preparedTags = <MetadataTag>[];
+    for (final tag in tags) {
+      if (tag.requiresAsyncPreparation) {
+        // Async prepare this tag (e.g., load artwork data)
+        final preparedTag = await tag.prepareForEncoding();
+        preparedTags.add(preparedTag);
+      } else {
+        // Tag doesn't need async preparation, use as-is
+        preparedTags.add(tag);
+      }
+    }
+
+    // Step 2: Use the synchronous preparation method with async-prepared tags
+    return prepareTagsForEncoding(
+      tags: preparedTags,
+      strategy: strategy,
+      capabilities: capabilities,
+    );
+  }
+
   /// Prepares tags for encoding based on format strategy and container capabilities.
   ///
   /// This method applies the complete preparation pipeline:
@@ -125,6 +198,10 @@ class EncodingPreparation {
   /// 2. Filters tags based on container capabilities
   /// 3. Normalizes values for each target container
   /// 4. Returns a map of prepared tags by container
+  ///
+  /// Note: This is the synchronous version that expects tags to already have
+  /// any async data loaded. For tags with async requirements (e.g., artwork),
+  /// use [prepareTagsForEncodingAsync] instead.
   ///
   /// The preparation process ensures that each container receives only the
   /// tags it supports, with values properly normalized for its constraints.
@@ -150,6 +227,17 @@ class EncodingPreparation {
   ///     GenreTag(['Rock', 'Alternative']),
   ///     RatingTag(85),
   ///   ],
+  ///   strategy: Mp3FormatStrategy(),
+  ///   capabilities: {
+  ///     (ContainerKind.id3v2, '2.4'): id3v24Capability,
+  ///     (ContainerKind.id3v1, 'v1'): id3v1Capability,
+  ///   },
+  /// );
+  ///
+  /// // Access prepared tags for each container
+  /// final id3v24Tags = prepared[(ContainerKind.id3v2, '2.4')];
+  /// final id3v1Tags = prepared[(ContainerKind.id3v1, 'v1')];
+  /// ```
   ///   strategy: Mp3FormatStrategy(),
   ///   capabilities: {
   ///     (ContainerKind.id3v2, '2.4'): id3v24Capability,

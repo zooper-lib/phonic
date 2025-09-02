@@ -12,6 +12,7 @@ import '../../core/tag_key.dart';
 import '../../core/tag_provenance.dart';
 import '../../core/text_encoding.dart';
 import '../../exceptions/corrupted_container_exception.dart';
+import '../../tags/tags.dart'; // Import tags to get YearTag
 import '../../utils/synchsafe_int.dart';
 import '../../utils/text_encoding_utils.dart';
 import '../../utils/unknown_data_preservation.dart';
@@ -489,7 +490,15 @@ class Id3v24Codec implements TagCodec {
         case TagKey.isrc:
         case TagKey.musicalKey:
         case TagKey.dateRecorded:
+          return _buildTextFrame(frameId, tag.value.toString());
+
         case TagKey.comment:
+          // Handle comment frames with proper COMM structure
+          if (tag is CommentTag) {
+            return _buildCommFrame(tag.value);
+          }
+          return null;
+
         case TagKey.lyrics:
           return _buildTextFrame(frameId, tag.value.toString());
 
@@ -513,10 +522,31 @@ class Id3v24Codec implements TagCodec {
           }
           return null;
 
+        case TagKey.year:
+          // Convert year to TDRC frame (ID3v2.4 uses TDRC instead of TYER)
+          // But skip if this tag comes from ID3v1 and we already have ID3v2.4 dateRecorded
+          if (tag is YearTag) {
+            // Check if this is an ID3v1 year tag and we have an ID3v2.4 dateRecorded tag
+            if (tag.provenance.containerKind == ContainerKind.id3v1) {
+              // Skip ID3v1 year tags when encoding to ID3v2.4 to avoid conflicts
+              // The ID3v1 section should handle this tag instead
+              return null;
+            }
+            return _buildTextFrame('TDRC', tag.value.toString());
+          }
+          return null;
+
         case TagKey.artwork:
           // Handle artwork frames
           if (tag is ArtworkTag) {
-            return _buildApicFrame(tag.value);
+            // Check if this tag has been async-prepared with immediate data
+            if (tag.value.hasImmediateData) {
+              return _buildApicFrame(tag.value);
+            } else {
+              // Artwork data not prepared - this should not happen if async preparation
+              // was properly called. Skip this tag to prevent encoding errors.
+              return null;
+            }
           }
           return null;
 
@@ -525,9 +555,6 @@ class Id3v24Codec implements TagCodec {
           if (tag is CustomTag) {
             return _buildTxxxFrame(tag.value);
           }
-          return null;
-
-        default:
           return null;
       }
     } catch (e) {
@@ -576,30 +603,65 @@ class Id3v24Codec implements TagCodec {
   }
 
   /// Builds an APIC (artwork) frame.
+  ///
+  /// This method builds an APIC frame using immediate artwork data that has been
+  /// prepared through the async preparation system. The artwork data must have
+  /// already been loaded and available immediately.
   _Id3v24Frame? _buildApicFrame(ArtworkData artworkData) {
-    // For now, we'll create a placeholder APIC frame
-    // Full implementation would need to load the artwork data
-    // This is a simplified version for the basic implementation
+    // Ensure we have immediate access to the image data
+    if (!artworkData.hasImmediateData) {
+      return null; // Cannot build frame without immediate data
+    }
 
-    final mimeTypeBytes = latin1.encode(artworkData.mimeType);
-    final descriptionBytes = artworkData.description != null
-        ? TextEncodingUtils.encodeText(artworkData.description!, TextEncoding.utf8, includeBom: false)
-        : Uint8List(0);
+    try {
+      // Get immediate image data - this should not throw since hasImmediateData is true
+      final imageData = artworkData.immediateData;
+      if (imageData == null || imageData.isEmpty) {
+        return null; // No image data to encode
+      }
 
-    // APIC frame: encoding + mime type + null + picture type + description + null + image data
-    // For now, we'll create a minimal frame without actual image data
+      // Prepare frame components
+      final mimeTypeBytes = latin1.encode(artworkData.mimeType);
+      final descriptionBytes = artworkData.description != null
+          ? TextEncodingUtils.encodeText(artworkData.description!, TextEncoding.utf8, includeBom: false)
+          : Uint8List(0);
+
+      // APIC frame structure: encoding + mime type + null + picture type + description + null + image data
+      final frameData = Uint8List.fromList([
+        0x03, // UTF-8 encoding
+        ...mimeTypeBytes,
+        0x00, // Null terminator after mime type
+        artworkData.type.index, // Picture type byte
+        ...descriptionBytes,
+        0x00, // Null terminator after description
+        ...imageData, // Actual image data (now available immediately)
+      ]);
+
+      return _Id3v24Frame(
+        id: 'APIC',
+        data: frameData,
+      );
+    } catch (e) {
+      // If anything goes wrong with frame building, skip this artwork
+      return null;
+    }
+  }
+
+  /// Builds a COMM (comment) frame.
+  _Id3v24Frame? _buildCommFrame(String comment) {
+    // COMM frame: encoding + language + description + null + comment text
+    final languageBytes = latin1.encode('eng'); // Default to English
+    final commentBytes = TextEncodingUtils.encodeText(comment, TextEncoding.utf8, includeBom: false);
+
     final frameData = Uint8List.fromList([
       0x03, // UTF-8 encoding
-      ...mimeTypeBytes,
-      0x00, // Null terminator
-      artworkData.type.index, // Picture type byte
-      ...descriptionBytes,
-      0x00, // Null terminator
-      // Image data would go here, but we'll skip it for this basic implementation
+      ...languageBytes, // Language code (3 bytes)
+      0x00, // Empty description + null terminator
+      ...commentBytes, // Comment text
     ]);
 
     return _Id3v24Frame(
-      id: 'APIC',
+      id: 'COMM',
       data: frameData,
     );
   }

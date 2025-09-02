@@ -41,6 +41,7 @@ class Id3v2FrameMap {
     TagKey.trackNumber: 'TRCK',
     TagKey.discNumber: 'TPOS',
     TagKey.dateRecorded: 'TDRC',
+    TagKey.year: 'TDRC', // ID3v2.4 uses TDRC for both dateRecorded and year
     TagKey.genre: 'TCON',
     TagKey.comment: 'COMM',
     TagKey.bpm: 'TBPM',

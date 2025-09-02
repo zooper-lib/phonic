@@ -176,6 +176,30 @@ sealed class MetadataTag<T> extends Equatable {
   /// return the appropriate concrete type rather than the base type.
   MetadataTag<T> withProvenance(TagProvenance newProvenance);
 
+  /// Whether this tag requires async data loading before encoding.
+  ///
+  /// Tags that contain lazy-loaded data (like artwork) should return true
+  /// to indicate they need preparation before synchronous encoding.
+  /// Text and numeric tags typically return false.
+  ///
+  /// This allows the encoding pipeline to identify which tags need special
+  /// async handling, making the architecture extensible for future tag types
+  /// that may also require async preparation.
+  bool get requiresAsyncPreparation => false;
+
+  /// Prepares the tag for synchronous encoding by loading any async data.
+  ///
+  /// For most tags, this returns the tag unchanged. Tags with async data
+  /// (like artwork) should load their data and return a tag with immediate
+  /// data available for synchronous encoding operations.
+  ///
+  /// This method is only called if [requiresAsyncPreparation] returns true.
+  /// The default implementation returns the tag unchanged, which is appropriate
+  /// for tags that don't require async preparation.
+  ///
+  /// @returns A future that completes with a tag ready for synchronous encoding
+  Future<MetadataTag<T>> prepareForEncoding() async => this;
+
   @override
   List<Object?> get props => [value, key, provenance];
 

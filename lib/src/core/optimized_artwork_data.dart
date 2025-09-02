@@ -197,6 +197,12 @@ class OptimizedArtworkData extends Equatable implements ArtworkData {
   @override
   String? get description => _description;
 
+  @override
+  bool get hasImmediateData => false;
+
+  @override
+  Uint8List? get immediateData => null;
+
   /// Gets the actual image data using the optimal loading strategy.
   ///
   /// This method automatically chooses the best loading approach based on:

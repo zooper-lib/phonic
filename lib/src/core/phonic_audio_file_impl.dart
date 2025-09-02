@@ -991,8 +991,8 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
         }
       }
 
-      // Prepare tags for encoding with container-specific normalization
-      final preparedTagsByContainer = encodingPreparation.prepareTagsForEncoding(
+      // Prepare tags for encoding with container-specific normalization and async preparation
+      final preparedTagsByContainer = await encodingPreparation.prepareTagsForEncodingAsync(
         tags: tagsToWrite,
         strategy: formatStrategy,
         capabilities: capabilities,
@@ -1015,6 +1015,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
         originalFileBytes: _fileBytes,
         tagsToWrite: allPreparedTags.isNotEmpty ? allPreparedTags : tagsToWrite,
         formatStrategy: formatStrategy,
+        targetContainers: targetContainers,
         existingContainers: loadedContainersByKindAndVersion,
       );
 
@@ -1026,8 +1027,17 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
       );
 
       // Step 5: Validate the assembled file structure for integrity
+      // Create validator configured according to encoding options
+      final validationLevel = encodingOptions.validationLevel;
+      final validator = PostWriteValidator(
+        codecRegistry: codecRegistry,
+        enableDeepValidation: validationLevel != ValidationLevel.basic,
+        enableRoundTripValidation: validationLevel == ValidationLevel.strict,
+        maxValidationFileSize: _validator.maxValidationFileSize,
+      );
+      
       // Use custom target containers instead of default fan-out
-      final validationResult = await _validator.validateEncodedFile(
+      final validationResult = await validator.validateEncodedFile(
         encodedBytes: assembledFile,
         originalTags: tagsToWrite,
         formatStrategy: formatStrategy,
