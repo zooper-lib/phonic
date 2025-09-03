@@ -1,12 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:typed_data';
-
-import '../lib/src/core/artwork_cache.dart';
-import '../lib/src/core/artwork_data.dart';
-import '../lib/src/core/artwork_type.dart';
-import '../lib/src/core/optimized_artwork_data.dart';
-import '../lib/src/utils/lazy_artwork_loader.dart';
+import 'package:phonic/phonic.dart';
 
 /// Example demonstrating the lazy artwork loading optimization features.
 ///

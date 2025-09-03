@@ -2,7 +2,18 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/capabilities/capabilities.dart';
-import 'package:phonic/src/core/core.dart';
+import 'package:phonic/src/core/artwork_data.dart';
+import 'package:phonic/src/core/artwork_type.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/media_kind.dart';
+import 'package:phonic/src/core/merge_policy.dart';
+import 'package:phonic/src/core/metadata_tag.dart';
+import 'package:phonic/src/core/tag_capability.dart';
+import 'package:phonic/src/core/tag_confidence.dart';
+import 'package:phonic/src/core/tag_key.dart';
+import 'package:phonic/src/core/tag_merger.dart';
+import 'package:phonic/src/core/tag_provenance.dart';
+import 'package:phonic/src/core/tag_semantics.dart';
 import 'package:phonic/src/formats/id3/mp3_format_strategy.dart';
 
 void main() {

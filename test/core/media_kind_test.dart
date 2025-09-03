@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/phonic.dart';
+import 'package:phonic/src/core/media_kind.dart';
 
 void main() {
   group('MediaKind', () {

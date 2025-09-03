@@ -2,6 +2,13 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
+import 'package:phonic/src/core/codec_registry.dart';
+import 'package:phonic/src/core/container_locator.dart';
+import 'package:phonic/src/core/container_rebuilder.dart';
+import 'package:phonic/src/core/file_assembler.dart';
+import 'package:phonic/src/core/format_strategy.dart';
+import 'package:phonic/src/core/media_kind.dart';
+import 'package:phonic/src/core/tag_codec.dart';
 import 'package:phonic/src/utils/unknown_data_preservation.dart';
 
 void main() {
@@ -544,5 +551,3 @@ class _MockVorbisLocator extends ContainerLocator {
     return Uint8List.fromList([...containerBytes, ...fileBytes]);
   }
 }
-
-

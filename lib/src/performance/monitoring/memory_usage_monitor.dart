@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'memory_checkpoint.dart';
+import 'memory_usage_report.dart';
+
 /// Utilities for monitoring memory usage in the Phonic library.
 ///
 /// This module provides tools to track memory consumption patterns,
@@ -45,20 +48,137 @@ class MemoryUsageMonitor {
 
   /// Records the current memory usage as a baseline for comparison.
   ///
-  /// This should typically be called at the start of processing to establish
-  /// a reference point for measuring memory growth.
+  /// Establishing a baseline is crucial for accurate memory growth analysis.
+  /// The baseline represents the "normal" memory state before processing begins,
+  /// allowing all subsequent measurements to be compared against this reference point.
   ///
-  /// @param label Optional label for the baseline
+  /// ## When to Set Baseline
+  ///
+  /// - **Application Start**: After initialization but before main processing
+  /// - **Pre-Processing**: Just before beginning a batch operation
+  /// - **Clean State**: After garbage collection or manual memory cleanup
+  /// - **Test Setup**: At the beginning of performance tests
+  ///
+  /// ## Usage Examples
+  ///
+  /// ```dart
+  /// final monitor = MemoryUsageMonitor();
+  ///
+  /// // Set baseline at application startup
+  /// monitor.recordBaseline('app_startup');
+  ///
+  /// // Set baseline before batch processing
+  /// monitor.recordBaseline('before_batch_processing');
+  ///
+  /// // Set baseline after cleanup
+  /// await performGarbageCollection();
+  /// monitor.recordBaseline('after_cleanup');
+  /// ```
+  ///
+  /// ## Analysis Impact
+  ///
+  /// Setting a baseline enables several analysis features:
+  /// - Memory growth calculations relative to baseline
+  /// - Leak detection through trend analysis
+  /// - Efficiency metrics comparing operations
+  /// - Anomaly detection when usage deviates significantly
+  ///
+  /// ## Multiple Baselines
+  ///
+  /// Each call replaces the previous baseline. For complex scenarios requiring
+  /// multiple reference points, consider:
+  /// - Creating separate monitor instances
+  /// - Using regular checkpoints with meaningful labels
+  /// - Manual calculation using checkpoint data
+  ///
+  /// @param label Descriptive identifier for this baseline measurement (default: 'baseline')
   void recordBaseline([String label = 'baseline']) {
     _baseline = _recordCurrentMemoryUsage(label);
   }
 
   /// Records a memory usage checkpoint with an optional label.
   ///
-  /// Checkpoints allow tracking memory usage at specific points during
-  /// processing to identify memory growth patterns and potential issues.
+  /// Checkpoints capture the current memory state at specific points during
+  /// processing, creating a timeline of memory usage that can be analyzed
+  /// for trends, spikes, and optimization opportunities.
   ///
-  /// @param label Optional label for the checkpoint
+  /// ## Strategic Checkpoint Placement
+  ///
+  /// ### Processing Milestones
+  /// Place checkpoints at key processing stages:
+  /// - Before and after major operations
+  /// - At regular intervals during batch processing
+  /// - When entering/exiting critical sections
+  /// - Before and after memory-intensive operations
+  ///
+  /// ### Error Boundaries
+  /// Capture memory state during error conditions:
+  /// - When exceptions occur
+  /// - During recovery operations
+  /// - After failed operations
+  /// - Before cleanup attempts
+  ///
+  /// ## Labeling Best Practices
+  ///
+  /// Use consistent, descriptive labels for easier analysis:
+  ///
+  /// ```dart
+  /// // Good: Descriptive and consistent
+  /// monitor.recordCheckpoint('batch_start');
+  /// monitor.recordCheckpoint('processed_1000_files');
+  /// monitor.recordCheckpoint('batch_complete');
+  ///
+  /// // Avoid: Vague or inconsistent labels
+  /// monitor.recordCheckpoint('here');
+  /// monitor.recordCheckpoint('done processing stuff');
+  /// ```
+  ///
+  /// ## Usage Patterns
+  ///
+  /// ### Regular Interval Monitoring
+  /// ```dart
+  /// for (int i = 0; i < files.length; i++) {
+  ///   await processFile(files[i]);
+  ///
+  ///   // Checkpoint every 100 files
+  ///   if (i % 100 == 0) {
+  ///     monitor.recordCheckpoint('processed_${i}_files');
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ### Critical Section Monitoring
+  /// ```dart
+  /// monitor.recordCheckpoint('before_memory_intensive_operation');
+  /// try {
+  ///   await performMemoryIntensiveOperation();
+  ///   monitor.recordCheckpoint('after_successful_operation');
+  /// } catch (error) {
+  ///   monitor.recordCheckpoint('after_failed_operation');
+  ///   rethrow;
+  /// }
+  /// ```
+  ///
+  /// ### Cleanup Verification
+  /// ```dart
+  /// monitor.recordCheckpoint('before_cleanup');
+  /// await performCleanup();
+  /// monitor.recordCheckpoint('after_cleanup');
+  ///
+  /// // Verify cleanup effectiveness
+  /// final report = monitor.generateReport();
+  /// final cleanupDelta = report.getMemoryDelta('before_cleanup', 'after_cleanup');
+  /// print('Memory freed: ${cleanupDelta} bytes');
+  /// ```
+  ///
+  /// ## Performance Considerations
+  ///
+  /// - Checkpoint recording is lightweight but not free
+  /// - Avoid excessive frequency in tight loops
+  /// - Consider using batch intervals for repetitive operations
+  /// - Memory for storing checkpoints grows with number of recordings
+  ///
+  /// @param label Descriptive identifier for this checkpoint (default: timestamp-based)
   void recordCheckpoint([String? label]) {
     final checkpoint = _recordCurrentMemoryUsage(label ?? 'checkpoint_${_checkpoints.length}');
     _checkpoints.add(checkpoint);
@@ -234,177 +354,4 @@ class MemoryUsageMonitor {
   MemoryCheckpoint getCurrentMemoryUsage() {
     return _recordCurrentMemoryUsage('current');
   }
-}
-
-/// Represents a single memory usage measurement at a specific point in time.
-class MemoryCheckpoint {
-  /// Label identifying this checkpoint.
-  final String label;
-
-  /// Timestamp when this checkpoint was recorded.
-  final DateTime timestamp;
-
-  /// Resident Set Size (RSS) memory usage in bytes, if available.
-  final int? rssMemory;
-
-  /// Heap memory usage in bytes, if available.
-  final int? heapUsage;
-
-  const MemoryCheckpoint({
-    required this.label,
-    required this.timestamp,
-    this.rssMemory,
-    this.heapUsage,
-  });
-
-  @override
-  String toString() {
-    final parts = <String>['$label @ ${timestamp.toIso8601String()}'];
-    if (rssMemory != null) {
-      parts.add('RSS: ${_formatBytes(rssMemory!)}');
-    }
-    if (heapUsage != null) {
-      parts.add('Heap: ${_formatBytes(heapUsage!)}');
-    }
-    return parts.join(', ');
-  }
-
-  /// Formats bytes in a human-readable format.
-  String _formatBytes(int bytes) {
-    if (bytes < 1024) return '${bytes}B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)}KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)}MB';
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)}GB';
-  }
-}
-
-/// Comprehensive report of memory usage analysis.
-class MemoryUsageReport {
-  /// Baseline memory measurement for comparison.
-  final MemoryCheckpoint baseline;
-
-  /// All recorded memory checkpoints.
-  final List<MemoryCheckpoint> checkpoints;
-
-  /// Total memory growth from baseline to final measurement.
-  final int? memoryGrowth;
-
-  /// Peak memory usage observed during monitoring.
-  final int? peakMemoryUsage;
-
-  /// Checkpoint where peak memory usage occurred.
-  final MemoryCheckpoint? peakCheckpoint;
-
-  /// Average memory usage across all measurements.
-  final double? averageMemoryUsage;
-
-  /// Whether potential memory leak was detected.
-  final bool hasMemoryLeak;
-
-  /// Total duration of monitoring period.
-  final Duration totalDuration;
-
-  const MemoryUsageReport({
-    required this.baseline,
-    required this.checkpoints,
-    this.memoryGrowth,
-    this.peakMemoryUsage,
-    this.peakCheckpoint,
-    this.averageMemoryUsage,
-    required this.hasMemoryLeak,
-    required this.totalDuration,
-  });
-
-  /// Creates an empty report for cases with no data.
-  factory MemoryUsageReport.empty() {
-    final now = DateTime.now();
-    return MemoryUsageReport(
-      baseline: MemoryCheckpoint(label: 'empty', timestamp: now),
-      checkpoints: [],
-      hasMemoryLeak: false,
-      totalDuration: Duration.zero,
-    );
-  }
-
-  /// Generates a formatted text report.
-  String generateTextReport() {
-    final buffer = StringBuffer();
-    buffer.writeln('Memory Usage Report');
-    buffer.writeln('==================');
-    buffer.writeln();
-
-    buffer.writeln('Monitoring Period: ${totalDuration.inMilliseconds}ms');
-    buffer.writeln('Checkpoints Recorded: ${checkpoints.length}');
-    buffer.writeln();
-
-    buffer.writeln('Baseline: $baseline');
-    if (memoryGrowth != null) {
-      buffer.writeln('Memory Growth: ${_formatBytes(memoryGrowth!)}');
-    }
-    if (peakMemoryUsage != null) {
-      buffer.writeln('Peak Memory: ${_formatBytes(peakMemoryUsage!)}');
-      if (peakCheckpoint != null) {
-        buffer.writeln('Peak at: ${peakCheckpoint!.label}');
-      }
-    }
-    if (averageMemoryUsage != null) {
-      buffer.writeln('Average Memory: ${_formatBytes(averageMemoryUsage!.round())}');
-    }
-
-    buffer.writeln();
-    buffer.writeln('Memory Leak Detection: ${hasMemoryLeak ? "POTENTIAL LEAK DETECTED" : "No leak detected"}');
-
-    if (checkpoints.isNotEmpty) {
-      buffer.writeln();
-      buffer.writeln('Checkpoints:');
-      for (final checkpoint in checkpoints) {
-        buffer.writeln('  $checkpoint');
-      }
-    }
-
-    return buffer.toString();
-  }
-
-  /// Formats bytes in a human-readable format.
-  String _formatBytes(int bytes) {
-    if (bytes < 1024) return '${bytes}B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)}KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)}MB';
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)}GB';
-  }
-}
-
-/// Utility for monitoring memory usage during batch processing operations.
-class BatchMemoryMonitor {
-  final MemoryUsageMonitor _monitor = MemoryUsageMonitor();
-  final int _checkpointInterval;
-  int _processedCount = 0;
-
-  /// Creates a batch memory monitor.
-  ///
-  /// @param checkpointInterval How often to record memory checkpoints (every N items)
-  BatchMemoryMonitor({int checkpointInterval = 100}) : _checkpointInterval = checkpointInterval;
-
-  /// Starts monitoring by recording a baseline.
-  void start() {
-    _monitor.recordBaseline('batch_start');
-  }
-
-  /// Records processing of an item, potentially creating a checkpoint.
-  void recordItem(String? itemLabel) {
-    _processedCount++;
-
-    if (_processedCount % _checkpointInterval == 0) {
-      _monitor.recordCheckpoint('batch_${_processedCount}');
-    }
-  }
-
-  /// Finishes monitoring and returns a report.
-  MemoryUsageReport finish() {
-    _monitor.recordCheckpoint('batch_end');
-    return _monitor.generateReport();
-  }
-
-  /// Returns the current number of processed items.
-  int get processedCount => _processedCount;
 }

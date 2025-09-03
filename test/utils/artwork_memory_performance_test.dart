@@ -2,7 +2,10 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/core/core.dart';
+import 'package:phonic/src/core/artwork_cache.dart';
+import 'package:phonic/src/core/artwork_data.dart';
+import 'package:phonic/src/core/artwork_type.dart';
+import 'package:phonic/src/core/optimized_artwork_data.dart';
 import 'package:phonic/src/utils/utils.dart';
 
 void main() {

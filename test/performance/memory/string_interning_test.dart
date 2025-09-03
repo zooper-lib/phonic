@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/utils/string_interning.dart';
+import 'package:phonic/src/performance/memory/string_interning.dart';
 
 void main() {
   group('StringInterning', () {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/phonic.dart';
+import 'package:phonic/src/formats/id3/id3.dart';
 
 void main() {
   group('Id3v1GenreTable Integration', () {

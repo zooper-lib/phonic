@@ -3,7 +3,6 @@
 import 'dart:typed_data';
 
 import 'package:phonic/phonic.dart';
-import 'package:phonic/src/core/encoding_options.dart';
 
 /// Basic usage examples demonstrating the core Phonic API functionality.
 ///

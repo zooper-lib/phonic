@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/utils/memory_usage_monitor.dart';
+import 'package:phonic/src/performance/monitoring/batch_memory_monitor.dart';
+import 'package:phonic/src/performance/monitoring/memory_checkpoint.dart';
+import 'package:phonic/src/performance/monitoring/memory_usage_monitor.dart';
+import 'package:phonic/src/performance/monitoring/memory_usage_report.dart';
 
 void main() {
   group('MemoryUsageMonitor', () {

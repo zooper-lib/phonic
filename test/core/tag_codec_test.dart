@@ -1,7 +1,14 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/core/core.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/tag_capability.dart';
+import 'package:phonic/src/core/tag_codec.dart';
+import 'package:phonic/src/core/tag_confidence.dart';
+import 'package:phonic/src/core/tag_key.dart';
+import 'package:phonic/src/core/tag_provenance.dart';
+import 'package:phonic/src/core/tag_semantics.dart';
+import 'package:phonic/src/tags/tags.dart';
 import 'package:phonic/src/utils/unknown_data_preservation.dart';
 
 // Test implementation of TagCodec for testing purposes
@@ -249,4 +256,3 @@ void main() {
     });
   });
 }
-

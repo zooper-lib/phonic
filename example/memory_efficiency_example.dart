@@ -1,10 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'package:phonic/src/core/metadata_tag.dart';
-import 'package:phonic/src/core/tag_key.dart';
-import 'package:phonic/src/utils/memory_efficient_tag_storage.dart';
-import 'package:phonic/src/utils/memory_usage_monitor.dart';
-import 'package:phonic/src/utils/string_interning.dart';
+import 'package:phonic/phonic.dart';
 
 /// Example demonstrating memory-efficient tag storage capabilities.
 ///

@@ -55,14 +55,50 @@
 ///   // UTF-8 is supported for titles in ID3v2.4
 /// }
 /// ```
+// ignore_for_file: directives_ordering
+
 library phonic;
 
-export 'src/capabilities/capabilities.dart';
-export 'src/core/core.dart';
+// Core API - Essential classes for library consumers
+export 'src/core/artwork_cache.dart';
+export 'src/core/artwork_data.dart';
+export 'src/core/artwork_type.dart';
+export 'src/core/container_kind.dart';
+export 'src/core/encoding_options.dart';
+export 'src/core/metadata_tag.dart';
+export 'src/core/mime_type.dart';
+export 'src/core/optimized_artwork_data.dart';
+export 'src/core/phonic.dart';
+export 'src/core/phonic_audio_file.dart';
+export 'src/core/tag_capability.dart';
+export 'src/core/tag_confidence.dart';
+export 'src/core/tag_key.dart';
+export 'src/core/tag_provenance.dart';
+export 'src/core/tag_semantics.dart';
+export 'src/core/text_encoding.dart';
+
+// Capability system for format constraints
+export 'src/capabilities/id3v1_capability.dart';
+export 'src/capabilities/id3v22_capability.dart';
+export 'src/capabilities/id3v23_capability.dart';
+export 'src/capabilities/id3v24_capability.dart';
+export 'src/capabilities/mp4_capability.dart';
+export 'src/capabilities/vorbis_capability.dart';
+
+// Exception types
 export 'src/exceptions/corrupted_container_exception.dart';
 export 'src/exceptions/phonic_exception.dart';
 export 'src/exceptions/tag_validation_exception.dart';
 export 'src/exceptions/unsupported_format_exception.dart';
-export 'src/formats/formats.dart';
-export 'src/tags/tags.dart';
-export 'src/utils/utils.dart';
+
+// Utils
+export 'src/utils/lazy_artwork_loader.dart';
+
+// Streaming utilities for large collections
+export 'src/streaming/streaming.dart';
+
+// Performance optimization utilities
+export 'src/performance/memory/string_interning.dart';
+export 'src/performance/memory/memory_efficient_tag_storage.dart';
+export 'src/performance/monitoring/memory_usage_monitor.dart';
+export 'src/performance/monitoring/batch_memory_monitor.dart';

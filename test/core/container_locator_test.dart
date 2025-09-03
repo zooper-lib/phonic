@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/core/core.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/container_locator.dart';
 
 /// Test implementation of ContainerLocator for testing purposes
 class TestContainerLocator extends ContainerLocator {

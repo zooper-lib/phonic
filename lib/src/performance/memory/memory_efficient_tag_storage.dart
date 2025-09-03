@@ -1,7 +1,8 @@
 import 'dart:collection';
 
-import '../core/metadata_tag.dart';
-import '../core/tag_key.dart';
+import 'package:phonic/src/core/metadata_tag.dart';
+import 'package:phonic/src/core/tag_key.dart';
+
 import 'string_interning.dart';
 
 /// Memory-efficient storage system for metadata tags that minimizes overhead

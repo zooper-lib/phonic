@@ -3,7 +3,13 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/core/core.dart';
+import 'package:phonic/src/core/codec_registry.dart';
+import 'package:phonic/src/core/merge_policy.dart';
+import 'package:phonic/src/core/metadata_tag.dart';
+import 'package:phonic/src/core/phonic_audio_file_impl.dart';
+import 'package:phonic/src/core/post_write_validator.dart';
+import 'package:phonic/src/core/rollback_manager.dart';
+import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/exceptions/corrupted_container_exception.dart';
 import 'package:phonic/src/formats/id3/id3.dart';
 import 'package:phonic/src/utils/locators/locators.dart';

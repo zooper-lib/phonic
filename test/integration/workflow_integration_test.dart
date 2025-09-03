@@ -5,7 +5,6 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
-import 'package:phonic/src/core/encoding_options.dart';
 
 /// Focused integration tests for the full audio file workflow.
 ///
