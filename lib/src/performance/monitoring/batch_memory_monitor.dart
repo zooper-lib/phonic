@@ -1,5 +1,6 @@
+import 'package:phonic/src/performance/monitoring/memory_usage_monitor.dart';
+
 import 'memory_usage_report.dart';
-import 'monitoring.dart';
 
 /// Specialized memory monitor for batch processing operations.
 ///

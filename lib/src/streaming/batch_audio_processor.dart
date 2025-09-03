@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:phonic/src/performance/performance.dart';
+import 'package:phonic/src/performance/monitoring/memory_usage_monitor.dart';
 import 'package:phonic/src/streaming/cancellation_token.dart';
 import 'package:phonic/src/streaming/processing_result.dart';
 import 'package:phonic/src/streaming/streaming_config.dart';
