@@ -4,8 +4,10 @@ import 'package:phonic/src/core/phonic.dart';
 import 'package:phonic/src/core/phonic_audio_file.dart';
 import 'package:phonic/src/performance/monitoring/memory_usage_report.dart';
 import 'package:phonic/src/performance/performance.dart';
-
-import 'streaming.dart';
+import 'package:phonic/src/streaming/cancellation_token.dart';
+import 'package:phonic/src/streaming/processing_result.dart';
+import 'package:phonic/src/streaming/streaming_config.dart';
+import 'package:phonic/src/streaming/streaming_progress.dart';
 
 /// Processor function type for streaming audio file operations.
 ///

@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/tag_key.dart';
-import 'package:phonic/src/utils/utils.dart';
+import 'package:phonic/src/utils/vorbis_comment_parser.dart';
 
 void main() {
   group('VorbisCommentParser', () {

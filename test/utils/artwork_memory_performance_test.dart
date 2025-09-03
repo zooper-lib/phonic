@@ -6,7 +6,8 @@ import 'package:phonic/src/core/artwork_cache.dart';
 import 'package:phonic/src/core/artwork_data.dart';
 import 'package:phonic/src/core/artwork_type.dart';
 import 'package:phonic/src/core/optimized_artwork_data.dart';
-import 'package:phonic/src/utils/utils.dart';
+import 'package:phonic/src/utils/lazy_artwork_loader.dart';
+import 'package:phonic/src/utils/streaming_artwork_loader.dart';
 
 void main() {
   group('Artwork Memory Performance Tests', () {

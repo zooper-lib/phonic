@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/capabilities/capabilities.dart';
+import 'package:phonic/src/capabilities/id3v1_capability.dart';
+import 'package:phonic/src/capabilities/id3v24_capability.dart';
+import 'package:phonic/src/capabilities/vorbis_capability.dart';
 import 'package:phonic/src/core/artwork_data.dart';
 import 'package:phonic/src/core/artwork_type.dart';
 import 'package:phonic/src/core/container_kind.dart';

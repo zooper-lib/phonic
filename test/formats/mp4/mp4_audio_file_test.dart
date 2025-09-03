@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
-import 'package:phonic/src/formats/formats.dart';
+import 'package:phonic/src/formats/mp4/mp4_audio_file.dart';
 
 void main() {
   group('Mp4AudioFile', () {

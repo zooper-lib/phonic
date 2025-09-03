@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:phonic/src/utils/utils.dart';
+import 'package:phonic/src/utils/byte_reader.dart';
+import 'package:phonic/src/utils/mp4_atom_parser.dart';
 
 void main() {
   group('Mp4AtomParser Freeform Atom Parsing', () {

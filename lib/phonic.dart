@@ -95,7 +95,13 @@ export 'src/exceptions/unsupported_format_exception.dart';
 export 'src/utils/lazy_artwork_loader.dart';
 
 // Streaming utilities for large collections
-export 'src/streaming/streaming.dart';
+export 'src/streaming/streaming_audio_processor.dart';
+export 'src/streaming/batch_audio_processor.dart';
+export 'src/streaming/collection_analyzer.dart';
+export 'src/streaming/streaming_config.dart';
+export 'src/streaming/processing_result.dart';
+export 'src/streaming/streaming_progress.dart';
+export 'src/streaming/cancellation_token.dart';
 
 // Performance optimization utilities
 export 'src/performance/memory/string_interning.dart';

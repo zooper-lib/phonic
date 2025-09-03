@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import '../../capabilities/id3v22_capability.dart';
-import '../../core/container_kind.dart';
-import '../../core/metadata_tag.dart';
-import '../../core/tag_capability.dart';
-import '../../core/tag_codec.dart';
-import '../../core/tag_confidence.dart';
-import '../../core/tag_key.dart';
-import '../../core/tag_provenance.dart';
-import '../../exceptions/corrupted_container_exception.dart';
-import '../../tags/tags.dart';
-import '../../utils/synchsafe_int.dart';
-import '../../utils/unknown_data_preservation.dart';
+import 'package:phonic/src/capabilities/id3v22_capability.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/metadata_tag.dart';
+import 'package:phonic/src/core/tag_capability.dart';
+import 'package:phonic/src/core/tag_codec.dart';
+import 'package:phonic/src/core/tag_confidence.dart';
+import 'package:phonic/src/core/tag_key.dart';
+import 'package:phonic/src/core/tag_provenance.dart';
+import 'package:phonic/src/exceptions/corrupted_container_exception.dart';
+import 'package:phonic/src/utils/synchsafe_int.dart';
+import 'package:phonic/src/utils/unknown_data_preservation.dart';
+
 import 'id3v2_frame_map.dart';
 import 'id3v2_frame_parser.dart';
 import 'id3v2_genre_utils.dart';

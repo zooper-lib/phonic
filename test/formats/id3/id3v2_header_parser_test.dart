@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
-import 'package:phonic/src/formats/id3/id3.dart';
-import 'package:phonic/src/utils/utils.dart';
+import 'package:phonic/src/formats/id3/id3v2_header_parser.dart';
+import 'package:phonic/src/utils/synchsafe_int.dart';
 
 void main() {
   group('Id3v2HeaderFlags', () {

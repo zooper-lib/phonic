@@ -1,20 +1,20 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import '../../capabilities/mp4_capability.dart';
-import '../../core/container_kind.dart';
-import '../../core/metadata_tag.dart';
-import '../../core/tag_capability.dart';
-import '../../core/tag_codec.dart';
-import '../../core/tag_confidence.dart';
-import '../../core/tag_key.dart';
-import '../../core/tag_provenance.dart';
-import '../../exceptions/corrupted_container_exception.dart';
-import '../../tags/tags.dart';
-import '../../utils/byte_reader.dart';
-import '../../utils/mp4_atom_parser.dart';
-import '../../utils/mp4_standard_atom_parser.dart';
-import '../../utils/unknown_data_preservation.dart';
+import 'package:phonic/src/capabilities/mp4_capability.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/metadata_tag.dart';
+import 'package:phonic/src/core/tag_capability.dart';
+import 'package:phonic/src/core/tag_codec.dart';
+import 'package:phonic/src/core/tag_confidence.dart';
+import 'package:phonic/src/core/tag_key.dart';
+import 'package:phonic/src/core/tag_provenance.dart';
+import 'package:phonic/src/exceptions/corrupted_container_exception.dart';
+import 'package:phonic/src/utils/byte_reader.dart';
+import 'package:phonic/src/utils/mp4_atom_parser.dart';
+import 'package:phonic/src/utils/mp4_standard_atom_parser.dart';
+import 'package:phonic/src/utils/unknown_data_preservation.dart';
+
 import 'mp4_atom_map.dart';
 
 /// MP4 atoms metadata codec for reading and writing MP4 ilst atom metadata.

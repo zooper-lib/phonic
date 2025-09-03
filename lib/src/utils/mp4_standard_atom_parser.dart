@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import '../core/artwork_data.dart';
-import '../core/artwork_type.dart';
-import '../core/metadata_tag.dart';
-import '../core/tag_key.dart';
-import '../core/tag_provenance.dart';
-import '../exceptions/corrupted_container_exception.dart';
-import '../formats/mp4/mp4_atom_map.dart';
-import '../tags/tags.dart';
+import 'package:phonic/src/core/artwork_data.dart';
+import 'package:phonic/src/core/artwork_type.dart';
+import 'package:phonic/src/core/metadata_tag.dart';
+import 'package:phonic/src/core/tag_key.dart';
+import 'package:phonic/src/core/tag_provenance.dart';
+import 'package:phonic/src/exceptions/corrupted_container_exception.dart';
+import 'package:phonic/src/formats/mp4/mp4_atom_map.dart';
+
 import 'byte_reader.dart';
 import 'mp4_atom_parser.dart';
 

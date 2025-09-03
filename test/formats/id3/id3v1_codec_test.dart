@@ -5,11 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/artwork_data.dart';
 import 'package:phonic/src/core/artwork_type.dart';
 import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/tag_confidence.dart';
 import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/exceptions/corrupted_container_exception.dart';
-import 'package:phonic/src/formats/id3/id3.dart';
-import 'package:phonic/src/tags/tags.dart';
+import 'package:phonic/src/formats/id3/id3v1_codec.dart';
 
 void main() {
   group('Id3v1Codec', () {

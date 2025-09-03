@@ -1,10 +1,10 @@
-import 'package:phonic/src/capabilities/capabilities.dart';
+import 'package:phonic/src/capabilities/id3v23_capability.dart';
+import 'package:phonic/src/capabilities/id3v24_capability.dart';
 import 'package:phonic/src/conversion/datetime_group_converter.dart';
 import 'package:phonic/src/conversion/metadata_converter.dart';
 import 'package:phonic/src/core/container_kind.dart';
 import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/tag_key.dart';
-import 'package:phonic/src/tags/tags.dart';
 import 'package:test/test.dart';
 
 void main() {

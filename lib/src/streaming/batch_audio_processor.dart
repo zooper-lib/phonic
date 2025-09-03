@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:phonic/src/performance/performance.dart';
-
-import 'streaming.dart';
+import 'package:phonic/src/streaming/cancellation_token.dart';
+import 'package:phonic/src/streaming/processing_result.dart';
+import 'package:phonic/src/streaming/streaming_config.dart';
+import 'package:phonic/src/streaming/streaming_progress.dart';
 
 /// High-performance batch processor for handling very large audio file collections.
 ///
