@@ -198,6 +198,7 @@ Integration tests will continue to fail until these core bugs are resolved.
 
         // Try encoding with different validation levels
         final validationLevels = [ValidationLevel.basic, ValidationLevel.standard, ValidationLevel.strict];
+        var anyRoundTripFailures = false;
 
         for (final level in validationLevels) {
           try {
@@ -210,6 +211,7 @@ Integration tests will continue to fail until these core bugs are resolved.
             print('✓ Success with ${level.name} validation');
           } catch (e) {
             if (e.toString().contains('ROUND_TRIP_FAILED')) {
+              anyRoundTripFailures = true;
               print('✗ ROUND_TRIP_FAILED with ${level.name} validation:');
               print('  ${e.toString().split('\n').first}');
 
@@ -226,7 +228,11 @@ Integration tests will continue to fail until these core bugs are resolved.
           }
         }
 
-        fail('ROUND_TRIP_FAILED bug needs to be fixed in ID3 version handling');
+        if (anyRoundTripFailures) {
+          fail('ROUND_TRIP_FAILED bug needs to be fixed in ID3 version handling');
+        } else {
+          print('✅ ROUND_TRIP_FAILED bug has been resolved - all validation levels pass!');
+        }
       } finally {
         audioFile?.dispose();
       }

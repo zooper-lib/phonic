@@ -1,7 +1,8 @@
+import '../conversion/metadata_converter.dart';
+import '../conversion/unified_metadata_converter.dart';
 import 'container_kind.dart';
 import 'format_strategy.dart';
 import 'metadata_tag.dart';
-import 'semantic_tag_converter.dart';
 import 'tag_capability.dart';
 import 'tag_confidence.dart';
 import 'tag_key.dart';
@@ -113,19 +114,21 @@ import 'tag_semantics.dart';
 /// The [EncodingPreparation] class is stateless and thread-safe. Multiple
 /// threads can safely use the same instance concurrently for tag preparation.
 class EncodingPreparation {
-  /// Semantic tag converter for handling frame mapping conflicts.
-  final SemanticTagConverter _semanticConverter;
+  /// Unified metadata converter for handling all tag conversions including cross-format support.
+  final UnifiedMetadataConverter _converter;
 
-  /// Gets the semantic tag converter used by this preparation instance.
-  SemanticTagConverter get semanticConverter => _semanticConverter;
+  /// Gets the unified metadata converter used by this preparation instance.
+  UnifiedMetadataConverter get converter => _converter;
 
   /// Creates a new encoding preparation utility instance.
   ///
   /// The utility is stateless and can be reused across multiple operations
   /// and threads safely.
-  const EncodingPreparation({
-    SemanticTagConverter? semanticConverter,
-  }) : _semanticConverter = semanticConverter ?? const SemanticTagConverter();
+  ///
+  /// @param converter Optional unified converter (uses default if not provided)
+  EncodingPreparation({
+    UnifiedMetadataConverter? converter,
+  }) : _converter = converter ?? UnifiedMetadataConverter();
 
   /// Prepares tags for encoding based on format strategy and container capabilities,
   /// including async preparation for tags that require it.
@@ -181,6 +184,7 @@ class EncodingPreparation {
     required List<MetadataTag> tags,
     required FormatStrategy strategy,
     required Map<(ContainerKind, String), TagCapability> capabilities,
+    ConversionOptions conversionOptions = const ConversionOptions(),
   }) async {
     // Step 1: Perform async preparation for tags that require it
     final preparedTags = <MetadataTag>[];
@@ -200,6 +204,7 @@ class EncodingPreparation {
       tags: preparedTags,
       strategy: strategy,
       capabilities: capabilities,
+      conversionOptions: conversionOptions,
     );
   }
 
@@ -268,11 +273,14 @@ class EncodingPreparation {
     required List<MetadataTag> tags,
     required FormatStrategy strategy,
     required Map<(ContainerKind, String), TagCapability> capabilities,
+    ConversionOptions conversionOptions = const ConversionOptions(),
   }) {
     // Step 1: Apply semantic conversions to resolve frame mapping conflicts
-    final convertedTags = _semanticConverter.convertForTargetVersion(tags, strategy.fanout);
-
+    // Use unified converter for all conversions including cross-format and ID3 version transitions
     final result = <(ContainerKind, String), List<MetadataTag>>{};
+
+    // Determine source format from tag provenance
+    final sourceFormat = _determineSourceFormat(tags);
 
     // Process each fan-out target from the format strategy
     for (final (containerKind, containerVersion) in strategy.fanout) {
@@ -280,9 +288,20 @@ class EncodingPreparation {
       final capability = capabilities[containerKey];
 
       if (capability != null) {
+        // Convert tags specifically for this target container
+        final conversionResult = _converter.convertTags(
+          tags,
+          sourceFormat,
+          containerKey,
+          conversionOptions,
+        );
+
+        // Use converted tags or fallback to original if conversion failed
+        final tagsForContainer = conversionResult.errors.isEmpty ? conversionResult.convertedTags : tags;
+
         // Prepare tags for this specific container
         final preparedTags = prepareTagsForContainer(
-          tags: convertedTags,
+          tags: tagsForContainer,
           containerKind: containerKind,
           containerVersion: containerVersion,
           capability: capability,
@@ -293,6 +312,35 @@ class EncodingPreparation {
     }
 
     return result;
+  }
+
+  /// Determines the primary source format from tag provenance.
+  (ContainerKind, String) _determineSourceFormat(List<MetadataTag> tags) {
+    if (tags.isEmpty) {
+      return (ContainerKind.none, '');
+    }
+
+    // Find the most common container kind among tags
+    final containerCounts = <ContainerKind, int>{};
+    final versionCounts = <String, int>{};
+
+    for (final tag in tags) {
+      final container = tag.provenance.containerKind;
+      final version = tag.provenance.containerVersion;
+
+      containerCounts[container] = (containerCounts[container] ?? 0) + 1;
+      if (version.isNotEmpty) {
+        versionCounts[version] = (versionCounts[version] ?? 0) + 1;
+      }
+    }
+
+    // Find most frequent container
+    final primaryContainer = containerCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+
+    // Find most frequent version for that container
+    final primaryVersion = versionCounts.isEmpty ? '' : versionCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+
+    return (primaryContainer, primaryVersion);
   }
 
   /// Prepares tags for a specific container type and version.

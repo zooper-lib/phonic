@@ -1,8 +1,8 @@
-import 'container_kind.dart';
-import 'metadata_tag.dart';
-import 'tag_confidence.dart';
-import 'tag_key.dart';
-import 'tag_provenance.dart';
+import '../core/container_kind.dart';
+import '../core/metadata_tag.dart';
+import '../core/tag_confidence.dart';
+import '../core/tag_key.dart';
+import '../core/tag_provenance.dart';
 
 /// Rule-based engine for defining semantic tag conversions and conflict resolution.
 ///

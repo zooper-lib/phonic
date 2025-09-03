@@ -19,7 +19,7 @@ void main() {
     late TagCapability vorbisCapability;
 
     setUp(() {
-      preparation = const EncodingPreparation();
+      preparation = EncodingPreparation();
 
       // Define test capabilities
       id3v1Capability = const TagCapability(

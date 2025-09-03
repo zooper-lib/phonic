@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -356,7 +358,12 @@ Uint8List _createValidMp3WithId3v2() {
 
 /// A validator that always fails validation for testing rollback scenarios.
 class _FailingValidator extends PostWriteValidator {
-  _FailingValidator(CodecRegistry codecRegistry) : super(codecRegistry: codecRegistry);
+  _FailingValidator(CodecRegistry codecRegistry)
+    : super(
+        codecRegistry: codecRegistry,
+        enableDeepValidation: true,
+        enableRoundTripValidation: true,
+      );
 
   @override
   Future<ValidationResult> validateEncodedFile({
@@ -365,6 +372,7 @@ class _FailingValidator extends PostWriteValidator {
     required dynamic formatStrategy,
     List<dynamic>? expectedContainers,
   }) async {
+    print('_FailingValidator.validateEncodedFile called - should fail!');
     // Always return a failed validation result
     return const ValidationResult(
       isValid: false,
