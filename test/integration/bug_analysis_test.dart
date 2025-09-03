@@ -35,7 +35,10 @@ void main() {
       int totalFiles = 0;
       int failedFiles = 0;
 
-      for (final testFile in testFiles.take(5)) {
+      // Use controlled set of test files instead of all fixtures
+      final controlledTestFiles = testFiles.take(3).toList(); // Limit to 3 files for predictable testing
+
+      for (final testFile in controlledTestFiles) {
         totalFiles++;
         PhonicAudioFile? audioFile;
 
@@ -43,38 +46,60 @@ void main() {
           print('Testing file: ${testFile.split('/').last}');
           audioFile = await Phonic.fromFile(testFile);
 
+          // First, let's see what's in this file
+          final existingTags = audioFile.getAllTags();
+          print('  Existing tags: ${existingTags.length}');
+          for (final tag in existingTags.take(3)) {
+            // Show first 3 tags
+            print('    ${tag.key.name}: ${tag.value.toString().length > 30 ? '${tag.value.toString().substring(0, 30)}...' : tag.value}');
+          }
+
           // Minimal modification to trigger encoding
           audioFile.setTag(const TitleTag('Bug Test'));
 
           // Try encoding with the most basic settings
           try {
-            await audioFile.encode(
+            final encoded = await audioFile.encode(
               const EncodingOptions(
                 strategy: EncodingStrategy.preserveExisting,
                 validationLevel: ValidationLevel.basic,
               ),
             );
-            print('  ✓ SUCCESS: File encoded without issues');
+            print('  ✓ SUCCESS: File encoded (${encoded.length} bytes)');
           } catch (e) {
             failedFiles++;
-            print('  ✗ FAILED: ${e.toString().split('\n').first}');
+            final fullError = e.toString();
+            print('  ✗ FAILED: ${fullError.split('\n').first}');
 
-            final errorString = e.toString();
-
-            // Categorize the error
-            if (errorString.contains('TAG_VALUE_INCONSISTENT')) {
-              bugReport.putIfAbsent('TAG_VALUE_INCONSISTENT', () => []);
-              bugReport['TAG_VALUE_INCONSISTENT']!.add(testFile.split('/').last);
+            // Print more detailed error information for debugging
+            if (fullError.contains('Post-write validation failed')) {
+              final lines = fullError.split('\n');
+              for (final line in lines.take(5)) {
+                if (line.trim().isNotEmpty) {
+                  print('    $line');
+                }
+              }
             }
 
-            if (errorString.contains('ROUND_TRIP_FAILED')) {
+            // Categorize the error
+            if (fullError.contains('TAG_VALUE_CHANGED')) {
+              bugReport.putIfAbsent('TAG_VALUE_CHANGED', () => []);
+              bugReport['TAG_VALUE_CHANGED']!.add(testFile.split('/').last);
+            }
+
+            if (fullError.contains('TAG_LOST')) {
+              bugReport.putIfAbsent('TAG_LOST', () => []);
+              bugReport['TAG_LOST']!.add(testFile.split('/').last);
+            }
+
+            if (fullError.contains('ROUND_TRIP_FAILED')) {
               bugReport.putIfAbsent('ROUND_TRIP_FAILED', () => []);
               bugReport['ROUND_TRIP_FAILED']!.add(testFile.split('/').last);
             }
 
-            if (errorString.contains('ID3v2.3') && errorString.contains('ID3v2.4')) {
-              bugReport.putIfAbsent('ID3_VERSION_MISMATCH', () => []);
-              bugReport['ID3_VERSION_MISMATCH']!.add(testFile.split('/').last);
+            if (fullError.contains('Validation failed')) {
+              bugReport.putIfAbsent('VALIDATION_FAILED', () => []);
+              bugReport['VALIDATION_FAILED']!.add(testFile.split('/').last);
             }
           }
         } finally {

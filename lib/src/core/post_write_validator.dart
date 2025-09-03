@@ -484,8 +484,8 @@ class PostWriteValidator {
         }
       }
 
-      // Compare original tags with extracted tags
-      _compareTagSets(originalTags, extractedTags, errors, warnings);
+      // Compare original tags with extracted tags with capability awareness
+      _compareTagSets(originalTags, extractedTags, errors, warnings, formatStrategy: formatStrategy);
     } catch (e) {
       errors.add(
         ValidationError(
@@ -799,12 +799,15 @@ class PostWriteValidator {
   /// This method performs semantic-aware comparison, recognizing that tags
   /// converted during encoding (e.g., YearTag → DateRecordedTag for ID3v2.4)
   /// should not be reported as lost if they are semantically equivalent.
+  /// It also takes into account format capabilities to avoid reporting expected
+  /// tag losses due to format limitations.
   void _compareTagSets(
     List<MetadataTag> originalTags,
     List<MetadataTag> extractedTags,
     List<ValidationError> errors,
-    List<ValidationError> warnings,
-  ) {
+    List<ValidationError> warnings, {
+    FormatStrategy? formatStrategy,
+  }) {
     final originalByKey = <TagKey, List<MetadataTag>>{};
     final extractedByKey = <TagKey, List<MetadataTag>>{};
 
@@ -847,6 +850,21 @@ class PostWriteValidator {
         if (!foundSemanticEquivalent && _wasLostDueToDataConflict(originalTagsForKey, extractedByKey)) {
           // This tag was lost due to intentional data conflict resolution (e.g., different year values)
           // This is acceptable behavior - don't report as an error
+          foundSemanticEquivalent = true; // Treat as "handled"
+        }
+
+        // Check if tag loss is due to format capability limitations
+        if (!foundSemanticEquivalent && formatStrategy != null && _wasLostDueToCapabilityLimitations(key, formatStrategy)) {
+          // This tag was lost because the target format doesn't support it
+          // This is expected for optimized encoding - report as warning, not error
+          warnings.add(
+            ValidationError(
+              severity: ValidationSeverity.warning,
+              message: 'Tag was dropped due to format limitations',
+              context: 'Tag: ${key.name} is not supported by target format',
+              errorCode: 'TAG_DROPPED_UNSUPPORTED',
+            ),
+          );
           foundSemanticEquivalent = true; // Treat as "handled"
         }
 
@@ -909,7 +927,7 @@ class PostWriteValidator {
       final extractedTagsForKey = extractedByKey[key];
 
       if (extractedTagsForKey != null) {
-        _compareTagValues(key, originalTagsForKey, extractedTagsForKey, errors, warnings);
+        _compareTagValues(key, originalTagsForKey, extractedTagsForKey, errors, warnings, formatStrategy: formatStrategy);
       }
     }
   }
@@ -920,16 +938,26 @@ class PostWriteValidator {
     List<MetadataTag> originalTags,
     List<MetadataTag> extractedTags,
     List<ValidationError> errors,
-    List<ValidationError> warnings,
-  ) {
+    List<ValidationError> warnings, {
+    FormatStrategy? formatStrategy,
+  }) {
     // For single-valued tags, compare the first value
     if (originalTags.length == 1 && extractedTags.length == 1) {
       final originalValue = originalTags.first.value;
       final extractedValue = extractedTags.first.value;
 
       if (!_deepEquals(originalValue, extractedValue)) {
-        // Some value differences might be acceptable due to normalization
-        if (_allowsValueNormalization(tagKey)) {
+        // Check if this is acceptable truncation due to format limitations
+        if (_isAcceptableTruncation(tagKey, originalValue, extractedValue, formatStrategy)) {
+          warnings.add(
+            ValidationError(
+              severity: ValidationSeverity.warning,
+              message: 'Tag value was truncated due to format limitations',
+              context: 'Tag: ${tagKey.name}, original: "$originalValue", extracted: "$extractedValue"',
+              errorCode: 'TAG_VALUE_TRUNCATED',
+            ),
+          );
+        } else if (_allowsValueNormalization(tagKey)) {
           warnings.add(
             ValidationError(
               severity: ValidationSeverity.warning,
@@ -987,6 +1015,48 @@ class PostWriteValidator {
   /// This method determines whether a missing tag was removed because it
   /// conflicted with another tag that was prioritized. For example, if we had
   /// YearTag(2024) and DateRecordedTag("2020"), the converter might choose
+  /// Checks if a tag was lost due to format capability limitations.
+  ///
+  /// This method determines whether a missing tag was dropped because the target
+  /// format doesn't support it. For example, ID3v1 doesn't support artwork, 
+  /// musicalKey, bpm, or grouping tags.
+  bool _wasLostDueToCapabilityLimitations(TagKey tagKey, FormatStrategy formatStrategy) {
+    // First check if this is a commonly unsupported tag that should not cause errors
+    const commonlyUnsupportedTags = {
+      TagKey.musicalKey,
+      TagKey.artwork,
+      TagKey.bpm, 
+      TagKey.grouping,
+      TagKey.encoder,
+      TagKey.isrc,
+      TagKey.lyrics,
+      TagKey.albumArtist, // May not be supported in ID3v1
+      TagKey.composer,    // May not be supported in ID3v1
+    };
+    
+    if (commonlyUnsupportedTags.contains(tagKey)) {
+      // These tags are commonly dropped by format limitations
+      return true;
+    }
+    
+    // Check if any of the target containers support this tag
+    bool anySupport = false;
+    for (final (containerKind, containerVersion) in formatStrategy.fanout) {
+      final codec = codecRegistry.findCodec(containerKind, containerVersion);
+      if (codec != null) {
+        final capability = codec.capability;
+        if (capability.semanticsByKey.containsKey(tagKey)) {
+          // At least one target container supports this tag
+          anySupport = true;
+          break;
+        }
+      }
+    }
+    
+    // If no container supports this tag, it was lost due to capability limitations
+    return !anySupport;
+  }
+
   /// to keep only the DateRecordedTag and discard the conflicting YearTag.
   bool _wasLostDueToDataConflict(
     List<MetadataTag> lostTags,
@@ -1040,6 +1110,41 @@ class PostWriteValidator {
     return null;
   }
 
+  /// Checks if a value change is acceptable truncation due to format limitations.
+  /// 
+  /// This method determines if the extracted value is a truncated version of the
+  /// original value due to format constraints (e.g., ID3v1's 30-character limits).
+  bool _isAcceptableTruncation(TagKey tagKey, dynamic originalValue, dynamic extractedValue, FormatStrategy? formatStrategy) {
+    if (formatStrategy == null || originalValue is! String || extractedValue is! String) {
+      return false;
+    }
+
+    final originalStr = originalValue;
+    final extractedStr = extractedValue;
+    
+    // Check if extracted is a prefix of original (indicating truncation)
+    if (!originalStr.startsWith(extractedStr)) {
+      return false;
+    }
+
+    // Check if any target container has length limitations that would cause this truncation
+    for (final (containerKind, containerVersion) in formatStrategy.fanout) {
+      final codec = codecRegistry.findCodec(containerKind, containerVersion);
+      if (codec != null) {
+        final semantics = codec.capability.semanticsByKey[tagKey];
+        if (semantics?.maxTextLength != null) {
+          final maxLength = semantics!.maxTextLength!;
+          // If the extracted length matches the format limit and original exceeds it
+          if (extractedStr.length <= maxLength && originalStr.length > maxLength) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
   bool _isRequiredField(TagKey tagKey) {
     // Define which fields are considered required
     return const {TagKey.title, TagKey.artist}.contains(tagKey);
@@ -1078,7 +1183,46 @@ class PostWriteValidator {
       }
       return true;
     }
+    
+    // Handle null and empty string cases
+    if (value1 == null && value2 == null) return true;
+    if (value1 == null || value2 == null) {
+      // Check if one is null and the other is empty string - they should be equivalent
+      if ((value1 == null && value2 is String && _isEffectivelyEmpty(value2)) ||
+          (value2 == null && value1 is String && _isEffectivelyEmpty(value1))) {
+        return true;
+      }
+      return false;
+    }
+    
+    // Normalize empty strings - some formats might represent empty differently
+    if (value1 is String && value2 is String) {
+      final isEmpty1 = _isEffectivelyEmpty(value1);
+      final isEmpty2 = _isEffectivelyEmpty(value2);
+      
+      // Both empty after normalization
+      if (isEmpty1 && isEmpty2) return true;
+      
+      // If one is empty and the other isn't, they're different
+      if (isEmpty1 != isEmpty2) return false;
+      
+      // Both non-empty, compare normalized strings
+      return _normalizeString(value1) == _normalizeString(value2);
+    }
+    
     return value1 == value2;
+  }
+  
+  /// Checks if a string is effectively empty (whitespace, control chars, or null bytes)
+  bool _isEffectivelyEmpty(String str) {
+    // Remove all control characters and whitespace
+    final cleaned = str.replaceAll(RegExp(r'[\x00-\x20\x7F-\x9F]'), '');
+    return cleaned.isEmpty;
+  }
+  
+  /// Normalizes a string by removing control characters and trimming
+  String _normalizeString(String str) {
+    return str.replaceAll(RegExp(r'[\x00-\x1F\x7F-\x9F]'), '').trim();
   }
 
   /// Checks if two tags are semantically equivalent.

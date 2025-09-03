@@ -7,7 +7,6 @@ import 'capability_constraint_rule.dart';
 import 'conversion_rule.dart';
 import 'datetime_group_converter.dart';
 import 'metadata_converter.dart';
-import 'multi_value_delimiter_rule.dart';
 
 /// Unified metadata converter that replaces SemanticTagConverter and GenericMetadataConverter.
 ///
@@ -262,7 +261,6 @@ class UnifiedMetadataConverter implements MetadataConverter {
     _conversionRules.addAll([
       DateTimeGroupConverter(),
       CapabilityConstraintRule(),
-      MultiValueDelimiterRule(),
     ]);
   }
 
