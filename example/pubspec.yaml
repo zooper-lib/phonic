@@ -1,0 +1,17 @@
+name: phonic_examples
+description: Comprehensive examples for the Phonic audio metadata library
+version: 1.0.0
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  # Reference to the parent Phonic library
+  phonic:
+    path: ../
+
+dev_dependencies:
+  lints: ^5.0.0
+
+# This is an example project, not a publishable package
+publish_to: none
