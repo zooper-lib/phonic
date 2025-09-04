@@ -1,3 +1,35 @@
-## 0.0.1
+## [1.0.0] - 2025-09-04
 
-* TODO: Describe initial release.
+### Added
+
+- Initial release of Phonic audio metadata library
+- Support for MP3 files with ID3v1, ID3v2.2, ID3v2.3, and ID3v2.4 tags
+- Support for FLAC files with Vorbis Comments
+- Support for OGG Vorbis files with Vorbis Comments
+- Support for Opus files with Vorbis Comments
+- Support for MP4/M4A files with iTunes-compatible atoms
+- Unified API for reading and writing metadata across all supported formats
+- Automatic format detection and capability handling
+- 50+ metadata tag types including title, artist, album, genre, artwork, and more
+- Multi-valued tag support (genres, artists, composers)
+- Lazy loading artwork system with memory optimization
+- Advanced artwork handling with multiple types (front cover, back cover, artist photo, etc.)
+- Streaming operations for batch processing large collections
+- Memory-efficient processing with automatic resource management
+- Tag provenance tracking to identify metadata sources
+- Cross-format metadata conversion with intelligent mapping
+- Comprehensive validation system with format-specific constraints
+- Error handling with typed exceptions
+- Unknown data preservation during tag operations
+- Performance optimization utilities (string interning, caching)
+- Progress tracking and cancellation support for long operations
+- Collection analysis tools for music library management
+- 145 comprehensive test files covering all formats and edge cases
+- Complete documentation with guides and examples
+- 7 example files demonstrating common usage patterns
+
+### Dependencies
+
+- `convert: ^3.1.2`
+- `equatable: ^2.0.7`
+- `collection: ^1.18.0`
