@@ -77,4 +77,25 @@ final class ComposerTag extends MetadataTag<String> {
   ComposerTag withProvenance(TagProvenance newProvenance) {
     return ComposerTag(value, provenance: newProvenance);
   }
+
+  /// Converts this ComposerTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates a ComposerTag from a JSON Map.
+  static ComposerTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as String?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return ComposerTag(value, provenance: provenance);
+  }
 }

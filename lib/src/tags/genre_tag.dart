@@ -268,4 +268,26 @@ final class GenreTag extends MetadataTag<List<String>> {
   GenreTag withProvenance(TagProvenance newProvenance) {
     return GenreTag(value, provenance: newProvenance);
   }
+
+  /// Converts this GenreTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates a GenreTag from a JSON Map.
+  static GenreTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as List<dynamic>?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final genres = value.cast<String>();
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return GenreTag(genres, provenance: provenance);
+  }
 }

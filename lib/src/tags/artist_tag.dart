@@ -77,4 +77,25 @@ final class ArtistTag extends MetadataTag<String> {
   ArtistTag withProvenance(TagProvenance newProvenance) {
     return ArtistTag(value, provenance: newProvenance);
   }
+
+  /// Converts this ArtistTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates an ArtistTag from a JSON Map.
+  static ArtistTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as String?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return ArtistTag(value, provenance: provenance);
+  }
 }

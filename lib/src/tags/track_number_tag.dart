@@ -100,4 +100,25 @@ final class TrackNumberTag extends MetadataTag<int> {
   TrackNumberTag withProvenance(TagProvenance newProvenance) {
     return TrackNumberTag(value, provenance: newProvenance);
   }
+
+  /// Converts this TrackNumberTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates a TrackNumberTag from a JSON Map.
+  static TrackNumberTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as int?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return TrackNumberTag(value, provenance: provenance);
+  }
 }

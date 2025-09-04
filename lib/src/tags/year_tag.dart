@@ -108,4 +108,25 @@ final class YearTag extends MetadataTag<int> {
   YearTag withProvenance(TagProvenance newProvenance) {
     return YearTag(value, provenance: newProvenance);
   }
+
+  /// Converts this YearTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates a YearTag from a JSON Map.
+  static YearTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as int?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return YearTag(value, provenance: provenance);
+  }
 }

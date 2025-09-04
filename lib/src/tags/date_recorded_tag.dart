@@ -253,4 +253,25 @@ final class DateRecordedTag extends MetadataTag<String> {
   DateRecordedTag withProvenance(TagProvenance newProvenance) {
     return DateRecordedTag(value, provenance: newProvenance);
   }
+
+  /// Converts this DateRecordedTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates a DateRecordedTag from a JSON Map.
+  static DateRecordedTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as String?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return DateRecordedTag(value, provenance: provenance);
+  }
 }
