@@ -1,6 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/exceptions/corrupted_container_exception.dart';
 import 'package:phonic/src/exceptions/phonic_exception.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('CorruptedContainerException', () {

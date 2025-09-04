@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/container_kind.dart';
 import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/tag_capability.dart';
 import 'package:phonic/src/core/tag_codec.dart';
 import 'package:phonic/src/exceptions/corrupted_container_exception.dart';
 import 'package:phonic/src/formats/id3/id3v23_codec.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('Id3v23Codec', () {

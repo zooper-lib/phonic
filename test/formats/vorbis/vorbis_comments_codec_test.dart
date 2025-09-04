@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/artwork_data.dart';
 import 'package:phonic/src/core/artwork_type.dart';
 import 'package:phonic/src/core/container_kind.dart';
@@ -12,6 +11,7 @@ import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/formats/vorbis/vorbis_comments_codec.dart';
 import 'package:phonic/src/utils/flac_picture_parser.dart';
 import 'package:phonic/src/utils/vorbis_comment_parser.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('VorbisCommentsCodec', () {

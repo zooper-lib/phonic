@@ -1,8 +1,9 @@
 // ignore_for_file: avoid_print
 
 import 'dart:io';
-import 'package:flutter_test/flutter_test.dart';
+
 import 'package:phonic/phonic.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('Validation Issue Investigation', () {

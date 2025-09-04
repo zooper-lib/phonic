@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/exceptions/corrupted_container_exception.dart';
 import 'package:phonic/src/utils/byte_reader.dart';
 import 'package:phonic/src/utils/mp4_atom_parser.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('Mp4AtomHeader', () {

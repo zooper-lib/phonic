@@ -1,9 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/container_kind.dart';
 import 'package:phonic/src/core/tag_capability.dart';
 import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/core/tag_semantics.dart';
 import 'package:phonic/src/core/tag_utils.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('isMultiValued', () {

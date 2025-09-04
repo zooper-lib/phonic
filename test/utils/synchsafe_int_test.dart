@@ -1,6 +1,7 @@
 import 'dart:typed_data';
-import 'package:flutter_test/flutter_test.dart';
+
 import 'package:phonic/src/utils/synchsafe_int.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('SynchsafeInt', () {

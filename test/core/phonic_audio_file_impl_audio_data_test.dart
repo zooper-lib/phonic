@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/codec_registry.dart';
 import 'package:phonic/src/core/merge_policy.dart';
 import 'package:phonic/src/core/phonic_audio_file_impl.dart';
@@ -19,6 +18,7 @@ import 'package:phonic/src/utils/locators/id3v2_locator.dart';
 import 'package:phonic/src/utils/locators/mp4_locator.dart';
 import 'package:phonic/src/utils/locators/ogg_vorbis_locator.dart';
 import 'package:phonic/src/utils/locators/vorbis_locator.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('PhonicAudioFileImpl audioData', () {

@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/artwork_data.dart';
 import 'package:phonic/src/core/artwork_type.dart';
 import 'package:phonic/src/core/container_kind.dart';
@@ -10,6 +9,7 @@ import 'package:phonic/src/core/tag_capability.dart';
 import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/core/tag_semantics.dart';
 import 'package:phonic/src/formats/id3/mp3_format_strategy.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('EncodingPreparation', () {

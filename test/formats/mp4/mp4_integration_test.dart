@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
 import 'package:phonic/src/formats/mp4/m4a_audio_file.dart';
 import 'package:phonic/src/formats/mp4/mp4_audio_file.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('MP4 Integration Test', () {

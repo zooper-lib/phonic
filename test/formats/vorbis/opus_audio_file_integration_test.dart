@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/container_kind.dart';
 import 'package:phonic/src/core/media_kind.dart';
 import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/formats/vorbis/ogg_format_strategy.dart';
 import 'package:phonic/src/formats/vorbis/opus_audio_file.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('OpusAudioFile Integration', () {

@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/exceptions/phonic_exception.dart';
+import 'package:test/test.dart';
 
 /// Concrete implementation of PhonicException for testing purposes.
 class TestPhonicException extends PhonicException {

@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:phonic/src/core/artwork_type.dart';
 import 'package:phonic/src/formats/vorbis/vorbis_comments_codec.dart';
 import 'package:phonic/src/utils/flac_picture_parser.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('FLAC Picture Integration', () {

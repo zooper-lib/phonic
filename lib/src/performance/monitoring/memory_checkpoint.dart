@@ -139,7 +139,6 @@ class MemoryCheckpoint {
   ///
   /// Heap usage information is limited in Dart:
   /// - **Dart VM**: No direct public API for heap usage measurement
-  /// - **Flutter**: Limited memory profiling APIs, mostly for development
   /// - **Web**: Browser memory APIs are restricted for security
   /// - **Custom Implementation**: May require platform-specific native code
   ///

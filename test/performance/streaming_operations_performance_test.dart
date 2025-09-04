@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/phonic.dart';
 import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/streaming/batch_audio_processor.dart';
@@ -11,6 +10,7 @@ import 'package:phonic/src/streaming/processing_result.dart';
 import 'package:phonic/src/streaming/streaming_audio_processor.dart';
 import 'package:phonic/src/streaming/streaming_config.dart';
 import 'package:phonic/src/streaming/streaming_progress.dart';
+import 'package:test/test.dart';
 
 /// Performance tests for streaming operations to ensure they work efficiently
 /// with large collections and maintain bounded memory usage.

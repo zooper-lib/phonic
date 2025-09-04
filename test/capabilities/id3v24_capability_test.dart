@@ -1,8 +1,8 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/capabilities/id3v24_capability.dart';
 import 'package:phonic/src/core/container_kind.dart';
 import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/core/text_encoding.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('ID3v2.4 Capability Tests', () {

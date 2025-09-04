@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/codec_registry.dart';
 import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/post_write_validator.dart';
@@ -9,6 +8,7 @@ import 'package:phonic/src/formats/id3/id3v24_codec.dart';
 import 'package:phonic/src/formats/id3/mp3_format_strategy.dart';
 import 'package:phonic/src/utils/locators/id3v1_locator.dart';
 import 'package:phonic/src/utils/locators/id3v2_locator.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('PostWriteValidator', () {

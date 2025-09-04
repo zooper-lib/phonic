@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/text_encoding.dart';
 import 'package:phonic/src/exceptions/corrupted_container_exception.dart';
 import 'package:phonic/src/formats/id3/id3v2_frame_parser.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('Id3v2FrameFlags', () {

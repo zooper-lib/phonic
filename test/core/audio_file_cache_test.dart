@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/audio_file_cache.dart';
 import 'package:phonic/src/core/encoding_options.dart';
 import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/phonic_audio_file.dart';
 import 'package:phonic/src/core/tag_key.dart';
+import 'package:test/test.dart';
 
 /// Mock implementation of PhonicAudioFile for testing purposes.
 class MockPhonicAudioFile implements PhonicAudioFile {

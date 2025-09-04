@@ -1,9 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/container_kind.dart';
 import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/tag_confidence.dart';
 import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/core/tag_provenance.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('MetadataTag', () {
@@ -163,10 +163,12 @@ void main() {
           TagConfidence.certain,
         );
 
-        const tag1 = ArtistTag('Same Value',
+        const tag1 = ArtistTag(
+          'Same Value',
           provenance: provenance,
         );
-        const tag2 = ArtistTag('Same Value',
+        const tag2 = ArtistTag(
+          'Same Value',
           provenance: provenance,
         );
 
@@ -306,7 +308,8 @@ void main() {
 
     group('immutability', () {
       test('all fields are final and cannot be modified', () {
-        const tag = TitleTag('Immutable Value',
+        const tag = TitleTag(
+          'Immutable Value',
           provenance: TagProvenance(ContainerKind.id3v2, '2.4', TagConfidence.certain),
         );
 
@@ -318,7 +321,8 @@ void main() {
 
       test('const constructor creates compile-time constants', () {
         // This should compile as a const expression
-        const tag = ArtistTag('Const Value',
+        const tag = ArtistTag(
+          'Const Value',
           provenance: TagProvenance.none(),
         );
 
@@ -388,14 +392,14 @@ void main() {
         // Test that TrackNumberTag validates its input
         expect(() => TrackNumberTag(-42), throwsArgumentError);
         expect(() => TrackNumberTag(0), throwsArgumentError);
-        
+
         // Valid values should work
         final validTag = TrackNumberTag(42);
         expect(validTag.value, equals(42));
       });
 
       test('handles boundary values correctly', () {
-        // Test maximum valid values for different tag types  
+        // Test maximum valid values for different tag types
         final maxTrack = TrackNumberTag(2147483647); // Max int32
         final validYear = YearTag(2023); // Valid year
         final validBpm = BpmTag(120); // Valid BPM

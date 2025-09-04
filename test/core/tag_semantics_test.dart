@@ -1,6 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/tag_semantics.dart';
 import 'package:phonic/src/core/text_encoding.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('TagSemantics', () {

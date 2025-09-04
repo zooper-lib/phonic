@@ -1,6 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/formats/vorbis/vorbis_comment_map.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('VorbisCommentMap', () {

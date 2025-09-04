@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/container_kind.dart';
 import 'package:phonic/src/core/container_locator.dart';
 import 'package:phonic/src/core/metadata_tag.dart';
@@ -11,6 +10,7 @@ import 'package:phonic/src/exceptions/phonic_exception.dart';
 import 'package:phonic/src/exceptions/unsupported_format_exception.dart';
 import 'package:phonic/src/utils/error_recovery.dart';
 import 'package:phonic/src/utils/unknown_data_preservation.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('ErrorRecoveryPolicy', () {

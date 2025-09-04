@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('CommentTag Integration', () {

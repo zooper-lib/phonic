@@ -1,8 +1,9 @@
 import 'dart:typed_data';
-import 'package:flutter_test/flutter_test.dart';
+
 import 'package:phonic/src/core/container_kind.dart';
 import 'package:phonic/src/utils/locators/id3v2_locator.dart';
 import 'package:phonic/src/utils/synchsafe_int.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('Id3v2Locator', () {

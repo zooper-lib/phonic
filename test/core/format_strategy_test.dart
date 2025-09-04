@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
 import 'package:phonic/src/core/format_strategy.dart';
 import 'package:phonic/src/core/media_kind.dart';
+import 'package:test/test.dart';
 
 /// Test implementation of FormatStrategy for testing purposes.
 class TestFormatStrategy extends FormatStrategy {

@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/capabilities/id3v1_capability.dart';
 import 'package:phonic/src/capabilities/id3v24_capability.dart';
 import 'package:phonic/src/capabilities/vorbis_capability.dart';
@@ -17,6 +16,7 @@ import 'package:phonic/src/core/tag_merger.dart';
 import 'package:phonic/src/core/tag_provenance.dart';
 import 'package:phonic/src/core/tag_semantics.dart';
 import 'package:phonic/src/formats/id3/mp3_format_strategy.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('MergePolicy', () {

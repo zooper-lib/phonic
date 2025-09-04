@@ -1,7 +1,8 @@
 import 'dart:typed_data';
-import 'package:flutter_test/flutter_test.dart';
+
 import 'package:phonic/src/core/container_kind.dart';
 import 'package:phonic/src/utils/locators/vorbis_locator.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('VorbisLocator', () {

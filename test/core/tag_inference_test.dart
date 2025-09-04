@@ -1,10 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/core/container_kind.dart';
 import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/tag_confidence.dart';
 import 'package:phonic/src/core/tag_inference.dart';
 import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/core/tag_provenance.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('TagInference', () {

@@ -4,7 +4,6 @@
 /// different container-specific scales and the unified 0-100 scale used by
 /// the Phonic API.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/src/capabilities/id3v23_capability.dart';
 import 'package:phonic/src/capabilities/id3v24_capability.dart';
 import 'package:phonic/src/capabilities/vorbis_capability.dart';
@@ -13,6 +12,7 @@ import 'package:phonic/src/core/tag_capability.dart';
 import 'package:phonic/src/core/tag_key.dart';
 import 'package:phonic/src/core/tag_semantics.dart';
 import 'package:phonic/src/utils/rating_normalization.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('RatingNormalization', () {

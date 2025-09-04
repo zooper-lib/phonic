@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:phonic/phonic.dart';
 import 'package:phonic/src/core/codec_registry.dart';
 import 'package:phonic/src/core/container_locator.dart';
@@ -11,6 +10,7 @@ import 'package:phonic/src/core/phonic_audio_file_impl.dart';
 import 'package:phonic/src/core/post_write_validator.dart';
 import 'package:phonic/src/core/tag_codec.dart';
 import 'package:phonic/src/utils/unknown_data_preservation.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('PhonicAudioFileImpl encoding', () {
