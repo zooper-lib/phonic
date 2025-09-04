@@ -88,4 +88,25 @@ final class LyricsTag extends MetadataTag<String> {
   LyricsTag withProvenance(TagProvenance newProvenance) {
     return LyricsTag(value, provenance: newProvenance);
   }
+
+  /// Converts this LyricsTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates a LyricsTag from a JSON Map.
+  static LyricsTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as String?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return LyricsTag(value, provenance: provenance);
+  }
 }

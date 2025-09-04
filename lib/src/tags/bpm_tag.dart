@@ -110,4 +110,25 @@ final class BpmTag extends MetadataTag<int> {
   BpmTag withProvenance(TagProvenance newProvenance) {
     return BpmTag(value, provenance: newProvenance);
   }
+
+  /// Converts this BpmTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates a BpmTag from a JSON Map.
+  static BpmTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as int?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return BpmTag(value, provenance: provenance);
+  }
 }

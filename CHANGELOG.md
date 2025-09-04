@@ -1,3 +1,11 @@
+## [1.1.0] - 2025-09-04
+
+### Added
+
+- JSON serialization support for all metadata tags with provenance preservation
+- Individual `toJson()` and `fromJson()` methods for each metadata tag type
+- Centralized provenance conversion in `TagProvenance` class
+
 ## [1.0.0] - 2025-09-04
 
 ### Added

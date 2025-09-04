@@ -77,4 +77,25 @@ final class EncoderTag extends MetadataTag<String> {
   EncoderTag withProvenance(TagProvenance newProvenance) {
     return EncoderTag(value, provenance: newProvenance);
   }
+
+  /// Converts this EncoderTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates an EncoderTag from a JSON Map.
+  static EncoderTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as String?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return EncoderTag(value, provenance: provenance);
+  }
 }

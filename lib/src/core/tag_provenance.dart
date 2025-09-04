@@ -99,6 +99,34 @@ class TagProvenance extends Equatable {
   /// ```
   const TagProvenance.none() : containerKind = ContainerKind.none, containerVersion = '', confidence = TagConfidence.certain;
 
+  /// Converts this TagProvenance to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'containerKind': containerKind.name,
+      'containerVersion': containerVersion,
+      'confidence': confidence.name,
+    };
+  }
+
+  /// Creates a TagProvenance from a JSON Map.
+  static TagProvenance fromJson(Map<String, dynamic> json) {
+    final containerKindName = json['containerKind'] as String;
+    final containerVersion = json['containerVersion'] as String;
+    final confidenceName = json['confidence'] as String;
+
+    final containerKind = ContainerKind.values.firstWhere(
+      (k) => k.name == containerKindName,
+      orElse: () => ContainerKind.none,
+    );
+
+    final confidence = TagConfidence.values.firstWhere(
+      (c) => c.name == confidenceName,
+      orElse: () => TagConfidence.derived,
+    );
+
+    return TagProvenance(containerKind, containerVersion, confidence);
+  }
+
   @override
   List<Object?> get props => [containerKind, containerVersion, confidence];
 

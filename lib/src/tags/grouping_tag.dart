@@ -77,4 +77,25 @@ final class GroupingTag extends MetadataTag<String> {
   GroupingTag withProvenance(TagProvenance newProvenance) {
     return GroupingTag(value, provenance: newProvenance);
   }
+
+  /// Converts this GroupingTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates a GroupingTag from a JSON Map.
+  static GroupingTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as String?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return GroupingTag(value, provenance: provenance);
+  }
 }

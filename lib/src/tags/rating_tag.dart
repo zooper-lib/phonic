@@ -112,4 +112,25 @@ final class RatingTag extends MetadataTag<int> {
   RatingTag withProvenance(TagProvenance newProvenance) {
     return RatingTag(value, provenance: newProvenance);
   }
+
+  /// Converts this RatingTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates a RatingTag from a JSON Map.
+  static RatingTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as int?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return RatingTag(value, provenance: provenance);
+  }
 }

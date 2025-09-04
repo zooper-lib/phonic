@@ -101,4 +101,25 @@ final class DiscNumberTag extends MetadataTag<int> {
   DiscNumberTag withProvenance(TagProvenance newProvenance) {
     return DiscNumberTag(value, provenance: newProvenance);
   }
+
+  /// Converts this DiscNumberTag to a JSON-serializable Map.
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'provenance': provenance.toJson(),
+    };
+  }
+
+  /// Creates a DiscNumberTag from a JSON Map.
+  static DiscNumberTag fromJson(Map<String, dynamic> json) {
+    final value = json['value'] as int?;
+    final provenanceJson = json['provenance'] as Map<String, dynamic>?;
+
+    if (value == null || provenanceJson == null) {
+      throw ArgumentError('Invalid JSON format: missing required fields');
+    }
+
+    final provenance = TagProvenance.fromJson(provenanceJson);
+    return DiscNumberTag(value, provenance: provenance);
+  }
 }
