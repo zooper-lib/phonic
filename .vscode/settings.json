@@ -1,0 +1,15 @@
+{
+  "kiroAgent.configureMCP": "Disabled",
+  "chat.tools.autoApprove": true,
+  "chat.tools.terminal.autoApprove": {
+    "mkdir": true,
+    "echo": true,
+    "/^git (status|show)\\b/": true,
+    "rm": false,
+    "Move-Item": true,
+    "Remove-Item": true,
+    "Get-ChildItem": true,
+    "dart": true,
+    "flutter": true
+  }
+}
