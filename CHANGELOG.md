@@ -1,3 +1,12 @@
+## [1.1.2] - 2025-09-21
+
+### Fixed
+
+- Fixed bug where corrupted text data from legacy containers (especially ID3v1) was being displayed as strange characters
+- Enhanced merge policy to automatically filter out corrupted text tags containing excessive null bytes or non-printable characters
+- Album and other text fields now properly return null instead of displaying corrupted data
+- Improved data quality by preventing corrupted metadata from reaching the user
+
 ## [1.1.1] - 2025-09-21
 
 ### Fixed

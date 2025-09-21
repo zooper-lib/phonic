@@ -330,7 +330,24 @@ class MergePolicy {
     // Extract container kinds in precedence order
     final containerPrecedence = precedence.map((p) => p.$1).toList();
 
-    return _merger.mergeByContainerPrecedence(tagsByContainer, containerPrecedence);
+    final mergedTags = _merger.mergeByContainerPrecedence(tagsByContainer, containerPrecedence);
+
+    // Filter out corrupted text tags after merging
+    return mergedTags.where((tag) {
+      // Check if tag is a text-based tag that could be corrupted
+      if (tag is TitleTag ||
+          tag is ArtistTag ||
+          tag is AlbumTag ||
+          tag is AlbumArtistTag ||
+          tag is CommentTag ||
+          tag is GroupingTag ||
+          tag is ComposerTag ||
+          tag is EncoderTag ||
+          tag is IsrcTag) {
+        return !_isCorruptedText(tag.value);
+      }
+      return true; // Keep non-text tags
+    }).toList();
   }
 
   /// Internal method to normalize a tag value based on semantic constraints.
@@ -345,8 +362,9 @@ class MergePolicy {
   ///
   /// Returns:
   /// - Normalized tag with applied constraints
+  /// - null if the tag content is corrupted and should be filtered out
   /// - Original tag if no normalization is needed
-  MetadataTag _normalizeTagValue(MetadataTag tag, TagSemantics semantics) {
+  MetadataTag? _normalizeTagValue(MetadataTag tag, TagSemantics semantics) {
     // Handle text-based tags with length constraints
     if (tag is TitleTag ||
         tag is ArtistTag ||
@@ -391,22 +409,34 @@ class MergePolicy {
     return tag;
   }
 
-  /// Normalizes text-based tags by applying length constraints.
+  /// Normalizes text-based tags by applying length constraints and filtering corrupted data.
+  ///
+  /// This method validates text content and filters out corrupted data such as:
+  /// - Strings containing only null bytes (common in corrupted ID3v1 tags)
+  /// - Strings with excessive control characters
+  /// - Empty or whitespace-only strings from corrupted containers
   ///
   /// Parameters:
   /// - [tag]: Text-based metadata tag
   /// - [semantics]: Semantic constraints including maxTextLength
   ///
   /// Returns:
+  /// - null if the text content is corrupted or invalid
   /// - Tag with truncated text if length exceeds constraints
-  /// - Original tag if no truncation is needed
-  MetadataTag _normalizeTextTag(MetadataTag tag, TagSemantics semantics) {
+  /// - Original tag if no normalization is needed
+  MetadataTag? _normalizeTextTag(MetadataTag tag, TagSemantics semantics) {
+    final currentValue = tag.value as String;
+
+    // Filter out corrupted text content
+    if (_isCorruptedText(currentValue)) {
+      return null; // Don't include corrupted tags
+    }
+
     if (semantics.maxTextLength == null) {
       return tag;
     }
 
     final maxLength = semantics.maxTextLength!;
-    final currentValue = tag.value as String;
 
     if (currentValue.length <= maxLength) {
       return tag;
@@ -443,6 +473,44 @@ class MergePolicy {
       default:
         return tag;
     }
+  }
+
+  /// Checks if a text string contains corrupted data that should be filtered out.
+  ///
+  /// This method identifies common patterns of text corruption in audio metadata:
+  /// - Strings containing only null bytes (common in corrupted ID3v1 fields)
+  /// - Strings with a high percentage of control characters
+  /// - Empty strings that may indicate missing or corrupted data
+  ///
+  /// Parameters:
+  /// - [text]: The text content to validate
+  ///
+  /// Returns:
+  /// - true if the text appears to be corrupted and should be filtered out
+  /// - false if the text appears to be valid
+  bool _isCorruptedText(String text) {
+    if (text.isEmpty) {
+      return false; // Empty strings are valid (just indicate missing data)
+    }
+
+    // Check for strings that are only null bytes (common ID3v1 corruption)
+    if (text.replaceAll('\u0000', '').isEmpty) {
+      return true; // String contains only null bytes
+    }
+
+    // Check for excessive control characters (excluding common whitespace)
+    int controlCharCount = 0;
+    for (int i = 0; i < text.length; i++) {
+      final char = text.codeUnitAt(i);
+      // Count control characters except tab (9), newline (10), and carriage return (13)
+      if (char < 32 && char != 9 && char != 10 && char != 13) {
+        controlCharCount++;
+      }
+    }
+
+    // If more than 50% of the string is control characters, consider it corrupted
+    final controlRatio = controlCharCount / text.length;
+    return controlRatio > 0.5;
   }
 
   /// Normalizes numeric tags by applying value range constraints.
