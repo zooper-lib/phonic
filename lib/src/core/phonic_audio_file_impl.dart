@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:phonic/src/core/tag_confidence.dart';
+
 import '../exceptions/corrupted_container_exception.dart';
 import '../exceptions/phonic_exception.dart';
 import '../exceptions/tag_validation_exception.dart';
@@ -18,6 +20,7 @@ import 'phonic_audio_file.dart';
 import 'post_write_validator.dart';
 import 'rollback_manager.dart';
 import 'tag_capability.dart';
+import 'tag_inference.dart';
 import 'tag_key.dart';
 import 'tag_semantics.dart';
 
@@ -1425,6 +1428,41 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
     inMemoryTagsByKey.clear();
     for (final tag in mergedTags) {
       inMemoryTagsByKey.putIfAbsent(tag.key, () => <MetadataTag>[]).add(tag);
+    }
+
+    // Apply tag inference to derive missing tags from available data
+    _applyTagInference();
+  }
+
+  /// Applies tag inference to derive missing metadata tags from available data.
+  ///
+  /// This method uses the TagInference system to automatically derive missing tags
+  /// that can be reasonably inferred from existing metadata. For example, it will
+  /// derive a Year tag from a DateRecorded tag when no explicit Year tag exists.
+  ///
+  /// All inferred tags are marked with appropriate confidence levels:
+  /// - [TagConfidence.derived] for calculated values (year from dateRecorded)
+  /// - [TagConfidence.inferred] for logical assumptions (albumArtist from artist)
+  ///
+  /// The inference process only adds tags that are completely missing - it will
+  /// not override existing tags even if they have lower confidence levels.
+  void _applyTagInference() {
+    // Get all currently loaded tags
+    final currentTags = <MetadataTag>[];
+    for (final tagList in inMemoryTagsByKey.values) {
+      currentTags.addAll(tagList);
+    }
+
+    // Apply inference rules to derive missing tags
+    const inference = TagInference();
+    final inferredTags = inference.inferMissingTags(currentTags);
+
+    // Add any newly inferred tags to the in-memory storage
+    for (final tag in inferredTags) {
+      // Only add if this is actually a new tag (not already in currentTags)
+      if (!currentTags.any((existing) => existing.key == tag.key && existing.value == tag.value)) {
+        inMemoryTagsByKey.putIfAbsent(tag.key, () => <MetadataTag>[]).add(tag);
+      }
     }
   }
 

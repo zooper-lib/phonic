@@ -1,3 +1,12 @@
+## [1.1.1] - 2025-09-21
+
+### Fixed
+
+- Fixed bug where year tags were not being derived from dateRecorded fields when explicit year tags were missing
+- Added automatic tag inference integration to derive missing metadata tags from available data
+- Year tags are now automatically derived with `TagConfidence.derived` provenance when only dateRecorded is present
+- AlbumArtist tags are now automatically inferred with `TagConfidence.inferred` provenance when only artist is present
+
 ## [1.1.0] - 2025-09-04
 
 ### Added
