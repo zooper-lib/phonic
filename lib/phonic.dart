@@ -91,6 +91,11 @@ export 'src/exceptions/phonic_exception.dart';
 export 'src/exceptions/tag_validation_exception.dart';
 export 'src/exceptions/unsupported_format_exception.dart';
 
+// Validators for input validation and form integration
+export 'src/validators/tag_validator.dart';
+export 'src/validators/rating_validator.dart';
+export 'src/validators/tag_validators.dart';
+
 // Utils
 export 'src/utils/lazy_artwork_loader.dart';
 

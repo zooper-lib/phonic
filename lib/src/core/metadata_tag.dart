@@ -1,34 +1,35 @@
 import 'package:equatable/equatable.dart';
 
+import '../validators/rating_validator.dart';
 import 'artwork_data.dart';
 import 'tag_key.dart';
 import 'tag_provenance.dart';
 
+part '../tags/album_artist_tag.dart';
+part '../tags/album_tag.dart';
+part '../tags/artist_tag.dart';
+part '../tags/artwork_tag.dart';
+part '../tags/bpm_tag.dart';
+part '../tags/comment_tag.dart';
+part '../tags/composer_tag.dart';
+part '../tags/custom_tag.dart';
+part '../tags/date_recorded_tag.dart';
+part '../tags/disc_number_tag.dart';
+part '../tags/encoder_tag.dart';
+part '../tags/genre_tag.dart';
+part '../tags/grouping_tag.dart';
+part '../tags/isrc_tag.dart';
+part '../tags/lyrics_tag.dart';
+part '../tags/musical_key_tag.dart';
+part '../tags/rating_tag.dart';
 // Test helpers are included as a part file to allow extending the sealed class
 // This is necessary for comprehensive testing of the base class functionality
 // part '../../test/test_helpers/metadata_tag_test_helpers.dart'; // Disabled due to path issues
 
 // Concrete tag implementations
 part '../tags/title_tag.dart';
-part '../tags/artist_tag.dart';
-part '../tags/album_tag.dart';
-part '../tags/album_artist_tag.dart';
-part '../tags/genre_tag.dart';
-part '../tags/comment_tag.dart';
-part '../tags/grouping_tag.dart';
-part '../tags/composer_tag.dart';
-part '../tags/encoder_tag.dart';
-part '../tags/isrc_tag.dart';
-part '../tags/lyrics_tag.dart';
-part '../tags/musical_key_tag.dart';
 part '../tags/track_number_tag.dart';
-part '../tags/disc_number_tag.dart';
 part '../tags/year_tag.dart';
-part '../tags/date_recorded_tag.dart';
-part '../tags/bpm_tag.dart';
-part '../tags/rating_tag.dart';
-part '../tags/artwork_tag.dart';
-part '../tags/custom_tag.dart';
 
 /// Base sealed class for all metadata tags in the unified tagging system.
 ///
