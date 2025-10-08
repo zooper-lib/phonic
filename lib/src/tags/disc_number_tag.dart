@@ -44,6 +44,20 @@ part of '../core/metadata_tag.dart';
 /// Different container formats may have different maximum values, but
 /// validation is handled during encoding.
 final class DiscNumberTag extends MetadataTag<int> {
+  /// Validator for disc number values.
+  ///
+  /// This validator can be used to validate disc number values before creating
+  /// a [DiscNumberTag] instance, or with form validation libraries.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Pre-validate before creating tag
+  /// if (DiscNumberTag.validator.validate(userInput) == null) {
+  ///   final tag = DiscNumberTag(userInput);
+  /// }
+  /// ```
+  static const validator = DiscNumberValidator();
+
   /// Creates a new DiscNumberTag with the specified disc number.
   ///
   /// @param value The disc number within the set, must be greater than 0
@@ -59,26 +73,10 @@ final class DiscNumberTag extends MetadataTag<int> {
     int value, {
     TagProvenance provenance = const TagProvenance.none(),
   }) : super(
-         value: _validateDiscNumber(value),
+         value: validator.validateOrThrow(value),
          key: TagKey.discNumber,
          provenance: provenance,
        );
-
-  /// Validates that the disc number is greater than 0.
-  ///
-  /// @param value The disc number to validate
-  /// @returns The validated disc number
-  /// @throws ArgumentError if the disc number is not greater than 0
-  static int _validateDiscNumber(int value) {
-    if (value <= 0) {
-      throw ArgumentError.value(
-        value,
-        'value',
-        'Disc number must be greater than 0',
-      );
-    }
-    return value;
-  }
 
   /// Creates a new DiscNumberTag instance with updated provenance information.
   ///

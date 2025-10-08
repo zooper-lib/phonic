@@ -37,7 +37,29 @@ part of '../core/metadata_tag.dart';
 /// The artist value should be a non-empty string containing the artist name.
 /// Different container formats may have length limitations that are handled
 /// automatically during encoding operations.
+///
+/// For validation and form integration, use [ArtistTag.validator]:
+/// ```dart
+/// // Pre-validate before creating tag
+/// if (ArtistTag.validator.validate(userInput) == null) {
+///   final tag = ArtistTag(userInput);
+/// }
+/// ```
 final class ArtistTag extends MetadataTag<String> {
+  /// Public validator for artist tag values.
+  ///
+  /// This validator ensures that artist values are not empty or whitespace-only,
+  /// making it useful for form validation where artist is a required field.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// // Pre-validate before creating tag
+  /// if (ArtistTag.validator.validate(userInput) == null) {
+  ///   final tag = ArtistTag(userInput);
+  /// }
+  /// ```
+  static const validator = ArtistValidator();
+
   /// Creates a new ArtistTag with the specified artist value.
   ///
   /// @param value The name of the artist or performer, must not be null

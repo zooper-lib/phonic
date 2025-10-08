@@ -1,4 +1,12 @@
+import 'album_validator.dart';
+import 'artist_validator.dart';
+import 'bpm_validator.dart';
+import 'date_recorded_validator.dart';
+import 'disc_number_validator.dart';
 import 'rating_validator.dart';
+import 'title_validator.dart';
+import 'track_number_validator.dart';
+import 'year_validator.dart';
 
 /// Convenience class providing access to all tag validators.
 ///
@@ -32,23 +40,30 @@ class TagValidators {
   // Private constructor to prevent instantiation
   TagValidators._();
 
+  /// Validator for title tag values (non-empty).
+  static const title = TitleValidator();
+
+  /// Validator for artist tag values (non-empty).
+  static const artist = ArtistValidator();
+
+  /// Validator for album tag values (non-empty).
+  static const album = AlbumValidator();
+
   /// Validator for rating tag values (0-100 range).
-  ///
-  /// Example:
-  /// ```dart
-  /// final error = TagValidators.rating.validate(150);
-  /// if (error != null) {
-  ///   // Handle validation error
-  ///   final data = error['outOfRange'];
-  ///   print('Rating must be ${data['min']}-${data['max']}, got ${data['actual']}');
-  /// }
-  /// ```
   static const rating = RatingValidator();
 
-  // Additional validators will be added here as they are implemented
-  // static const bpm = BpmValidator();
-  // static const year = YearValidator();
-  // static const trackNumber = TrackNumberValidator();
-  // static const discNumber = DiscNumberValidator();
-  // static const iso8601Date = Iso8601DateValidator();
+  /// Validator for BPM tag values (1-999 range).
+  static const bpm = BpmValidator();
+
+  /// Validator for year tag values (1900-2100 range).
+  static const year = YearValidator();
+
+  /// Validator for track number tag values (> 0).
+  static const trackNumber = TrackNumberValidator();
+
+  /// Validator for disc number tag values (> 0).
+  static const discNumber = DiscNumberValidator();
+
+  /// Validator for date recorded tag values (ISO-8601 format).
+  static const dateRecorded = DateRecordedValidator();
 }

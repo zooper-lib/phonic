@@ -1,6 +1,14 @@
 import 'package:equatable/equatable.dart';
 
+import '../validators/album_validator.dart';
+import '../validators/artist_validator.dart';
+import '../validators/bpm_validator.dart';
+import '../validators/date_recorded_validator.dart';
+import '../validators/disc_number_validator.dart';
 import '../validators/rating_validator.dart';
+import '../validators/title_validator.dart';
+import '../validators/track_number_validator.dart';
+import '../validators/year_validator.dart';
 import 'artwork_data.dart';
 import 'tag_key.dart';
 import 'tag_provenance.dart';

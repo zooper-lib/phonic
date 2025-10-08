@@ -43,6 +43,20 @@ part of '../core/metadata_tag.dart';
 /// Different container formats may have different maximum values (e.g.,
 /// ID3v1 supports 1-255), but validation is handled during encoding.
 final class TrackNumberTag extends MetadataTag<int> {
+  /// Validator for track number values.
+  ///
+  /// This validator can be used to validate track number values before creating
+  /// a [TrackNumberTag] instance, or with form validation libraries.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Pre-validate before creating tag
+  /// if (TrackNumberTag.validator.validate(userInput) == null) {
+  ///   final tag = TrackNumberTag(userInput);
+  /// }
+  /// ```
+  static const validator = TrackNumberValidator();
+
   /// Creates a new TrackNumberTag with the specified track number.
   ///
   /// @param value The track number within the album, must be greater than 0
@@ -58,26 +72,10 @@ final class TrackNumberTag extends MetadataTag<int> {
     int value, {
     TagProvenance provenance = const TagProvenance.none(),
   }) : super(
-         value: _validateTrackNumber(value),
+         value: validator.validateOrThrow(value),
          key: TagKey.trackNumber,
          provenance: provenance,
        );
-
-  /// Validates that the track number is greater than 0.
-  ///
-  /// @param value The track number to validate
-  /// @returns The validated track number
-  /// @throws ArgumentError if the track number is not greater than 0
-  static int _validateTrackNumber(int value) {
-    if (value <= 0) {
-      throw ArgumentError.value(
-        value,
-        'value',
-        'Track number must be greater than 0',
-      );
-    }
-    return value;
-  }
 
   /// Creates a new TrackNumberTag instance with updated provenance information.
   ///

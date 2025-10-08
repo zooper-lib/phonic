@@ -46,11 +46,25 @@ part of '../core/metadata_tag.dart';
 /// This range accommodates extremely slow ambient music through the fastest
 /// electronic genres while preventing obviously invalid tempo values.
 final class BpmTag extends MetadataTag<int> {
+  /// Validator for BPM values.
+  ///
+  /// This validator can be used to validate BPM values before creating
+  /// a [BpmTag] instance, or with form validation libraries.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Pre-validate before creating tag
+  /// if (BpmTag.validator.validate(userInput) == null) {
+  ///   final tag = BpmTag(userInput);
+  /// }
+  /// ```
+  static const validator = BpmValidator();
+
   /// The minimum valid BPM value (inclusive).
-  static const int minBpm = 1;
+  static const int minBpm = BpmValidator.min;
 
   /// The maximum valid BPM value (inclusive).
-  static const int maxBpm = 999;
+  static const int maxBpm = BpmValidator.max;
 
   /// Creates a new BpmTag with the specified BPM value.
   ///
@@ -68,26 +82,10 @@ final class BpmTag extends MetadataTag<int> {
     int value, {
     TagProvenance provenance = const TagProvenance.none(),
   }) : super(
-         value: _validateBpm(value),
+         value: validator.validateOrThrow(value),
          key: TagKey.bpm,
          provenance: provenance,
        );
-
-  /// Validates that the BPM is within the acceptable range.
-  ///
-  /// @param value The BPM to validate
-  /// @returns The validated BPM
-  /// @throws ArgumentError if the BPM is not between 1 and 999 (inclusive)
-  static int _validateBpm(int value) {
-    if (value < minBpm || value > maxBpm) {
-      throw ArgumentError.value(
-        value,
-        'value',
-        'BPM must be between $minBpm and $maxBpm (inclusive)',
-      );
-    }
-    return value;
-  }
 
   /// Creates a new BpmTag instance with updated provenance information.
   ///
