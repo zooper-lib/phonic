@@ -44,11 +44,25 @@ part of '../core/metadata_tag.dart';
 /// This range accommodates the earliest commercial recordings through
 /// reasonable future releases while preventing obviously invalid dates.
 final class YearTag extends MetadataTag<int> {
+  /// Validator for year values.
+  ///
+  /// This validator can be used to validate year values before creating
+  /// a [YearTag] instance, or with form validation libraries.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Pre-validate before creating tag
+  /// if (YearTag.validator.validate(userInput) == null) {
+  ///   final tag = YearTag(userInput);
+  /// }
+  /// ```
+  static const validator = YearValidator();
+
   /// The minimum valid year value (inclusive).
-  static const int minYear = 1900;
+  static const int minYear = YearValidator.min;
 
   /// The maximum valid year value (inclusive).
-  static const int maxYear = 2100;
+  static const int maxYear = YearValidator.max;
 
   /// Creates a new YearTag with the specified year.
   ///
@@ -66,26 +80,10 @@ final class YearTag extends MetadataTag<int> {
     int value, {
     TagProvenance provenance = const TagProvenance.none(),
   }) : super(
-         value: _validateYear(value),
+         value: validator.validateOrThrow(value),
          key: TagKey.year,
          provenance: provenance,
        );
-
-  /// Validates that the year is within the acceptable range.
-  ///
-  /// @param value The year to validate
-  /// @returns The validated year
-  /// @throws ArgumentError if the year is not between 1900 and 2100 (inclusive)
-  static int _validateYear(int value) {
-    if (value < minYear || value > maxYear) {
-      throw ArgumentError.value(
-        value,
-        'value',
-        'Year must be between $minYear and $maxYear (inclusive)',
-      );
-    }
-    return value;
-  }
 
   /// Creates a new YearTag instance with updated provenance information.
   ///

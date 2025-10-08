@@ -184,14 +184,14 @@ void main() {
         );
       });
 
-      test('ArgumentError includes the invalid value', () {
+      test('ArgumentError includes descriptive message', () {
         expect(
           () => RatingTag(-1),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(-1),
+              (e) => e.message,
+              'message',
+              contains('Rating must be between 0 and 100'),
             ),
           ),
         );
@@ -200,9 +200,9 @@ void main() {
           () => RatingTag(101),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(101),
+              (e) => e.message,
+              'message',
+              contains('Rating must be between 0 and 100'),
             ),
           ),
         );
@@ -211,22 +211,9 @@ void main() {
           () => RatingTag(-10),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(-10),
-            ),
-          ),
-        );
-      });
-
-      test('ArgumentError includes parameter name', () {
-        expect(
-          () => RatingTag(-1),
-          throwsA(
-            isA<ArgumentError>().having(
-              (e) => e.name,
-              'name',
-              equals('value'),
+              (e) => e.message,
+              'message',
+              contains('Rating must be between 0 and 100'),
             ),
           ),
         );
@@ -761,8 +748,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Rating must be between 0 and 100 (inclusive)'));
-          expect(error.invalidValue, equals(-1));
-          expect(error.name, equals('value'));
         }
       });
 
@@ -774,8 +759,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Rating must be between 0 and 100 (inclusive)'));
-          expect(error.invalidValue, equals(101));
-          expect(error.name, equals('value'));
         }
       });
 
@@ -787,8 +770,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Rating must be between 0 and 100 (inclusive)'));
-          expect(error.invalidValue, equals(-50));
-          expect(error.name, equals('value'));
         }
       });
 

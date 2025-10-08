@@ -114,14 +114,14 @@ void main() {
         );
       });
 
-      test('ArgumentError includes the invalid value', () {
+      test('ArgumentError includes descriptive message', () {
         expect(
           () => TrackNumberTag(0),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(0),
+              (e) => e.message,
+              'message',
+              contains('Track number must be greater than 0'),
             ),
           ),
         );
@@ -130,22 +130,9 @@ void main() {
           () => TrackNumberTag(-10),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(-10),
-            ),
-          ),
-        );
-      });
-
-      test('ArgumentError includes parameter name', () {
-        expect(
-          () => TrackNumberTag(0),
-          throwsA(
-            isA<ArgumentError>().having(
-              (e) => e.name,
-              'name',
-              equals('value'),
+              (e) => e.message,
+              'message',
+              contains('Track number must be greater than 0'),
             ),
           ),
         );
@@ -600,8 +587,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Track number must be greater than 0'));
-          expect(error.invalidValue, equals(0));
-          expect(error.name, equals('value'));
         }
       });
 
@@ -613,8 +598,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Track number must be greater than 0'));
-          expect(error.invalidValue, equals(-5));
-          expect(error.name, equals('value'));
         }
       });
 

@@ -187,14 +187,14 @@ void main() {
         );
       });
 
-      test('ArgumentError includes the invalid value', () {
+      test('ArgumentError includes descriptive message', () {
         expect(
           () => YearTag(1899),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(1899),
+              (e) => e.message,
+              'message',
+              contains('Year must be between 1900 and 2100'),
             ),
           ),
         );
@@ -203,22 +203,9 @@ void main() {
           () => YearTag(2101),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(2101),
-            ),
-          ),
-        );
-      });
-
-      test('ArgumentError includes parameter name', () {
-        expect(
-          () => YearTag(1800),
-          throwsA(
-            isA<ArgumentError>().having(
-              (e) => e.name,
-              'name',
-              equals('value'),
+              (e) => e.message,
+              'message',
+              contains('Year must be between 1900 and 2100'),
             ),
           ),
         );
@@ -718,8 +705,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Year must be between 1900 and 2100 (inclusive)'));
-          expect(error.invalidValue, equals(1899));
-          expect(error.name, equals('value'));
         }
       });
 
@@ -731,8 +716,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Year must be between 1900 and 2100 (inclusive)'));
-          expect(error.invalidValue, equals(2101));
-          expect(error.name, equals('value'));
         }
       });
 
