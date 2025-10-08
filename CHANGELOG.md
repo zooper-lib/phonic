@@ -1,3 +1,18 @@
+## [Unreleased]
+
+### Added
+
+- Public validator API for form integration and input validation
+- `TagValidator<T>` base class with `validate()`, `validateOrThrow()`, and `formatErrorMessage()` methods
+- Numeric validators: `RatingValidator`, `BpmValidator`, `YearValidator`, `TrackNumberValidator`, `DiscNumberValidator`
+- Date validator: `DateRecordedValidator` with comprehensive ISO-8601 format validation
+- Text validators: `TitleValidator`, `ArtistValidator`, `AlbumValidator` for required field validation
+- `TagValidators` convenience class providing static access to all validators
+- Static validator constants on tag classes (e.g., `TitleTag.validator`, `RatingTag.validator`)
+- `reactive_forms` integration support via `Validators.delegate()`
+- Comprehensive validator test suite with 153+ tests covering all validators
+- Automatic value normalization (trimming whitespace) in text validators
+
 ## [1.1.2] - 2025-09-21
 
 ### Fixed
