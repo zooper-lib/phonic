@@ -2,6 +2,13 @@
 
 ### Added
 
+- Silence audio tool improvements:
+  - Added Linux/macOS bash script (`tools/silence_audio.sh`) equivalent to PowerShell version
+  - Single file mode support with `-i`/`--input` and `-o`/`--output` flags for both scripts
+  - MP4 format support (extracts audio stream and preserves metadata)
+  - Help command (`-h`/`--help`) with usage examples
+  - Comprehensive documentation in `doc/silence-audio-tool.md`
+  - Support for 8 audio formats: MP3, M4A, AAC, FLAC, OGG, OPUS, WAV, MP4
 - Public validator API for form integration and input validation
 - `TagValidator<T>` base class with `validate()`, `validateOrThrow()`, and `formatErrorMessage()` methods
 - Numeric validators: `RatingValidator`, `BpmValidator`, `YearValidator`, `TrackNumberValidator`, `DiscNumberValidator`
