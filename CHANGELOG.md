@@ -1,4 +1,4 @@
-## [Unreleased]
+## [1.2.0] - 2025.10.09
 
 ### Fixed
 
@@ -13,7 +13,7 @@
 ### Added
 
 - Silence audio tool improvements:
-  - Added Linux/macOS bash script (`tools/silence_audio.sh`) equivalent to PowerShell version
+  - Added Linux/macOS bash script (`tool/silence_audio.sh`) equivalent to PowerShell version
   - Single file mode support with `-i`/`--input` and `-o`/`--output` flags for both scripts
   - MP4 format support (extracts audio stream and preserves metadata)
   - Help command (`-h`/`--help`) with usage examples
