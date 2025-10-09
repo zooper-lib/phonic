@@ -1,21 +1,65 @@
-param([string]$Root = ".")
+param(
+	[string]$Root = ".",
+	[string]$InputFile = "",
+	[string]$OutputFile = "",
+	[switch]$Help
+)
 
-$files = @(Get-ChildItem -Path $Root -Recurse -File -Include *.mp3, *.m4a, *.aac, *.flac, *.ogg, *.opus, *.wav)
-Write-Host "Found $($files.Count) audio files to process..."
+# Display usage information
+function Show-Usage {
+	Write-Host "Usage: .\silence_audio.ps1 [OPTIONS]"
+	Write-Host ""
+	Write-Host "Options:"
+	Write-Host "  -InputFile FILE    Process a single input file"
+	Write-Host "  -OutputFile FILE   Output file path (requires -InputFile)"
+	Write-Host "  -Root DIR          Process all audio files in directory (default: current directory)"
+	Write-Host "  -Help              Display this help message"
+	Write-Host ""
+	Write-Host "Examples:"
+	Write-Host "  .\silence_audio.ps1 -Root 'C:\audio'                    # Process all files in directory"
+	Write-Host "  .\silence_audio.ps1 -InputFile song.mp3 -OutputFile silent.mp3   # Process single file with custom output"
+	Write-Host "  .\silence_audio.ps1 -InputFile song.mp3                          # Process single file (auto-named output)"
+	exit 0
+}
 
-$processedCount = 0
-$errorCount = 0
+if ($Help) {
+	Show-Usage
+}
 
-$files | ForEach-Object {
-	$inputFile = $_.FullName
-	$fileName = $_.Name
-	$ext = $_.Extension.ToLowerInvariant()
+# Validate arguments
+$singleFileMode = -not [string]::IsNullOrEmpty($InputFile)
+
+if ($singleFileMode) {
+	if (-not (Test-Path $InputFile)) {
+		Write-Error "Input file '$InputFile' not found"
+		exit 1
+	}
+	if ($OutputFile -and (Test-Path $OutputFile -PathType Container)) {
+		Write-Error "Output path '$OutputFile' is a directory"
+		exit 1
+	}
+}
+
+# Function to process a single file
+function Process-AudioFile {
+	param(
+		[string]$inputFile,
+		[string]$outputFile = ""
+	)
 	
-	Write-Host "Processing ($($processedCount + 1)/$($files.Count)): $fileName" -ForegroundColor Cyan
+	$fileName = Split-Path $inputFile -Leaf
+	$ext = [System.IO.Path]::GetExtension($fileName).ToLowerInvariant().TrimStart('.')
+	
+	# Auto-generate output filename if not provided
+	if ([string]::IsNullOrEmpty($outputFile)) {
+		$baseName = [System.IO.Path]::GetFileNameWithoutExtension($inputFile)
+		$directory = Split-Path $inputFile -Parent
+		$outputFile = Join-Path $directory "$baseName.silenced.$ext"
+	}
 	
 	try {
 		switch ($ext) {
-			".mp3" {
+			"mp3" {
 				$props = @(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate, channels, channel_layout, bit_rate -show_entries format=duration -of default=nw=1:nk=1 "$inputFile")
 				if ($props.Count -ge 4) {
 					$sampleRate = $props[0]; $channelLayout = if ($props[2]) { $props[2] } else { "stereo" }; $bitRate = if ($props[3]) { $props[3] } else { "192000" }
@@ -26,7 +70,7 @@ $files | ForEach-Object {
 					# Create minimal silent MP3
 					$fileId = [System.IO.Path]::GetRandomFileName()
 					$silentPath = Join-Path $PWD "tmp_silent_$fileId.mp3"
-					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -c:a libmp3lame -b:a $bitRate -write_id3v1 0 -id3v2_version 0 "$silentPath"
+					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -c:a libmp3lame -b:a $bitRate -write_id3v1 0 -id3v2_version 0 "$silentPath" 2>$null
 					$silentBytes = [System.IO.File]::ReadAllBytes($silentPath)
 				
 					# Extract ID3v2 tag from original (if present)
@@ -61,81 +105,164 @@ $files | ForEach-Object {
 					}
 				
 					# Write final file
-					$outputPath = Join-Path $PWD "tmp_$fileId.mp3"
-					[System.IO.File]::WriteAllBytes($outputPath, $outputStream.ToArray())
+					$tempPath = Join-Path $PWD "tmp_$fileId.mp3"
+					[System.IO.File]::WriteAllBytes($tempPath, $outputStream.ToArray())
 					$outputStream.Dispose()
 				
 					Remove-Item $silentPath -ErrorAction SilentlyContinue
-					if (Test-Path $outputPath) { Move-Item -Force $outputPath ($inputFile -replace '\.mp3$', '.silenced.mp3') }
+					if (Test-Path $tempPath) { 
+						Move-Item -Force $tempPath $outputFile
+						Write-Host "Created: $outputFile" -ForegroundColor Green
+						return $true
+					}
 				}
 			}
-			".m4a" {
+			"m4a" {
 				$props = @(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate, channels, channel_layout, bit_rate -show_entries format=duration -of default=nw=1:nk=1 "$inputFile")
 				if ($props.Count -ge 4) {
 					$sampleRate = $props[0]; $channelLayout = if ($props[2]) { $props[2] } else { "stereo" }; $bitRate = if ($props[3]) { $props[3] } else { "192000" }
 					$fileId = [System.IO.Path]::GetRandomFileName()
-					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a aac -b:a $bitRate -movflags +faststart "tmp_$fileId.m4a"
-					if (Test-Path "tmp_$fileId.m4a") { Move-Item -Force "tmp_$fileId.m4a" ($inputFile -replace '\.m4a$', '.silenced.m4a') }
+					$tempPath = "tmp_$fileId.m4a"
+					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a aac -b:a $bitRate -movflags +faststart "$tempPath" 2>$null
+					if (Test-Path $tempPath) { 
+						Move-Item -Force $tempPath $outputFile
+						Write-Host "Created: $outputFile" -ForegroundColor Green
+						return $true
+					}
 				}
 			}
-			".aac" {
+			"aac" {
 				$props = @(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate, channels, channel_layout, bit_rate -show_entries format=duration -of default=nw=1:nk=1 "$inputFile")
 				if ($props.Count -ge 4) {
 					$sampleRate = $props[0]; $channelLayout = if ($props[2]) { $props[2] } else { "stereo" }; $bitRate = if ($props[3]) { $props[3] } else { "192000" }
-					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a aac -b:a $bitRate "tmp.aac"
-					if (Test-Path "tmp.aac") { Move-Item -Force "tmp.aac" ($inputFile -replace '\.aac$', '.silenced.aac') }
+					$tempPath = "tmp.aac"
+					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a aac -b:a $bitRate "$tempPath" 2>$null
+					if (Test-Path $tempPath) { 
+						Move-Item -Force $tempPath $outputFile
+						Write-Host "Created: $outputFile" -ForegroundColor Green
+						return $true
+					}
 				}
 			}
-			".flac" {
+			"flac" {
 				$props = @(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate, channels, channel_layout -show_entries format=duration -of default=nw=1:nk=1 "$inputFile")
 				if ($props.Count -ge 3) {
 					$sampleRate = $props[0]; $channelLayout = if ($props[2]) { $props[2] } else { "stereo" }
-					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a flac -compression_level 5 "tmp.flac"
-					if (Test-Path "tmp.flac") { Move-Item -Force "tmp.flac" ($inputFile -replace '\.flac$', '.silenced.flac') }
+					$tempPath = "tmp.flac"
+					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a flac -compression_level 5 "$tempPath" 2>$null
+					if (Test-Path $tempPath) { 
+						Move-Item -Force $tempPath $outputFile
+						Write-Host "Created: $outputFile" -ForegroundColor Green
+						return $true
+					}
 				}
 			}
-			".ogg" {
+			"ogg" {
 				$codec = ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nw=1:nk=1 "$inputFile"
 				if ($codec -eq "opus") {
 					$props = @(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate, channels, channel_layout, bit_rate -show_entries format=duration -of default=nw=1:nk=1 "$inputFile")
 					if ($props.Count -ge 4) {
 						$sampleRate = $props[0]; $channelLayout = if ($props[2]) { $props[2] } else { "stereo" }; $bitRate = if ($props[3]) { $props[3] } else { "96000" }
-						ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a libopus -b:a $bitRate "tmp.opus"
-						if (Test-Path "tmp.opus") { Move-Item -Force "tmp.opus" ($inputFile -replace '\.ogg$', '.silenced.opus') }
+						$tempPath = "tmp.opus"
+						ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a libopus -b:a $bitRate "$tempPath" 2>$null
+						if (Test-Path $tempPath) { 
+							Move-Item -Force $tempPath $outputFile
+							Write-Host "Created: $outputFile" -ForegroundColor Green
+							return $true
+						}
 					}
 				}
 				else {
 					$props = @(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate, channels, channel_layout, bit_rate -show_entries format=duration -of default=nw=1:nk=1 "$inputFile")
 					if ($props.Count -ge 4) {
 						$sampleRate = $props[0]; $channelLayout = if ($props[2]) { $props[2] } else { "stereo" }
-						ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a libvorbis -qscale:a 5 "tmp.ogg"
-						if (Test-Path "tmp.ogg") { Move-Item -Force "tmp.ogg" ($inputFile -replace '\.ogg$', '.silenced.ogg') }
+						$tempPath = "tmp.ogg"
+						ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a libvorbis -qscale:a 5 "$tempPath" 2>$null
+						if (Test-Path $tempPath) { 
+							Move-Item -Force $tempPath $outputFile
+							Write-Host "Created: $outputFile" -ForegroundColor Green
+							return $true
+						}
 					}
 				}
 			}
-			".wav" {
+			"wav" {
 				$props = @(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate, channels, channel_layout -show_entries format=duration -of default=nw=1:nk=1 "$inputFile")
 				if ($props.Count -ge 3) {
 					$sampleRate = $props[0]; $channelLayout = if ($props[2]) { $props[2] } else { "stereo" }
-					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a pcm_s16le "tmp.wav"
-					if (Test-Path "tmp.wav") { Move-Item -Force "tmp.wav" ($inputFile -replace '\.wav$', '.silenced.wav') }
+					$tempPath = "tmp.wav"
+					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a pcm_s16le "$tempPath" 2>$null
+					if (Test-Path $tempPath) { 
+						Move-Item -Force $tempPath $outputFile
+						Write-Host "Created: $outputFile" -ForegroundColor Green
+						return $true
+					}
+				}
+			}
+			"mp4" {
+				$props = @(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate, channels, channel_layout, bit_rate -show_entries format=duration -of default=nw=1:nk=1 "$inputFile")
+				if ($props.Count -ge 4) {
+					$sampleRate = $props[0]; $channelLayout = if ($props[2]) { $props[2] } else { "stereo" }; $bitRate = if ($props[3]) { $props[3] } else { "192000" }
+					$fileId = [System.IO.Path]::GetRandomFileName()
+					$tempPath = "tmp_$fileId.mp4"
+					ffmpeg -y -f lavfi -t 0.5 -i "anullsrc=r=$sampleRate`:cl=$channelLayout" -i "$inputFile" -map 0:a -map_metadata 1 -c:a aac -b:a $bitRate -movflags +faststart "$tempPath" 2>$null
+					if (Test-Path $tempPath) { 
+						Move-Item -Force $tempPath $outputFile
+						Write-Host "Created: $outputFile" -ForegroundColor Green
+						return $true
+					}
 				}
 			}
 			default {
-				Write-Warning "Skipped unsupported: $fileName"
+				Write-Error "Unsupported file format: $ext"
+				return $false
 			}
 		}  # End switch
+		
+		Write-Error "Failed to process $fileName"
+		return $false
 	}
- catch {
+	catch {
 		Write-Error "Error processing $fileName`: $($_.Exception.Message)"
-		$script:errorCount++
-	}
- finally {
-		$script:processedCount++
+		return $false
 	}
 }
 
-Write-Host "`nCompleted processing $processedCount files." -ForegroundColor Green
-if ($errorCount -gt 0) {
-	Write-Host "$errorCount files had errors." -ForegroundColor Red
+# Main execution
+if ($singleFileMode) {
+	# Process single file
+	Write-Host "Processing: $(Split-Path $InputFile -Leaf)" -ForegroundColor Cyan
+	if (Process-AudioFile -inputFile $InputFile -outputFile $OutputFile) {
+		Write-Host "`nCompleted successfully." -ForegroundColor Green
+		exit 0
+	}
+	else {
+		Write-Host "`nProcessing failed." -ForegroundColor Red
+		exit 1
+	}
+}
+else {
+	# Process directory (original batch mode)
+	$files = @(Get-ChildItem -Path $Root -Recurse -File -Include *.mp3, *.m4a, *.aac, *.flac, *.ogg, *.opus, *.wav, *.mp4)
+	Write-Host "Found $($files.Count) audio files to process..."
+
+	$processedCount = 0
+	$errorCount = 0
+
+	$files | ForEach-Object {
+		$inputFile = $_.FullName
+		$fileName = $_.Name
+		
+		$processedCount++
+		Write-Host "Processing ($processedCount/$($files.Count)): $fileName" -ForegroundColor Cyan
+		
+		if (-not (Process-AudioFile -inputFile $inputFile)) {
+			$errorCount++
+		}
+	}
+
+	Write-Host "`nCompleted processing $processedCount files." -ForegroundColor Green
+	if ($errorCount -gt 0) {
+		Write-Host "$errorCount files had errors." -ForegroundColor Red
+	}
 }
