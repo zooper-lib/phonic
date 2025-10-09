@@ -1,3 +1,35 @@
+## [1.2.0] - 2025.10.09
+
+### Fixed
+
+- Fixed critical MP4 decoding bug where iTunes-style metadata atoms were not being read correctly
+  - Fixed parser to properly handle nested 'data' atom structure (16-byte offset: 8-byte header + 8-byte version/flags)
+  - Fixed encoder to create correct nested 'data' atom structure for iTunes compatibility
+  - Fixed Mp4Locator to properly extract/inject child atoms instead of full ilst container
+  - Corrected Mp4Capability to mark genres as multi-valued (semicolon-delimited) instead of single-valued
+  - All 358 MP4 format tests now passing
+  - Real-world MP4 files now decode correctly with all metadata preserved
+
+### Added
+
+- Silence audio tool improvements:
+  - Added Linux/macOS bash script (`tool/silence_audio.sh`) equivalent to PowerShell version
+  - Single file mode support with `-i`/`--input` and `-o`/`--output` flags for both scripts
+  - MP4 format support (extracts audio stream and preserves metadata)
+  - Help command (`-h`/`--help`) with usage examples
+  - Comprehensive documentation in `doc/silence-audio-tool.md`
+  - Support for 8 audio formats: MP3, M4A, AAC, FLAC, OGG, OPUS, WAV, MP4
+- Public validator API for form integration and input validation
+- `TagValidator<T>` base class with `validate()`, `validateOrThrow()`, and `formatErrorMessage()` methods
+- Numeric validators: `RatingValidator`, `BpmValidator`, `YearValidator`, `TrackNumberValidator`, `DiscNumberValidator`
+- Date validator: `DateRecordedValidator` with comprehensive ISO-8601 format validation
+- Text validators: `TitleValidator`, `ArtistValidator`, `AlbumValidator` for required field validation
+- `TagValidators` convenience class providing static access to all validators
+- Static validator constants on tag classes (e.g., `TitleTag.validator`, `RatingTag.validator`)
+- `reactive_forms` integration support via `Validators.delegate()`
+- Comprehensive validator test suite with 153+ tests covering all validators
+- Automatic value normalization (trimming whitespace) in text validators
+
 ## [1.1.2] - 2025-09-21
 
 ### Fixed

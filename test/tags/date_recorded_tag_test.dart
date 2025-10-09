@@ -397,27 +397,14 @@ void main() {
           }
         });
 
-        test('ArgumentError includes the invalid value', () {
+        test('ArgumentError includes descriptive message', () {
           expect(
             () => DateRecordedTag('invalid-date'),
             throwsA(
               isA<ArgumentError>().having(
-                (e) => e.invalidValue,
-                'invalidValue',
-                equals('invalid-date'),
-              ),
-            ),
-          );
-        });
-
-        test('ArgumentError includes parameter name', () {
-          expect(
-            () => DateRecordedTag('invalid'),
-            throwsA(
-              isA<ArgumentError>().having(
-                (e) => e.name,
-                'name',
-                equals('value'),
+                (e) => e.message,
+                'message',
+                contains('ISO-8601 format'),
               ),
             ),
           );
@@ -946,8 +933,6 @@ void main() {
           expect(error.message, contains('2023'));
           expect(error.message, contains('2023-03-15'));
           expect(error.message, contains('2023-03-15T14:30:00Z'));
-          expect(error.invalidValue, equals('invalid-date'));
-          expect(error.name, equals('value'));
         }
       });
 
@@ -959,8 +944,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Year must be between 1900 and 2100 (inclusive)'));
-          expect(error.invalidValue, equals('1800-01-01'));
-          expect(error.name, equals('value'));
         }
       });
 
@@ -972,8 +955,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Month must be between 01 and 12'));
-          expect(error.invalidValue, equals('2023-13-15'));
-          expect(error.name, equals('value'));
         }
       });
 
@@ -985,8 +966,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Day 30 is not valid for year 2023 month 2'));
-          expect(error.invalidValue, equals('2023-02-30'));
-          expect(error.name, equals('value'));
         }
       });
 

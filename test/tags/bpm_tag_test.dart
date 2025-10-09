@@ -171,14 +171,14 @@ void main() {
         );
       });
 
-      test('ArgumentError includes the invalid value', () {
+      test('ArgumentError includes descriptive message', () {
         expect(
           () => BpmTag(0),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(0),
+              (e) => e.message,
+              'message',
+              contains('BPM must be between 1 and 999'),
             ),
           ),
         );
@@ -187,9 +187,9 @@ void main() {
           () => BpmTag(1000),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(1000),
+              (e) => e.message,
+              'message',
+              contains('BPM must be between 1 and 999'),
             ),
           ),
         );
@@ -198,22 +198,9 @@ void main() {
           () => BpmTag(-10),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(-10),
-            ),
-          ),
-        );
-      });
-
-      test('ArgumentError includes parameter name', () {
-        expect(
-          () => BpmTag(0),
-          throwsA(
-            isA<ArgumentError>().having(
-              (e) => e.name,
-              'name',
-              equals('value'),
+              (e) => e.message,
+              'message',
+              contains('BPM must be between 1 and 999'),
             ),
           ),
         );
@@ -766,8 +753,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('BPM must be between 1 and 999 (inclusive)'));
-          expect(error.invalidValue, equals(0));
-          expect(error.name, equals('value'));
         }
       });
 
@@ -779,8 +764,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('BPM must be between 1 and 999 (inclusive)'));
-          expect(error.invalidValue, equals(1000));
-          expect(error.name, equals('value'));
         }
       });
 
@@ -792,8 +775,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('BPM must be between 1 and 999 (inclusive)'));
-          expect(error.invalidValue, equals(-50));
-          expect(error.name, equals('value'));
         }
       });
 

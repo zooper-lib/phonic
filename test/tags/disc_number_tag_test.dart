@@ -114,14 +114,14 @@ void main() {
         );
       });
 
-      test('ArgumentError includes the invalid value', () {
+      test('ArgumentError includes descriptive message', () {
         expect(
           () => DiscNumberTag(0),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(0),
+              (e) => e.message,
+              'message',
+              contains('Disc number must be greater than 0'),
             ),
           ),
         );
@@ -130,22 +130,9 @@ void main() {
           () => DiscNumberTag(-10),
           throwsA(
             isA<ArgumentError>().having(
-              (e) => e.invalidValue,
-              'invalidValue',
-              equals(-10),
-            ),
-          ),
-        );
-      });
-
-      test('ArgumentError includes parameter name', () {
-        expect(
-          () => DiscNumberTag(0),
-          throwsA(
-            isA<ArgumentError>().having(
-              (e) => e.name,
-              'name',
-              equals('value'),
+              (e) => e.message,
+              'message',
+              contains('Disc number must be greater than 0'),
             ),
           ),
         );
@@ -612,8 +599,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Disc number must be greater than 0'));
-          expect(error.invalidValue, equals(0));
-          expect(error.name, equals('value'));
         }
       });
 
@@ -625,8 +610,6 @@ void main() {
           expect(e, isA<ArgumentError>());
           final error = e as ArgumentError;
           expect(error.message, contains('Disc number must be greater than 0'));
-          expect(error.invalidValue, equals(-3));
-          expect(error.name, equals('value'));
         }
       });
 

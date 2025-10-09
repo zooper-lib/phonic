@@ -230,13 +230,13 @@ class Mp4Locator extends ContainerLocator {
   /// Navigates the MP4 atom hierarchy to find the ilst atom.
   ///
   /// This method follows the path: moov → udta → meta → ilst
-  /// and returns the ilst atom data if found.
+  /// and returns the ilst atom's data content (child atoms) if found.
   ///
   /// Parameters:
   /// - [fileBytes]: Complete MP4 file data
   ///
   /// Returns:
-  /// - The ilst atom data (including header) if found
+  /// - The ilst atom's data content (child atoms, excluding ilst header) if found
   /// - `null` if ilst atom is not found or hierarchy is invalid
   Uint8List? _findIlstAtom(Uint8List fileBytes) {
     // Find moov atom
@@ -259,8 +259,9 @@ class Mp4Locator extends ContainerLocator {
     final ilstAtom = _findAtom(metaContent, 'ilst');
     if (ilstAtom == null) return null;
 
-    // Return the complete ilst atom (header + data)
-    return ilstAtom.fullAtom;
+    // Return only the data content (child atoms), not the ilst header
+    // The codec expects to parse the child atoms directly
+    return ilstAtom.data;
   }
 
   /// Finds a specific atom type within the given data.
@@ -556,7 +557,11 @@ class Mp4Locator extends ContainerLocator {
 
       if (atomType == 'ilst') {
         // Replace with new ilst atom (if provided)
+        // containerBytes contains the child atoms (data), so we need to wrap them in ilst header
         if (containerBytes != null) {
+          final ilstSize = atomHeaderSize + containerBytes.length;
+          result.addAll(_writeUint32BigEndian(ilstSize));
+          result.addAll('ilst'.codeUnits);
           result.addAll(containerBytes);
         }
         ilstFound = true;
@@ -569,8 +574,11 @@ class Mp4Locator extends ContainerLocator {
       offset += actualAtomSize;
     }
 
-    // If no existing ilst was found and we have new data, add it
+    // If no existing ilst was found and we have new data, add it wrapped in ilst header
     if (!ilstFound && containerBytes != null) {
+      final ilstSize = atomHeaderSize + containerBytes.length;
+      result.addAll(_writeUint32BigEndian(ilstSize));
+      result.addAll('ilst'.codeUnits);
       result.addAll(containerBytes);
     }
 

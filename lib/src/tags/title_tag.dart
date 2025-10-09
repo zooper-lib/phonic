@@ -36,7 +36,29 @@ part of '../core/metadata_tag.dart';
 /// The title value should be a non-empty string containing the track name.
 /// Different container formats may have length limitations that are handled
 /// automatically during encoding operations.
+///
+/// For validation and form integration, use [TitleTag.validator]:
+/// ```dart
+/// // Pre-validate before creating tag
+/// if (TitleTag.validator.validate(userInput) == null) {
+///   final tag = TitleTag(userInput);
+/// }
+/// ```
 final class TitleTag extends MetadataTag<String> {
+  /// Public validator for title tag values.
+  ///
+  /// This validator ensures that title values are not empty or whitespace-only,
+  /// making it useful for form validation where title is a required field.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// // Pre-validate before creating tag
+  /// if (TitleTag.validator.validate(userInput) == null) {
+  ///   final tag = TitleTag(userInput);
+  /// }
+  /// ```
+  static const validator = TitleValidator();
+
   /// Creates a new TitleTag with the specified title value.
   ///
   /// @param value The title or name of the track, must not be null

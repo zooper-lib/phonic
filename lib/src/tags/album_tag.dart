@@ -37,7 +37,29 @@ part of '../core/metadata_tag.dart';
 /// The album value should be a non-empty string containing the album name.
 /// Different container formats may have length limitations that are handled
 /// automatically during encoding operations.
+///
+/// For validation and form integration, use [AlbumTag.validator]:
+/// ```dart
+/// // Pre-validate before creating tag
+/// if (AlbumTag.validator.validate(userInput) == null) {
+///   final tag = AlbumTag(userInput);
+/// }
+/// ```
 final class AlbumTag extends MetadataTag<String> {
+  /// Public validator for album tag values.
+  ///
+  /// This validator ensures that album values are not empty or whitespace-only,
+  /// making it useful for form validation where album is a required field.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// // Pre-validate before creating tag
+  /// if (AlbumTag.validator.validate(userInput) == null) {
+  ///   final tag = AlbumTag(userInput);
+  /// }
+  /// ```
+  static const validator = AlbumValidator();
+
   /// Creates a new AlbumTag with the specified album value.
   ///
   /// @param value The name of the album or collection, must not be null

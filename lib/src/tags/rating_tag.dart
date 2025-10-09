@@ -39,6 +39,12 @@ part of '../core/metadata_tag.dart';
 /// final updatedTag = ratingTag.withProvenance(
 ///   TagProvenance(ContainerKind.vorbis, '', TagConfidence.certain),
 /// );
+///
+/// // Validate rating before creating tag
+/// final error = RatingTag.validator.validate(150);
+/// if (error != null) {
+///   print('Invalid rating: $error');
+/// }
 /// ```
 ///
 /// The rating value must be between 0 and 100 (inclusive). Values outside
@@ -46,11 +52,33 @@ part of '../core/metadata_tag.dart';
 /// This range provides a standardized percentage-based rating system that
 /// can be easily converted to format-specific scales as needed.
 final class RatingTag extends MetadataTag<int> {
+  /// Validator for rating values.
+  ///
+  /// This validator can be used to validate rating values before creating
+  /// a [RatingTag] instance, or with form validation libraries like
+  /// reactive_forms.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Pre-validate before creating tag
+  /// if (RatingTag.validator.validate(userInput) == null) {
+  ///   final tag = RatingTag(userInput);
+  /// }
+  ///
+  /// // Use with reactive_forms
+  /// final control = FormControl<int>(
+  ///   validators: [
+  ///     Validators.delegate((c) => RatingTag.validator.validate(c.value)),
+  ///   ],
+  /// );
+  /// ```
+  static const validator = RatingValidator();
+
   /// The minimum valid rating value (inclusive).
-  static const int minRating = 0;
+  static const int minRating = RatingValidator.min;
 
   /// The maximum valid rating value (inclusive).
-  static const int maxRating = 100;
+  static const int maxRating = RatingValidator.max;
 
   /// Creates a new RatingTag with the specified rating value.
   ///
@@ -70,26 +98,10 @@ final class RatingTag extends MetadataTag<int> {
     int value, {
     TagProvenance provenance = const TagProvenance.none(),
   }) : super(
-         value: _validateRating(value),
+         value: validator.validateOrThrow(value),
          key: TagKey.rating,
          provenance: provenance,
        );
-
-  /// Validates that the rating is within the acceptable range.
-  ///
-  /// @param value The rating to validate
-  /// @returns The validated rating
-  /// @throws ArgumentError if the rating is not between 0 and 100 (inclusive)
-  static int _validateRating(int value) {
-    if (value < minRating || value > maxRating) {
-      throw ArgumentError.value(
-        value,
-        'value',
-        'Rating must be between $minRating and $maxRating (inclusive)',
-      );
-    }
-    return value;
-  }
 
   /// Creates a new RatingTag instance with updated provenance information.
   ///
