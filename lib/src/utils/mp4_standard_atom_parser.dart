@@ -108,17 +108,32 @@ class Mp4StandardAtomParser {
     TagKey tagKey,
     TagProvenance provenance,
   ) {
-    if (atom.data.length < 4) {
+    // iTunes metadata atoms contain a nested 'data' atom with structure:
+    // [size: 4 bytes][type: 4 bytes]['data'][flags: 8 bytes][text data]
+    // Minimum size: 8 (data atom header) + 8 (flags) = 16 bytes
+    if (atom.data.length < 16) {
       throw CorruptedContainerException(
-        'Text atom too short: ${atom.data.length} bytes (minimum 4)',
+        'Text atom too short: ${atom.data.length} bytes (minimum 16 for nested data atom)',
         byteOffset: atom.header.offset,
       );
     }
 
     final reader = ByteReader(atom.data);
 
-    // Skip type field (4 bytes)
-    reader.skip(4);
+    // Parse nested 'data' atom header
+    reader.readUint32(); // 4 bytes: data atom size (not needed, we read to end)
+    final dataAtomType = String.fromCharCodes(reader.readBytes(4)); // 4 bytes: type
+
+    // Verify this is a 'data' atom
+    if (dataAtomType != 'data') {
+      throw CorruptedContainerException(
+        'Expected nested "data" atom, found "$dataAtomType"',
+        byteOffset: atom.header.offset,
+      );
+    }
+
+    // Skip data atom flags (8 bytes: version + flags)
+    reader.skip(8);
 
     // Read remaining data as UTF-8 text
     final textBytes = reader.readRemainingBytes();
@@ -183,17 +198,32 @@ class Mp4StandardAtomParser {
     Mp4Atom atom,
     TagProvenance provenance,
   ) {
-    if (atom.data.length < 8) {
+    // iTunes metadata atoms contain a nested 'data' atom with structure:
+    // [size: 4 bytes][type: 4 bytes]['data'][flags: 8 bytes][binary data]
+    // Minimum size: 8 (data atom header) + 8 (flags) + 8 (track data) = 24 bytes
+    if (atom.data.length < 24) {
       throw CorruptedContainerException(
-        'Track number atom too short: ${atom.data.length} bytes (minimum 8)',
+        'Track number atom too short: ${atom.data.length} bytes (minimum 24 for nested data atom)',
         byteOffset: atom.header.offset,
       );
     }
 
     final reader = ByteReader(atom.data);
 
-    // Skip type field (4 bytes)
-    reader.skip(4);
+    // Parse nested 'data' atom header
+    reader.readUint32(); // 4 bytes: data atom size (not needed)
+    final dataAtomType = String.fromCharCodes(reader.readBytes(4)); // 4 bytes: type
+
+    // Verify this is a 'data' atom
+    if (dataAtomType != 'data') {
+      throw CorruptedContainerException(
+        'Expected nested "data" atom, found "$dataAtomType"',
+        byteOffset: atom.header.offset,
+      );
+    }
+
+    // Skip data atom flags (8 bytes: version + flags)
+    reader.skip(8);
 
     // Skip padding (2 bytes)
     reader.skip(2);
@@ -225,17 +255,32 @@ class Mp4StandardAtomParser {
     Mp4Atom atom,
     TagProvenance provenance,
   ) {
-    if (atom.data.length < 8) {
+    // iTunes metadata atoms contain a nested 'data' atom with structure:
+    // [size: 4 bytes][type: 4 bytes]['data'][flags: 8 bytes][binary data]
+    // Minimum size: 8 (data atom header) + 8 (flags) + 8 (disc data) = 24 bytes
+    if (atom.data.length < 24) {
       throw CorruptedContainerException(
-        'Disc number atom too short: ${atom.data.length} bytes (minimum 8)',
+        'Disc number atom too short: ${atom.data.length} bytes (minimum 24 for nested data atom)',
         byteOffset: atom.header.offset,
       );
     }
 
     final reader = ByteReader(atom.data);
 
-    // Skip type field (4 bytes)
-    reader.skip(4);
+    // Parse nested 'data' atom header
+    reader.readUint32(); // 4 bytes: data atom size (not needed)
+    final dataAtomType = String.fromCharCodes(reader.readBytes(4)); // 4 bytes: type
+
+    // Verify this is a 'data' atom
+    if (dataAtomType != 'data') {
+      throw CorruptedContainerException(
+        'Expected nested "data" atom, found "$dataAtomType"',
+        byteOffset: atom.header.offset,
+      );
+    }
+
+    // Skip data atom flags (8 bytes: version + flags)
+    reader.skip(8);
 
     // Skip padding (2 bytes)
     reader.skip(2);
@@ -267,17 +312,32 @@ class Mp4StandardAtomParser {
     Mp4Atom atom,
     TagProvenance provenance,
   ) {
-    if (atom.data.length < 6) {
+    // iTunes metadata atoms contain a nested 'data' atom with structure:
+    // [size: 4 bytes][type: 4 bytes]['data'][flags: 8 bytes][bpm: 2 bytes][padding: 2 bytes]
+    // Minimum size: 8 (data atom header) + 8 (flags) + 2 (bpm) = 18 bytes
+    if (atom.data.length < 18) {
       throw CorruptedContainerException(
-        'BPM atom too short: ${atom.data.length} bytes (minimum 6)',
+        'BPM atom too short: ${atom.data.length} bytes (minimum 18 for nested data atom)',
         byteOffset: atom.header.offset,
       );
     }
 
     final reader = ByteReader(atom.data);
 
-    // Skip type field (4 bytes)
-    reader.skip(4);
+    // Parse nested 'data' atom header
+    reader.readUint32(); // 4 bytes: data atom size (not needed)
+    final dataAtomType = String.fromCharCodes(reader.readBytes(4)); // 4 bytes: type
+
+    // Verify this is a 'data' atom
+    if (dataAtomType != 'data') {
+      throw CorruptedContainerException(
+        'Expected nested "data" atom, found "$dataAtomType"',
+        byteOffset: atom.header.offset,
+      );
+    }
+
+    // Skip data atom flags (8 bytes: version + flags)
+    reader.skip(8);
 
     // Read BPM value (2 bytes, big-endian)
     final bpm = reader.readUint16();
@@ -309,17 +369,35 @@ class Mp4StandardAtomParser {
     TagProvenance provenance,
     Uint8List containerBytes,
   ) {
-    if (atom.data.length < 4) {
+    // iTunes metadata atoms contain a nested 'data' atom with structure:
+    // [size: 4 bytes][type: 4 bytes]['data'][flags: 8 bytes][image data]
+    // Minimum size: 8 (data atom header) + 8 (flags) = 16 bytes
+    if (atom.data.length < 16) {
       throw CorruptedContainerException(
-        'Artwork atom too short: ${atom.data.length} bytes (minimum 4)',
+        'Artwork atom too short: ${atom.data.length} bytes (minimum 16 for nested data atom)',
         byteOffset: atom.header.offset,
       );
     }
 
     final reader = ByteReader(atom.data);
 
-    // Read type field to determine image format
+    // Parse nested 'data' atom header
+    reader.readUint32(); // 4 bytes: data atom size (not needed)
+    final dataAtomType = String.fromCharCodes(reader.readBytes(4)); // 4 bytes: type
+
+    // Verify this is a 'data' atom
+    if (dataAtomType != 'data') {
+      throw CorruptedContainerException(
+        'Expected nested "data" atom, found "$dataAtomType"',
+        byteOffset: atom.header.offset,
+      );
+    }
+
+    // Read type field from flags to determine image format (first 4 bytes of flags)
     final typeValue = reader.readUint32();
+
+    // Skip remaining flags (4 bytes)
+    reader.skip(4);
 
     // Read the image data
     final imageData = reader.readRemainingBytes();

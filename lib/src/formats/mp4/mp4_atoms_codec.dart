@@ -492,120 +492,167 @@ class Mp4AtomsCodec implements TagCodec {
     }
   }
 
-  /// Builds a text atom (©nam, ©ART, etc.)
+  /// Builds a text atom (©nam, ©ART, etc.) with proper nested 'data' atom structure
   Uint8List _buildTextAtom(String atomType, String text) {
     final textBytes = Uint8List.fromList(utf8.encode(text));
-    final dataSize = 4 + textBytes.length; // type field + text
-    final atomSize = 8 + dataSize; // header + data
+
+    // Nested 'data' atom structure:
+    // [data size: 4][data type: 4]['data'][version/flags: 8][text]
+    final dataAtomContentSize = 8 + textBytes.length; // version/flags + text
+    final dataAtomSize = 8 + dataAtomContentSize; // data atom header + content
+    final atomSize = 8 + dataAtomSize; // outer atom header + data atom
 
     final result = Uint8List(atomSize);
     final view = ByteData.sublistView(result);
 
-    // Atom header
-    view.setUint32(0, atomSize, Endian.big); // size
-    result.setRange(4, 8, atomType.codeUnits); // type
+    // Outer atom header (©nam, ©ART, etc.)
+    view.setUint32(0, atomSize, Endian.big); // total size
+    result.setRange(4, 8, atomType.codeUnits); // atom type
 
-    // Data type (UTF-8 text)
-    view.setUint32(8, 0x00000001, Endian.big);
+    // Nested 'data' atom header
+    view.setUint32(8, dataAtomSize, Endian.big); // data atom size
+    result.setRange(12, 16, 'data'.codeUnits); // 'data' type
+
+    // Data atom version/flags (8 bytes)
+    view.setUint32(16, 0x00000001, Endian.big); // version + type indicator (UTF-8)
+    view.setUint32(20, 0x00000000, Endian.big); // flags
 
     // Text data
-    result.setRange(12, 12 + textBytes.length, textBytes);
+    result.setRange(24, 24 + textBytes.length, textBytes);
 
     return result;
   }
 
-  /// Builds a track number atom (trkn)
+  /// Builds a track number atom (trkn) with proper nested 'data' atom structure
   Uint8List _buildTrackNumberAtom(int trackNumber) {
-    const atomSize = 20; // 8 byte header + 4 byte type + 8 byte track data
+    // Nested 'data' atom structure:
+    // [data size: 4][data type: 4]['data'][version/flags: 8][track data: 8]
+    const dataAtomContentSize = 8 + 8; // version/flags + track data (8 bytes)
+    const dataAtomSize = 8 + dataAtomContentSize; // data atom header + content
+    const atomSize = 8 + dataAtomSize; // trkn header + data atom
+
     final result = Uint8List(atomSize);
     final view = ByteData.sublistView(result);
 
-    // Atom header
-    view.setUint32(0, atomSize, Endian.big); // size
-    result.setRange(4, 8, 'trkn'.codeUnits); // type
+    // Outer atom header (trkn)
+    view.setUint32(0, atomSize, Endian.big); // total size
+    result.setRange(4, 8, 'trkn'.codeUnits); // atom type
 
-    // Data type (binary)
-    view.setUint32(8, 0x00000000, Endian.big);
+    // Nested 'data' atom header
+    view.setUint32(8, dataAtomSize, Endian.big); // data atom size
+    result.setRange(12, 16, 'data'.codeUnits); // 'data' type
 
-    // Track data: [padding][track][total][padding]
-    view.setUint16(12, 0, Endian.big); // padding
-    view.setUint16(14, trackNumber, Endian.big); // track number
-    view.setUint16(16, 0, Endian.big); // total tracks (unknown)
-    view.setUint16(18, 0, Endian.big); // padding
+    // Data atom version/flags (8 bytes)
+    view.setUint32(16, 0x00000000, Endian.big); // version + type indicator (binary)
+    view.setUint32(20, 0x00000000, Endian.big); // flags
+
+    // Track data: [padding: 2][track: 2][total: 2][padding: 2]
+    view.setUint16(24, 0, Endian.big); // padding
+    view.setUint16(26, trackNumber, Endian.big); // track number
+    view.setUint16(28, 0, Endian.big); // total tracks (unknown)
+    view.setUint16(30, 0, Endian.big); // padding
 
     return result;
   }
 
-  /// Builds a disc number atom (disk)
+  /// Builds a disc number atom (disk) with proper nested 'data' atom structure
   Uint8List _buildDiscNumberAtom(int discNumber) {
-    const atomSize = 20; // 8 byte header + 4 byte type + 8 byte disc data
+    // Nested 'data' atom structure:
+    // [data size: 4][data type: 4]['data'][version/flags: 8][disc data: 8]
+    const dataAtomContentSize = 8 + 8; // version/flags + disc data (8 bytes)
+    const dataAtomSize = 8 + dataAtomContentSize; // data atom header + content
+    const atomSize = 8 + dataAtomSize; // disk header + data atom
+
     final result = Uint8List(atomSize);
     final view = ByteData.sublistView(result);
 
-    // Atom header
-    view.setUint32(0, atomSize, Endian.big); // size
-    result.setRange(4, 8, 'disk'.codeUnits); // type
+    // Outer atom header (disk)
+    view.setUint32(0, atomSize, Endian.big); // total size
+    result.setRange(4, 8, 'disk'.codeUnits); // atom type
 
-    // Data type (binary)
-    view.setUint32(8, 0x00000000, Endian.big);
+    // Nested 'data' atom header
+    view.setUint32(8, dataAtomSize, Endian.big); // data atom size
+    result.setRange(12, 16, 'data'.codeUnits); // 'data' type
 
-    // Disc data: [padding][disc][total][padding]
-    view.setUint16(12, 0, Endian.big); // padding
-    view.setUint16(14, discNumber, Endian.big); // disc number
-    view.setUint16(16, 0, Endian.big); // total discs (unknown)
-    view.setUint16(18, 0, Endian.big); // padding
+    // Data atom version/flags (8 bytes)
+    view.setUint32(16, 0x00000000, Endian.big); // version + type indicator (binary)
+    view.setUint32(20, 0x00000000, Endian.big); // flags
+
+    // Disc data: [padding: 2][disc: 2][total: 2][padding: 2]
+    view.setUint16(24, 0, Endian.big); // padding
+    view.setUint16(26, discNumber, Endian.big); // disc number
+    view.setUint16(28, 0, Endian.big); // total discs (unknown)
+    view.setUint16(30, 0, Endian.big); // padding
 
     return result;
   }
 
-  /// Builds a BPM atom (tmpo)
+  /// Builds a BPM atom (tmpo) with proper nested 'data' atom structure
   Uint8List _buildBpmAtom(int bpm) {
-    const atomSize = 16; // 8 byte header + 4 byte type + 4 byte data
+    // Nested 'data' atom structure:
+    // [data size: 4][data type: 4]['data'][version/flags: 8][bpm: 2][padding: 2]
+    const dataAtomContentSize = 8 + 4; // version/flags + bpm value (2 bytes) + padding (2 bytes)
+    const dataAtomSize = 8 + dataAtomContentSize; // data atom header + content
+    const atomSize = 8 + dataAtomSize; // tmpo header + data atom
+
     final result = Uint8List(atomSize);
     final view = ByteData.sublistView(result);
 
-    // Atom header
-    view.setUint32(0, atomSize, Endian.big); // size
-    result.setRange(4, 8, 'tmpo'.codeUnits); // type
+    // Outer atom header (tmpo)
+    view.setUint32(0, atomSize, Endian.big); // total size
+    result.setRange(4, 8, 'tmpo'.codeUnits); // atom type
 
-    // Data type (16-bit integer)
-    view.setUint32(8, 0x00000015, Endian.big);
+    // Nested 'data' atom header
+    view.setUint32(8, dataAtomSize, Endian.big); // data atom size
+    result.setRange(12, 16, 'data'.codeUnits); // 'data' type
+
+    // Data atom version/flags (8 bytes)
+    view.setUint32(16, 0x00000015, Endian.big); // version + type indicator (16-bit int)
+    view.setUint32(20, 0x00000000, Endian.big); // flags
 
     // BPM value (16-bit) with padding
-    view.setUint16(12, bpm, Endian.big);
-    view.setUint16(14, 0, Endian.big); // padding
+    view.setUint16(24, bpm, Endian.big);
+    view.setUint16(26, 0, Endian.big); // padding
 
     return result;
   }
 
-  /// Builds an artwork atom (covr)
+  /// Builds an artwork atom (covr) with proper nested 'data' atom structure
   Uint8List _buildArtworkAtom(ArtworkTag artworkTag) {
     // For now, we'll create a placeholder since artwork data is lazy-loaded
     // In a real implementation, we'd need to load the artwork data
     final artworkData = artworkTag.value;
 
-    // Create a simple placeholder atom structure
-    // In practice, this would need to load the actual image data
+    // Create a simple placeholder image data
     final imageData = Uint8List.fromList([
       0xFF, 0xD8, 0xFF, 0xE0, // JPEG signature as placeholder
     ]);
 
-    final dataSize = 4 + imageData.length; // type field + image data
-    final atomSize = 8 + dataSize; // header + data
+    // Nested 'data' atom structure:
+    // [data size: 4][data type: 4]['data'][version/flags: 8][image data]
+    final dataAtomContentSize = 8 + imageData.length; // version/flags + image
+    final dataAtomSize = 8 + dataAtomContentSize; // data atom header + content
+    final atomSize = 8 + dataAtomSize; // covr header + data atom
 
     final result = Uint8List(atomSize);
     final view = ByteData.sublistView(result);
 
-    // Atom header
-    view.setUint32(0, atomSize, Endian.big); // size
-    result.setRange(4, 8, 'covr'.codeUnits); // type
+    // Outer atom header (covr)
+    view.setUint32(0, atomSize, Endian.big); // total size
+    result.setRange(4, 8, 'covr'.codeUnits); // atom type
 
-    // Data type (JPEG by default)
+    // Nested 'data' atom header
+    view.setUint32(8, dataAtomSize, Endian.big); // data atom size
+    result.setRange(12, 16, 'data'.codeUnits); // 'data' type
+
+    // Data atom version/flags (8 bytes)
+    // Type indicator: 0x0D for JPEG, 0x0E for PNG
     final dataType = artworkData.mimeType == 'image/png' ? 0x0000000E : 0x0000000D;
-    view.setUint32(8, dataType, Endian.big);
+    view.setUint32(16, dataType, Endian.big); // version + type indicator
+    view.setUint32(20, 0x00000000, Endian.big); // flags
 
     // Image data (placeholder)
-    result.setRange(12, 12 + imageData.length, imageData);
+    result.setRange(24, 24 + imageData.length, imageData);
 
     return result;
   }
