@@ -4,6 +4,7 @@ applyTo: '**'
 
 # Documentation
 - NEVER create summary files, except if explicitly asked to do so.
+- Comments NEVER mention what or why you changed. They ALWAYS explain what the code does or why it exists.
 
 # Code
 - ALWAYS write production-ready code.

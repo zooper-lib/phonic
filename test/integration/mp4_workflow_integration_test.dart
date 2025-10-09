@@ -102,14 +102,14 @@ void main() {
             'title': 'Round Trip Test',
             'artist': 'Test Artist',
             'album': 'Test Album',
-            'year': 2024,
+            'dateRecorded': '2024', // MP4 ©day atom stores dates, not just years
             'trackNumber': 5,
           };
 
           audioFile.setTag(TitleTag(testData['title'] as String));
           audioFile.setTag(ArtistTag(testData['artist'] as String));
           audioFile.setTag(AlbumTag(testData['album'] as String));
-          audioFile.setTag(YearTag(testData['year'] as int));
+          audioFile.setTag(DateRecordedTag(testData['dateRecorded'] as String)); 
           audioFile.setTag(TrackNumberTag(testData['trackNumber'] as int));
 
           final encodedBytes = await audioFile.encode(
@@ -126,7 +126,7 @@ void main() {
           expect(decodedFile.getTag(TagKey.title)?.value, equals(testData['title']));
           expect(decodedFile.getTag(TagKey.artist)?.value, equals(testData['artist']));
           expect(decodedFile.getTag(TagKey.album)?.value, equals(testData['album']));
-          expect((decodedFile.getTag(TagKey.year) as YearTag?)?.value, equals(testData['year']));
+          expect((decodedFile.getTag(TagKey.dateRecorded) as DateRecordedTag?)?.value, equals(testData['dateRecorded']));
           expect((decodedFile.getTag(TagKey.trackNumber) as TrackNumberTag?)?.value, equals(testData['trackNumber']));
 
           decodedFile.dispose();

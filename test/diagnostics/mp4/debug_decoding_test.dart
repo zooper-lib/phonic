@@ -57,7 +57,7 @@ void main() {
 
       // Step 4: Use codec to read tags
       print('Step 4: Using Mp4AtomsCodec to read tags');
-      final codec = Mp4AtomsCodec();
+      final codec = const Mp4AtomsCodec();
 
       try {
         final tags = codec.readFromContainer(ilstBytes);

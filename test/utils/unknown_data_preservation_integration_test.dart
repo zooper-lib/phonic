@@ -447,12 +447,29 @@ Uint8List _buildTextFrameData(String text) {
   ]);
 }
 
-/// Builds MP4 text atom data
+/// Builds MP4 text atom data with proper nested 'data' atom structure
 Uint8List _buildMp4TextAtomData(String text) {
-  return Uint8List.fromList([
-    0x00, 0x00, 0x00, 0x01, // UTF-8 text type
-    ...text.codeUnits,
-  ]);
+  final textBytes = text.codeUnits;
+
+  // Nested 'data' atom structure:
+  // [data size: 4][data type: 4]['data'][version/flags: 8][text]
+  final dataAtomContentSize = 8 + textBytes.length; // version/flags + text
+  final dataAtomSize = 8 + dataAtomContentSize; // data atom header + content
+
+  final result = <int>[];
+
+  // Nested 'data' atom header
+  result.addAll(_encodeUint32BigEndian(dataAtomSize));
+  result.addAll('data'.codeUnits);
+
+  // Data atom version/flags (8 bytes)
+  result.addAll([0x00, 0x00, 0x00, 0x01]); // version + type indicator (UTF-8)
+  result.addAll([0x00, 0x00, 0x00, 0x00]); // flags
+
+  // Text data
+  result.addAll(textBytes);
+
+  return Uint8List.fromList(result);
 }
 
 /// Encodes a 32-bit integer in big-endian format

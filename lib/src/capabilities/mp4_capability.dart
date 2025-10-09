@@ -109,13 +109,13 @@ const TagCapability mp4Capability = TagCapability(
       allowedEncodings: _mp4TextEncodings,
     ),
 
-    /// Genre field: Variable length, supports multiple values via semicolon separation.
+    /// Genre field: Multi-valued with semicolon delimiter, UTF-8 encoding.
     ///
-    /// Stored in ©gen atom. Multiple genres are typically separated by
+    /// Stored in ©gen atom. Multiple genres are encoded using
     /// semicolons (e.g., "Rock;Alternative;Indie") following iTunes conventions.
     /// Some applications may use other delimiters, but semicolon is standard.
     TagKey.genre: TagSemantics(
-      multiValued: false, // Single atom with delimited content
+      multiValued: true, // Multiple genres in single atom with semicolon delimiter
       allowedEncodings: _mp4TextEncodings,
     ),
 

@@ -34,16 +34,18 @@ void main() {
         final result = validator.validate('');
         expect(result, isNotNull);
         expect(result!.keys.single, equals('empty'));
-        expect(result['empty']!['fieldName'], equals('Title'));
-        expect(result['empty']!['actual'], equals(''));
+        final errorDetails = result['empty']! as Map<String, dynamic>;
+        expect(errorDetails['fieldName'], equals('Title'));
+        expect(errorDetails['actual'], equals(''));
       });
 
       test('returns error map for whitespace-only title', () {
         final result = validator.validate('   ');
         expect(result, isNotNull);
         expect(result!.keys.single, equals('empty'));
-        expect(result['empty']!['fieldName'], equals('Title'));
-        expect(result['empty']!['actual'], equals('   '));
+        final errorDetails = result['empty']! as Map<String, dynamic>;
+        expect(errorDetails['fieldName'], equals('Title'));
+        expect(errorDetails['actual'], equals('   '));
       });
 
       test('returns error map for tab-only title', () {
@@ -164,15 +166,17 @@ void main() {
         final result = validator.validate('');
         expect(result, isNotNull);
         expect(result!.keys.single, equals('empty'));
-        expect(result['empty']!['fieldName'], equals('Artist'));
-        expect(result['empty']!['actual'], equals(''));
+        final errorDetails = result['empty']! as Map<String, dynamic>;
+        expect(errorDetails['fieldName'], equals('Artist'));
+        expect(errorDetails['actual'], equals(''));
       });
 
       test('returns error map for whitespace-only artist', () {
         final result = validator.validate('   ');
         expect(result, isNotNull);
         expect(result!.keys.single, equals('empty'));
-        expect(result['empty']!['fieldName'], equals('Artist'));
+        final errorDetails = result['empty']! as Map<String, dynamic>;
+        expect(errorDetails['fieldName'], equals('Artist'));
       });
     });
 
@@ -249,15 +253,17 @@ void main() {
         final result = validator.validate('');
         expect(result, isNotNull);
         expect(result!.keys.single, equals('empty'));
-        expect(result['empty']!['fieldName'], equals('Album'));
-        expect(result['empty']!['actual'], equals(''));
+        final errorDetails = result['empty']! as Map<String, dynamic>;
+        expect(errorDetails['fieldName'], equals('Album'));
+        expect(errorDetails['actual'], equals(''));
       });
 
       test('returns error map for whitespace-only album', () {
         final result = validator.validate('   ');
         expect(result, isNotNull);
         expect(result!.keys.single, equals('empty'));
-        expect(result['empty']!['fieldName'], equals('Album'));
+        final errorDetails = result['empty']! as Map<String, dynamic>;
+        expect(errorDetails['fieldName'], equals('Album'));
       });
     });
 

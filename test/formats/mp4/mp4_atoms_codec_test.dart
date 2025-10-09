@@ -5,6 +5,8 @@ import 'package:phonic/src/core/tag_codec.dart';
 import 'package:phonic/src/formats/mp4/mp4_atoms_codec.dart';
 import 'package:test/test.dart';
 
+import '../../helpers/mp4_atom_test_helpers.dart';
+
 void main() {
   group('Mp4AtomsCodec', () {
     late Mp4AtomsCodec codec;
@@ -160,9 +162,8 @@ void main() {
     });
 
     group('readFromContainer', () {
-      test('parses standard text atom correctly', () {
-        // Create a ©nam (title) atom with "Test Title"
-        final titleAtom = _buildTextAtom('©nam', 'Test Title');
+      test('encodes Title tag to ©nam atom', () {
+        final titleAtom = buildTextAtom('©nam', 'Test Title');
         final tags = codec.readFromContainer(titleAtom);
 
         expect(tags, hasLength(1));
@@ -175,9 +176,9 @@ void main() {
 
       test('parses multiple standard atoms correctly', () {
         // Create multiple atoms
-        final titleAtom = _buildTextAtom('©nam', 'Test Title');
-        final artistAtom = _buildTextAtom('©ART', 'Test Artist');
-        final albumAtom = _buildTextAtom('©alb', 'Test Album');
+        final titleAtom = buildTextAtom('©nam', 'Test Title');
+        final artistAtom = buildTextAtom('©ART', 'Test Artist');
+        final albumAtom = buildTextAtom('©alb', 'Test Album');
 
         final combinedData = Uint8List.fromList([
           ...titleAtom,
@@ -200,7 +201,7 @@ void main() {
       });
 
       test('parses track number atom correctly', () {
-        final trackAtom = _buildTrackNumberAtom(5, 12);
+        final trackAtom = buildTrackNumberAtom(5);
         final tags = codec.readFromContainer(trackAtom);
 
         expect(tags, hasLength(1));
@@ -210,7 +211,7 @@ void main() {
       });
 
       test('parses BPM atom correctly', () {
-        final bpmAtom = _buildBpmAtom(120);
+        final bpmAtom = buildBpmAtom(120);
         final tags = codec.readFromContainer(bpmAtom);
 
         expect(tags, hasLength(1));
@@ -219,8 +220,8 @@ void main() {
         expect(tags[0].key, equals(TagKey.bpm));
       });
 
-      test('parses genre atom with semicolon-separated values', () {
-        final genreAtom = _buildTextAtom('©gen', 'Rock;Alternative;Indie');
+      test('parses composite genre correctly', () {
+        final genreAtom = buildTextAtom('©gen', 'Rock;Alternative;Indie');
         final tags = codec.readFromContainer(genreAtom);
 
         expect(tags, hasLength(1));
@@ -265,7 +266,7 @@ void main() {
       test('skips unsupported atoms gracefully', () {
         // Create an unknown atom type
         final unknownAtom = _buildAtom('UNKN', Uint8List.fromList([1, 2, 3, 4]));
-        final titleAtom = _buildTextAtom('©nam', 'Test Title');
+        final titleAtom = buildTextAtom('©nam', 'Test Title');
 
         final combinedData = Uint8List.fromList([
           ...unknownAtom,
@@ -285,7 +286,7 @@ void main() {
           0xFF, 0xD8, 0xFF, 0xE0, // JPEG signature
           ...List.generate(100, (i) => i % 256), // Mock JPEG data
         ]);
-        final artworkAtom = _buildArtworkAtom(jpegData);
+        final artworkAtom = buildArtworkAtom(jpegData);
         final tags = codec.readFromContainer(artworkAtom);
 
         expect(tags, hasLength(1));
@@ -301,7 +302,7 @@ void main() {
       });
 
       test('provides correct provenance information', () {
-        final titleAtom = _buildTextAtom('©nam', 'Test Title');
+        final titleAtom = buildTextAtom('©nam', 'Test Title');
         final tags = codec.readFromContainer(titleAtom);
 
         expect(tags, hasLength(1));
@@ -601,91 +602,6 @@ void main() {
       });
     });
   });
-}
-
-/// Helper function to build a text atom (©nam, ©ART, etc.)
-Uint8List _buildTextAtom(String atomType, String text) {
-  final textBytes = Uint8List.fromList(text.codeUnits);
-  final dataSize = 4 + textBytes.length; // type field + text
-  final atomSize = 8 + dataSize; // header + data
-
-  final result = Uint8List(atomSize);
-  final view = ByteData.sublistView(result);
-
-  // Atom header
-  view.setUint32(0, atomSize, Endian.big); // size
-  result.setRange(4, 8, atomType.codeUnits); // type
-
-  // Data type (UTF-8 text)
-  view.setUint32(8, 0x00000001, Endian.big);
-
-  // Text data
-  result.setRange(12, 12 + textBytes.length, textBytes);
-
-  return result;
-}
-
-/// Helper function to build a track number atom (trkn)
-Uint8List _buildTrackNumberAtom(int trackNumber, int totalTracks) {
-  const atomSize = 20; // 8 byte header + 4 byte type + 8 byte track data
-  final result = Uint8List(atomSize);
-  final view = ByteData.sublistView(result);
-
-  // Atom header
-  view.setUint32(0, atomSize, Endian.big); // size
-  result.setRange(4, 8, 'trkn'.codeUnits); // type
-
-  // Data type (binary)
-  view.setUint32(8, 0x00000000, Endian.big);
-
-  // Track data: [padding][track][total][padding]
-  view.setUint16(12, 0, Endian.big); // padding
-  view.setUint16(14, trackNumber, Endian.big); // track number
-  view.setUint16(16, totalTracks, Endian.big); // total tracks
-  view.setUint16(18, 0, Endian.big); // padding
-
-  return result;
-}
-
-/// Helper function to build a BPM atom (tmpo)
-Uint8List _buildBpmAtom(int bpm) {
-  const atomSize = 16; // 8 byte header + 4 byte type + 4 byte data
-  final result = Uint8List(atomSize);
-  final view = ByteData.sublistView(result);
-
-  // Atom header
-  view.setUint32(0, atomSize, Endian.big); // size
-  result.setRange(4, 8, 'tmpo'.codeUnits); // type
-
-  // Data type (16-bit integer)
-  view.setUint32(8, 0x00000015, Endian.big);
-
-  // BPM value (16-bit) with padding
-  view.setUint16(12, bpm, Endian.big);
-  view.setUint16(14, 0, Endian.big); // padding
-
-  return result;
-}
-
-/// Helper function to build an artwork atom (covr)
-Uint8List _buildArtworkAtom(Uint8List imageData) {
-  final dataSize = 4 + imageData.length; // type field + image data
-  final atomSize = 8 + dataSize; // header + data
-
-  final result = Uint8List(atomSize);
-  final view = ByteData.sublistView(result);
-
-  // Atom header
-  view.setUint32(0, atomSize, Endian.big); // size
-  result.setRange(4, 8, 'covr'.codeUnits); // type
-
-  // Data type (JPEG)
-  view.setUint32(8, 0x0000000D, Endian.big);
-
-  // Image data
-  result.setRange(12, 12 + imageData.length, imageData);
-
-  return result;
 }
 
 /// Helper function to build a generic atom

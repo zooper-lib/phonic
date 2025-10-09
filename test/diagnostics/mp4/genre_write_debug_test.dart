@@ -15,7 +15,7 @@ void main() {
     // Read original
     final fileBytes = await File('test/fixtures/mp4/23.mp4').readAsBytes();
     final locator = Mp4Locator();
-    final codec = Mp4AtomsCodec();
+    final codec = const Mp4AtomsCodec();
 
     final ilstData = locator.extract(fileBytes)!;
     final tags = codec.readFromContainer(ilstData);
