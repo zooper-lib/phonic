@@ -11,6 +11,24 @@ import 'package:phonic/src/utils/mp4_atom_parser.dart';
 import 'package:phonic/src/utils/mp4_standard_atom_parser.dart';
 import 'package:test/test.dart';
 
+import '../../helpers/mp4_atom_test_helpers.dart';
+
+/// Helper to convert full atom bytes to Mp4Atom (header + data)
+Mp4Atom _atomFromBytes(Uint8List fullAtom) {
+  final view = ByteData.sublistView(fullAtom);
+  final size = view.getUint32(0, Endian.big);
+  final type = String.fromCharCodes(fullAtom.sublist(4, 8));
+
+  return Mp4Atom(
+    header: Mp4AtomHeader(
+      size: size,
+      type: type,
+      offset: 0,
+    ),
+    data: fullAtom.sublist(8),
+  );
+}
+
 void main() {
   group('Mp4StandardAtomParser', () {
     late TagProvenance provenance;
@@ -25,19 +43,8 @@ void main() {
 
     group('parseTextAtom', () {
       test('parses title atom correctly', () {
-        final atomData = Uint8List.fromList([
-          0x00, 0x00, 0x00, 0x01, // Type: UTF-8 text
-          ...('Test Song Title'.codeUnits),
-        ]);
-
-        final atom = Mp4Atom(
-          header: Mp4AtomHeader(
-            size: atomData.length + 8,
-            type: '©nam',
-            offset: 0,
-          ),
-          data: atomData,
-        );
+        final fullAtom = buildTextAtom('©nam', 'Test Song Title');
+        final atom = _atomFromBytes(fullAtom);
 
         final result = Mp4StandardAtomParser.parseTextAtom(
           atom,
@@ -51,19 +58,8 @@ void main() {
       });
 
       test('parses genre atom with multiple genres', () {
-        final atomData = Uint8List.fromList([
-          0x00, 0x00, 0x00, 0x01, // Type: UTF-8 text
-          ...('Rock;Alternative;Indie'.codeUnits),
-        ]);
-
-        final atom = Mp4Atom(
-          header: Mp4AtomHeader(
-            size: atomData.length + 8,
-            type: '©gen',
-            offset: 0,
-          ),
-          data: atomData,
-        );
+        final fullAtom = buildTextAtom('©gen', 'Rock;Alternative;Indie');
+        final atom = _atomFromBytes(fullAtom);
 
         final result = Mp4StandardAtomParser.parseTextAtom(
           atom,
@@ -101,22 +97,8 @@ void main() {
 
     group('parseTrackNumberAtom', () {
       test('parses track number correctly', () {
-        final atomData = Uint8List.fromList([
-          0x00, 0x00, 0x00, 0x00, // Type field
-          0x00, 0x00, // Padding
-          0x00, 0x05, // Track number: 5
-          0x00, 0x0C, // Total tracks: 12
-          0x00, 0x00, // Padding
-        ]);
-
-        final atom = Mp4Atom(
-          header: Mp4AtomHeader(
-            size: atomData.length + 8,
-            type: 'trkn',
-            offset: 0,
-          ),
-          data: atomData,
-        );
+        final fullAtom = buildTrackNumberAtom(5);
+        final atom = _atomFromBytes(fullAtom);
 
         final result = Mp4StandardAtomParser.parseTrackNumberAtom(
           atom,
@@ -135,25 +117,13 @@ void main() {
           ...List.filled(100, 0x42), // Dummy JPEG data
         ]);
 
-        final atomData = Uint8List.fromList([
-          0x00, 0x00, 0x00, 0x0D, // Type: JPEG
-          ...jpegData,
-        ]);
+        final fullAtom = buildArtworkAtom(jpegData);
+        final atom = _atomFromBytes(fullAtom);
 
         final containerBytes = Uint8List.fromList([
           ...List.filled(50, 0x00), // Padding before atom
-          ...atomData,
+          ...fullAtom,
         ]);
-
-        final atom = Mp4Atom(
-          header: Mp4AtomHeader(
-            size: atomData.length + 8,
-            type: 'covr',
-            offset: 50,
-            dataOffset: 58, // 50 + 8 byte header
-          ),
-          data: atomData,
-        );
 
         final result = Mp4StandardAtomParser.parseArtworkAtom(
           atom,
@@ -170,19 +140,8 @@ void main() {
 
     group('parseStandardAtom', () {
       test('routes text atoms correctly', () {
-        final atomData = Uint8List.fromList([
-          0x00, 0x00, 0x00, 0x01, // Type: UTF-8 text
-          ...('Test Title'.codeUnits),
-        ]);
-
-        final atom = Mp4Atom(
-          header: Mp4AtomHeader(
-            size: atomData.length + 8,
-            type: '©nam',
-            offset: 0,
-          ),
-          data: atomData,
-        );
+        final fullAtom = buildTextAtom('©nam', 'Test Title');
+        final atom = _atomFromBytes(fullAtom);
 
         final result = Mp4StandardAtomParser.parseStandardAtom(
           atom,

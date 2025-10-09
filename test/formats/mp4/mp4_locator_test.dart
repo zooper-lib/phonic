@@ -112,11 +112,11 @@ void main() {
         final extracted = locator.extract(mp4File);
 
         expect(extracted, isNotNull);
-        expect(extracted!.length, greaterThan(8)); // Should have atom header + data
+        expect(extracted!.length, greaterThan(8)); // Should have child atoms
 
-        // Verify it's an ilst atom
+        // Verify it contains child atoms (first one should be ©nam)
         final atomType = String.fromCharCodes(extracted.sublist(4, 8));
-        expect(atomType, equals('ilst'));
+        expect(atomType, equals('©nam'));
       });
 
       test('should return null for files without MP4 signature', () {
@@ -399,7 +399,8 @@ void main() {
 
         final extracted = locator.extract(mp4File);
         expect(extracted, isNotNull);
-        expect(extracted!.length, equals(emptyIlst.length));
+        // Extract returns only child atoms, empty ilst has no children (0 bytes)
+        expect(extracted!.length, equals(0));
       });
 
       test('should handle atom size of 0 (extends to end of file)', () {

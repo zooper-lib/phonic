@@ -78,7 +78,7 @@ void main() {
           TagKey.artist,
           TagKey.album,
           TagKey.albumArtist,
-          TagKey.genre, // Single atom with delimited content
+          // Genre is excluded - it supports multiple values via semicolon delimiter
           TagKey.comment,
           TagKey.grouping,
           TagKey.composer,
@@ -165,6 +165,13 @@ void main() {
     });
 
     group('Multi-valued Field Semantics', () {
+      test('should support multi-valued genre', () {
+        final semantics = mp4Capability.semantics(TagKey.genre);
+        expect(semantics.multiValued, isTrue, reason: 'Genre should support multiple values with semicolon delimiter');
+        expect(semantics.allowedEncodings!.contains(TextEncoding.utf8Name), isTrue);
+        expect(semantics.maxTextLength, isNull);
+      });
+
       test('should support multi-valued artwork', () {
         final semantics = mp4Capability.semantics(TagKey.artwork);
         expect(semantics.multiValued, isTrue);

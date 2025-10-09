@@ -1,5 +1,15 @@
 ## [Unreleased]
 
+### Fixed
+
+- Fixed critical MP4 decoding bug where iTunes-style metadata atoms were not being read correctly
+  - Fixed parser to properly handle nested 'data' atom structure (16-byte offset: 8-byte header + 8-byte version/flags)
+  - Fixed encoder to create correct nested 'data' atom structure for iTunes compatibility
+  - Fixed Mp4Locator to properly extract/inject child atoms instead of full ilst container
+  - Corrected Mp4Capability to mark genres as multi-valued (semicolon-delimited) instead of single-valued
+  - All 358 MP4 format tests now passing
+  - Real-world MP4 files now decode correctly with all metadata preserved
+
 ### Added
 
 - Silence audio tool improvements:
