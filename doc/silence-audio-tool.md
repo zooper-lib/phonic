@@ -58,33 +58,33 @@ choco install ffmpeg
 
 ### Linux/macOS (Bash Script)
 
-The bash script is located at `tools/silence_audio.sh`.
+The bash script is located at `tool/silence_audio.sh`.
 
 #### Process Directory (Batch Mode)
 
 Process all audio files in the current directory:
 ```bash
-./tools/silence_audio.sh
+./tool/silence_audio.sh
 ```
 
 Process files in a specific directory:
 ```bash
-./tools/silence_audio.sh -d /path/to/audio/files
+./tool/silence_audio.sh -d /path/to/audio/files
 # or using legacy positional argument:
-./tools/silence_audio.sh /path/to/audio/files
+./tool/silence_audio.sh /path/to/audio/files
 ```
 
 #### Process Single File
 
 Process a single file with auto-generated output name:
 ```bash
-./tools/silence_audio.sh -i song.mp3
+./tool/silence_audio.sh -i song.mp3
 # Creates: song.silenced.mp3
 ```
 
 Process a single file with custom output name:
 ```bash
-./tools/silence_audio.sh -i song.mp3 -o silent_song.mp3
+./tool/silence_audio.sh -i song.mp3 -o silent_song.mp3
 # Creates: silent_song.mp3
 ```
 
@@ -92,38 +92,38 @@ Process a single file with custom output name:
 
 Display usage information:
 ```bash
-./tools/silence_audio.sh -h
+./tool/silence_audio.sh -h
 # or
-./tools/silence_audio.sh --help
+./tool/silence_audio.sh --help
 ```
 
 ### Windows (PowerShell Script)
 
-The PowerShell script is located at `tools/silence_audio.ps1`.
+The PowerShell script is located at `tool/silence_audio.ps1`.
 
 #### Process Directory (Batch Mode)
 
 Process all audio files in the current directory:
 ```powershell
-.\tools\silence_audio.ps1
+.\tool\silence_audio.ps1
 ```
 
 Process files in a specific directory:
 ```powershell
-.\tools\silence_audio.ps1 -Root "C:\path\to\audio\files"
+.\tool\silence_audio.ps1 -Root "C:\path\to\audio\files"
 ```
 
 #### Process Single File
 
 Process a single file with auto-generated output name:
 ```powershell
-.\tools\silence_audio.ps1 -InputFile song.mp3
+.\tool\silence_audio.ps1 -InputFile song.mp3
 # Creates: song.silenced.mp3
 ```
 
 Process a single file with custom output name:
 ```powershell
-.\tools\silence_audio.ps1 -InputFile song.mp3 -OutputFile silent_song.mp3
+.\tool\silence_audio.ps1 -InputFile song.mp3 -OutputFile silent_song.mp3
 # Creates: silent_song.mp3
 ```
 
@@ -131,7 +131,7 @@ Process a single file with custom output name:
 
 Display usage information:
 ```powershell
-.\tools\silence_audio.ps1 -Help
+.\tool\silence_audio.ps1 -Help
 ```
 
 ## How It Works
@@ -189,10 +189,10 @@ Replace audio content in test files to avoid including copyrighted material in y
 
 ```bash
 # Batch mode: Create silenced versions of test fixtures
-./tools/silence_audio.sh -d ./test/fixtures
+./tool/silence_audio.sh -d ./test/fixtures
 
 # Single file mode: Process specific test file
-./tools/silence_audio.sh -i ./test/fixtures/sample.mp3 -o ./test/fixtures/test.mp3
+./tool/silence_audio.sh -i ./test/fixtures/sample.mp3 -o ./test/fixtures/test.mp3
 ```
 
 ### Creating Sample Files
@@ -201,10 +201,10 @@ Generate lightweight sample files with real metadata but no audio content:
 
 ```bash
 # Process a collection of files
-./tools/silence_audio.sh -d ./samples
+./tool/silence_audio.sh -d ./samples
 
 # Create a specific sample file
-./tools/silence_audio.sh -i myalbum.mp3 -o samples/album_metadata_only.mp3
+./tool/silence_audio.sh -i myalbum.mp3 -o samples/album_metadata_only.mp3
 ```
 
 ### Privacy Protection
@@ -213,10 +213,10 @@ Remove audio content while preserving metadata structure:
 
 ```bash
 # Process sensitive recordings
-./tools/silence_audio.sh -d ./recordings
+./tool/silence_audio.sh -d ./recordings
 
 # Process single sensitive file
-./tools/silence_audio.sh -i interview.mp3 -o interview_metadata.mp3
+./tool/silence_audio.sh -i interview.mp3 -o interview_metadata.mp3
 ```
 
 ### Custom Workflows
@@ -225,11 +225,11 @@ Single file mode enables integration with other tools:
 
 ```bash
 # Process and move to different location
-./tools/silence_audio.sh -i input/song.mp3 -o output/processed.mp3
+./tool/silence_audio.sh -i input/song.mp3 -o output/processed.mp3
 
 # Use in a script
 for file in *.mp3; do
-    ./tools/silence_audio.sh -i "$file" -o "processed/${file}"
+    ./tool/silence_audio.sh -i "$file" -o "processed/${file}"
 done
 ```
 
@@ -268,7 +268,7 @@ Install FFmpeg (see Prerequisites section above).
 
 On Linux/macOS, ensure the script is executable:
 ```bash
-chmod +x ./tools/silence_audio.sh
+chmod +x ./tool/silence_audio.sh
 ```
 
 ### No output files created
