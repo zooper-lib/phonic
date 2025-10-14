@@ -10,7 +10,6 @@ import 'codec_registry.dart';
 import 'container_kind.dart';
 import 'container_rebuilder.dart';
 import 'encoding_options.dart';
-import 'encoding_preparation.dart';
 import 'file_assembler.dart';
 import 'format_strategy.dart';
 import 'media_kind.dart';
@@ -19,7 +18,6 @@ import 'metadata_tag.dart';
 import 'phonic_audio_file.dart';
 import 'post_write_validator.dart';
 import 'rollback_manager.dart';
-import 'tag_capability.dart';
 import 'tag_inference.dart';
 import 'tag_key.dart';
 import 'tag_semantics.dart';
@@ -985,48 +983,36 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
       // Step 1: Determine target containers based on encoding strategy
       final targetContainers = _determineTargetContainers(encodingOptions);
 
-      // Step 2: Prepare tags for encoding using format-specific normalization
-      final encodingPreparation = EncodingPreparation();
+      // Step 2: Perform async preparation for tags that require it (e.g., artwork loading)
       final tagsToWrite = getAllTags();
-
-      // Get capabilities for target containers (not all fan-out containers)
-      final capabilities = <(ContainerKind, String), TagCapability>{};
-      for (final (containerKind, containerVersion) in targetContainers) {
-        final codec = codecRegistry.findCodec(containerKind, containerVersion);
-        if (codec != null) {
-          capabilities[(containerKind, containerVersion)] = codec.capability;
+      final preparedTags = <MetadataTag>[];
+      for (final tag in tagsToWrite) {
+        if (tag.requiresAsyncPreparation) {
+          final preparedTag = await tag.prepareForEncoding();
+          preparedTags.add(preparedTag);
+        } else {
+          preparedTags.add(tag);
         }
       }
 
-      // Prepare tags for encoding with container-specific normalization and async preparation
-      final preparedTagsByContainer = await encodingPreparation.prepareTagsForEncodingAsync(
-        tags: tagsToWrite,
-        strategy: formatStrategy,
-        capabilities: capabilities,
-      );
-
-      // Step 2: Create file assembler with container rebuilder
+      // Step 3: Create file assembler with container rebuilder
       final fileAssembler = FileAssembler(
         codecRegistry: codecRegistry,
         containerRebuilder: const ContainerRebuilder(),
       );
 
-      // Step 3: Assemble the file with updated metadata containers
-      // Use the prepared tags instead of raw tags for proper normalization
-      final allPreparedTags = <MetadataTag>[];
-      for (final tagList in preparedTagsByContainer.values) {
-        allPreparedTags.addAll(tagList);
-      }
-
+      // Step 4: Assemble the file with updated metadata containers
+      // The FileAssembler will normalize tags for each target container individually
+      // based on the container's capabilities, ensuring proper encoding for each format.
       final assembledFile = await fileAssembler.assembleFile(
         originalFileBytes: _fileBytes,
-        tagsToWrite: allPreparedTags.isNotEmpty ? allPreparedTags : tagsToWrite,
+        tagsToWrite: preparedTags,
         formatStrategy: formatStrategy,
         targetContainers: targetContainers,
         existingContainers: loadedContainersByKindAndVersion,
       );
 
-      // Step 4: Save current state for potential rollback
+      // Step 5: Save current state for potential rollback
       final rollbackToken = _rollbackManager.saveState(
         fileBytes: _fileBytes,
         tags: inMemoryTagsByKey,
