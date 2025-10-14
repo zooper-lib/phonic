@@ -1,3 +1,13 @@
+## [1.2.1] - 2025.10.14
+
+### Fixed
+
+- Fixed critical genre fanout bug where changing MP3 genre metadata resulted in duplicate values
+  - Bug: When changing genre from "Blues" to "Blues, RNB", file managers displayed "Blues, RNB and Blues"
+  - Root cause: Encoding process was incorrectly combining container-specific normalized tags into a single list
+  - Fixed by letting FileAssembler normalize tags individually for each container (ID3v2.4 and ID3v1)
+  - Added comprehensive regression test suite to prevent recurrence
+
 ## [1.2.0] - 2025.10.09
 
 ### Fixed
