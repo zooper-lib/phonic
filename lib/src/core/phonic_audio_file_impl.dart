@@ -1029,6 +1029,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
         originalTags: tagsToWrite,
         formatStrategy: formatStrategy,
         expectedContainers: targetContainers,
+        validationLevel: encodingOptions.validationLevel,
       );
 
       // Step 6: Handle validation results

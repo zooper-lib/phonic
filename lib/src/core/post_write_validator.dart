@@ -4,6 +4,7 @@ import '../conversion/unified_metadata_converter.dart';
 import '../exceptions/corrupted_container_exception.dart';
 import 'codec_registry.dart';
 import 'container_kind.dart';
+import 'encoding_options.dart';
 import 'format_strategy.dart';
 import 'metadata_tag.dart';
 import 'tag_key.dart';
@@ -126,9 +127,13 @@ class PostWriteValidator {
     required List<MetadataTag> originalTags,
     required FormatStrategy formatStrategy,
     List<(ContainerKind, String)>? expectedContainers,
+    ValidationLevel? validationLevel,
   }) async {
     final errors = <ValidationError>[];
     final warnings = <ValidationError>[];
+
+    final bool shouldPerformDeepValidation = enableDeepValidation && _isDeepValidationRequested(validationLevel);
+    final bool shouldPerformRoundTripValidation = enableRoundTripValidation && _isRoundTripValidationRequested(validationLevel);
 
     try {
       // Step 1: Basic structure validation
@@ -149,7 +154,7 @@ class PostWriteValidator {
       warnings.addAll(containerResult.warnings);
 
       // Step 3: Tag consistency validation (if deep validation enabled)
-      if (enableDeepValidation) {
+      if (shouldPerformDeepValidation) {
         final tagResult = await _validateTagConsistency(
           encodedBytes: encodedBytes,
           formatStrategy: formatStrategy,
@@ -159,7 +164,7 @@ class PostWriteValidator {
       }
 
       // Step 4: Round-trip validation (if enabled and no critical errors)
-      if (enableRoundTripValidation && !_hasCriticalErrors(errors)) {
+      if (shouldPerformRoundTripValidation && !_hasCriticalErrors(errors)) {
         final roundTripResult = await _validateRoundTrip(
           encodedBytes: encodedBytes,
           originalTags: originalTags,
@@ -174,7 +179,10 @@ class PostWriteValidator {
         isValid: errors.isEmpty,
         errors: errors,
         warnings: warnings,
-        validationLevel: _getValidationLevel(),
+        validationLevel: _getValidationLevel(
+          effectiveDeepValidation: shouldPerformDeepValidation,
+          effectiveRoundTripValidation: shouldPerformRoundTripValidation,
+        ),
       );
     } catch (e) {
       // Convert exceptions to validation errors
@@ -189,7 +197,10 @@ class PostWriteValidator {
         isValid: false,
         errors: [error],
         warnings: warnings,
-        validationLevel: _getValidationLevel(),
+        validationLevel: _getValidationLevel(
+          effectiveDeepValidation: shouldPerformDeepValidation,
+          effectiveRoundTripValidation: shouldPerformRoundTripValidation,
+        ),
       );
     }
   }
@@ -212,7 +223,15 @@ class PostWriteValidator {
           errorCode: 'EMPTY_FILE',
         ),
       );
-      return ValidationResult(isValid: false, errors: errors, warnings: warnings, validationLevel: _getValidationLevel());
+      return ValidationResult(
+        isValid: false,
+        errors: errors,
+        warnings: warnings,
+        validationLevel: _getValidationLevel(
+          effectiveDeepValidation: enableDeepValidation,
+          effectiveRoundTripValidation: enableRoundTripValidation,
+        ),
+      );
     }
 
     // Check maximum file size for validation
@@ -997,12 +1016,33 @@ class PostWriteValidator {
     return errors.any((error) => error.severity == ValidationSeverity.critical);
   }
 
-  String _getValidationLevel() {
+  String _getValidationLevel({
+    required bool effectiveDeepValidation,
+    required bool effectiveRoundTripValidation,
+  }) {
     final levels = <String>[];
     levels.add('basic');
-    if (enableDeepValidation) levels.add('deep');
-    if (enableRoundTripValidation) levels.add('round-trip');
+    if (effectiveDeepValidation) levels.add('deep');
+    if (effectiveRoundTripValidation) levels.add('round-trip');
     return levels.join('+');
+  }
+
+  bool _isDeepValidationRequested(ValidationLevel? validationLevel) {
+    if (validationLevel == null) {
+      // Back-compat: if no override is provided, use the validator's flags.
+      return true;
+    }
+
+    return validationLevel != ValidationLevel.basic;
+  }
+
+  bool _isRoundTripValidationRequested(ValidationLevel? validationLevel) {
+    if (validationLevel == null) {
+      // Back-compat: if no override is provided, use the validator's flags.
+      return true;
+    }
+
+    return validationLevel == ValidationLevel.strict;
   }
 
   bool _isRequiredContainer(ContainerKind containerKind, FormatStrategy formatStrategy) {
