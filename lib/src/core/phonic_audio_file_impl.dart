@@ -77,7 +77,7 @@ import 'tag_semantics.dart';
 /// - **Extensibility**: Supports custom merge rules and normalization strategies
 ///
 /// ### In-Memory Tag Storage
-/// - **Structure**: Map<TagKey, List<MetadataTag>> for efficient access
+/// - **Structure**: `Map<TagKey, List<MetadataTag>>` for efficient access
 /// - **Benefits**: O(1) tag lookup, support for multi-valued fields, provenance preservation
 /// - **Memory Efficiency**: Lazy loading for large payloads, string interning for common values
 ///
@@ -203,7 +203,7 @@ import 'tag_semantics.dart';
 /// for (final filePath in files) {
 ///   PhonicAudioFile? audioFile;
 ///   try {
-///     audioFile = await Phonic.fromFile(filePath);
+///     audioFile = await Phonic.fromFileAsync(filePath);
 ///
 ///     // Process metadata
 ///     final title = audioFile.getTag(TagKey.title);
@@ -1171,7 +1171,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   ///
   /// ### Single File Processing
   /// ```dart
-  /// final audioFile = await Phonic.fromFile('song.mp3');
+  /// final audioFile = await Phonic.fromFileAsync('song.mp3');
   /// try {
   ///   // Work with the audio file
   ///   audioFile.setTag(TitleTag('New Title'));
@@ -1186,7 +1186,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   /// ### Batch Processing
   /// ```dart
   /// for (final filePath in audioFiles) {
-  ///   final audioFile = await Phonic.fromFile(filePath);
+  ///   final audioFile = await Phonic.fromFileAsync(filePath);
   ///   try {
   ///     // Process the file
   ///     processAudioFile(audioFile);
@@ -1203,7 +1203,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   /// try {
   ///   // Load multiple files
   ///   for (final path in filePaths) {
-  ///     audioFiles.add(await Phonic.fromFile(path));
+  ///     audioFiles.add(await Phonic.fromFileAsync(path));
   ///   }
   ///   // Work with collection...
   /// } finally {
@@ -1536,7 +1536,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   /// Example:
   /// ```dart
   /// // Extract audio data for processing
-  /// final audioFile = await Phonic.fromFile('song.mp3');
+  /// final audioFile = await Phonic.fromFileAsync('song.mp3');
   /// final rawAudio = audioFile.audioData;
   ///
   /// // Process raw audio (e.g., apply effects, analyze waveform)

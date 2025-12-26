@@ -13,13 +13,13 @@ class IsolateProcessor {
   /// This validates the file can be parsed and returns success/failure status.
   /// We don't transfer tag data since we'll re-parse in the main isolate
   /// after validation.
-  static Future<_IsolateProcessingResult> processInIsolate(
+  static Future<IsolateProcessingResult> processInIsolate(
     Uint8List bytes,
     String? filename,
   ) => processInIsolateAsync(bytes, filename);
 
   /// Processes audio file bytes in an isolate.
-  static Future<_IsolateProcessingResult> processInIsolateAsync(
+  static Future<IsolateProcessingResult> processInIsolateAsync(
     Uint8List bytes,
     String? filename,
   ) async {
@@ -32,28 +32,33 @@ class IsolateProcessor {
   }
 
   /// Runs the processing logic.
-  static Future<_IsolateProcessingResult> _runInIsolateAsync(
+  static Future<IsolateProcessingResult> _runInIsolateAsync(
     _IsolateProcessingRequest request,
   ) async {
-    return _processInIsolate(request);
+    return _processInIsolateAsync(request);
   }
 
   /// Validates the file can be parsed.
-  static _IsolateProcessingResult _processInIsolate(
-    _IsolateProcessingRequest request,
-  ) {
+  static Future<IsolateProcessingResult> _processInIsolateAsync(_IsolateProcessingRequest request) async {
     try {
       // Parse the file to validate it's supported and readable
       // This is the expensive operation we want to offload
-      final _ = Phonic.fromBytes(request.fileBytes, request.filename);
+      final audioFile = await Phonic.fromBytesAsync(
+        request.fileBytes,
+        request.filename,
+      );
+
+      // We only validate parseability in the isolate.
+      // Dispose to avoid retaining large in-memory caches.
+      audioFile.dispose();
 
       // If we got here, the file is valid and parseable
-      return const _IsolateProcessingResult(
+      return const IsolateProcessingResult(
         success: true,
       );
     } catch (e) {
       // Return error information
-      return _IsolateProcessingResult(
+      return IsolateProcessingResult(
         success: false,
         errorMessage: e.toString(),
       );
@@ -63,13 +68,13 @@ class IsolateProcessor {
   /// Reconstructs a PhonicAudioFile from isolate processing result.
   ///
   /// Simply re-parses the file in the main isolate after validation.
-  static PhonicAudioFile reconstructFromResult(
-    _IsolateProcessingResult result,
+  static Future<PhonicAudioFile> reconstructFromResultAsync(
+    IsolateProcessingResult result,
     Uint8List fileBytes,
     String? filename,
-  ) {
+  ) async {
     // Simply parse the file normally - the isolate already validated it works
-    return Phonic.fromBytes(fileBytes, filename);
+    return Phonic.fromBytesAsync(fileBytes, filename);
   }
 }
 
@@ -89,7 +94,7 @@ class _IsolateProcessingRequest {
 }
 
 /// Result from isolate processing.
-class _IsolateProcessingResult {
+class IsolateProcessingResult {
   /// Whether processing was successful.
   final bool success;
 
@@ -97,7 +102,7 @@ class _IsolateProcessingResult {
   final String? errorMessage;
 
   /// Creates a new isolate processing result.
-  const _IsolateProcessingResult({
+  const IsolateProcessingResult({
     required this.success,
     this.errorMessage,
   });

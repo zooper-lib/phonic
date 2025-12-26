@@ -910,7 +910,7 @@ All public APIs must include comprehensive Dart documentation with:
 ///
 /// Example usage:
 /// ```dart
-/// final audioFile = await Phonic.fromFile('song.mp3');
+/// final audioFile = await Phonic.fromFileAsync('song.mp3');
 /// final title = audioFile.getTag(TagKey.title)?.value as String?;
 /// audioFile.setTag(TitleTag('New Title'));
 /// await File('output.mp3').writeAsBytes(await audioFile.encode());

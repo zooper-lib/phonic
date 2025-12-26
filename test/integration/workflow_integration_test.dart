@@ -32,7 +32,7 @@ void main() {
           for (final testFile in testFiles) {
             try {
               // Test loading
-              final audioFile = await Phonic.fromFile(testFile);
+              final audioFile = await Phonic.fromFileAsync(testFile);
               loadResults[testFile] = true;
 
               // Test modification
@@ -96,7 +96,7 @@ void main() {
     group('Specific Functionality Tests', () {
       test('Metadata modification round-trip', () async {
         final testFile = testFiles.first;
-        final audioFile = await Phonic.fromFile(testFile);
+        final audioFile = await Phonic.fromFileAsync(testFile);
 
         // Record original values
         final originalTitle = audioFile.getTag(TagKey.title)?.value;
@@ -156,7 +156,7 @@ void main() {
 
       test('Genre handling workflow', () async {
         final testFile = testFiles.first;
-        final audioFile = await Phonic.fromFile(testFile);
+        final audioFile = await Phonic.fromFileAsync(testFile);
 
         // Test multi-valued genre handling
         final originalGenres = audioFile.getTags(TagKey.genre);
@@ -187,7 +187,7 @@ void main() {
 
       test('Artwork workflow', () async {
         final testFile = testFiles.first;
-        final audioFile = await Phonic.fromFile(testFile);
+        final audioFile = await Phonic.fromFileAsync(testFile);
 
         // Check existing artwork
         final existingArtwork = audioFile.getTags(TagKey.artwork);
@@ -228,7 +228,7 @@ void main() {
 
         for (final strategy in EncodingStrategy.values) {
           try {
-            final audioFile = await Phonic.fromFile(testFile);
+            final audioFile = await Phonic.fromFileAsync(testFile);
 
             // Make consistent modifications
             audioFile.setTag(const AlbumTag('Strategy Test Album'));
@@ -298,7 +298,7 @@ void main() {
 
         for (final testFile in testFiles) {
           try {
-            final audioFile = await Phonic.fromFile(testFile);
+            final audioFile = await Phonic.fromFileAsync(testFile);
 
             // Quick modifications
             audioFile.setTag(const AlbumTag('Batch Performance Test'));
@@ -343,7 +343,7 @@ void main() {
 
 /// Tests basic workflow for a single file.
 Future<bool> _testBasicWorkflow(String filePath, EncodingStrategy strategy) async {
-  final audioFile = await Phonic.fromFile(filePath);
+  final audioFile = await Phonic.fromFileAsync(filePath);
 
   try {
     // Modify file

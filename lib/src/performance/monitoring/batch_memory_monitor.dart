@@ -24,7 +24,7 @@ import 'memory_usage_report.dart';
 ///
 /// for (int i = 0; i < largeFileCollection.length; i++) {
 ///   // Process file...
-///   final audioFile = await Phonic.fromFile(largeFileCollection[i]);
+///   final audioFile = await Phonic.fromFileAsync(largeFileCollection[i]);
 ///   processAudioFile(audioFile);
 ///
 ///   // This automatically creates checkpoints every 100 items
@@ -144,7 +144,7 @@ class BatchMemoryMonitor {
   /// monitor.start();
   ///
   /// for (int i = 0; i < audioFiles.length; i++) {
-  ///   final audioFile = await Phonic.fromFile(audioFiles[i]);
+  ///   final audioFile = await Phonic.fromFileAsync(audioFiles[i]);
   ///   processAudioFile(audioFile);
   ///
   ///   // Checkpoints created automatically at items 50, 100, 150, etc.

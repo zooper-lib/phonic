@@ -24,7 +24,7 @@ import 'tag_key.dart';
 ///
 /// ### Reading Tags
 /// ```dart
-/// final audioFile = await Phonic.fromFile('song.mp3');
+/// final audioFile = await Phonic.fromFileAsync('song.mp3');
 ///
 /// // Get single tag value
 /// final titleTag = audioFile.getTag(TagKey.title);

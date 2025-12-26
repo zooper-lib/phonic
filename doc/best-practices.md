@@ -11,7 +11,7 @@ Always dispose of audio file instances to free memory:
 ```dart
 // ❌ Memory leak - missing dispose
 Future<String> badExample(String filePath) async {
-  final audioFile = await Phonic.fromFile(filePath);
+  final audioFile = await Phonic.fromFileAsync(filePath);
   final title = audioFile.getTag(TagKey.title);
   return title?.value ?? 'Unknown';
   // Missing: audioFile.dispose();
@@ -19,7 +19,7 @@ Future<String> badExample(String filePath) async {
 
 // ✅ Proper resource management
 Future<String> goodExample(String filePath) async {
-  final audioFile = await Phonic.fromFile(filePath);
+  final audioFile = await Phonic.fromFileAsync(filePath);
   try {
     final title = audioFile.getTag(TagKey.title);
     return title?.value ?? 'Unknown';
@@ -33,7 +33,7 @@ Future<T> withAudioFile<T>(
   String filePath,
   Future<T> Function(PhonicAudioFile) action,
 ) async {
-  final audioFile = await Phonic.fromFile(filePath);
+  final audioFile = await Phonic.fromFileAsync(filePath);
   try {
     return await action(audioFile);
   } finally {
@@ -53,7 +53,7 @@ Future<void> badBatchProcessing(List<String> filePaths) async {
 
   // Loads all files at once - memory intensive
   for (final path in filePaths) {
-    allFiles.add(await Phonic.fromFile(path));
+    allFiles.add(await Phonic.fromFileAsync(path));
   }
 
   // Process all at once
@@ -92,7 +92,7 @@ Always handle potential errors gracefully:
 // ✅ Comprehensive error handling
 Future<Map<String, String>> safeReadMetadata(String filePath) async {
   try {
-    final audioFile = await Phonic.fromFile(filePath);
+    final audioFile = await Phonic.fromFileAsync(filePath);
 
     try {
       return {
@@ -598,7 +598,7 @@ final monitor = PerformanceMonitor();
 
 Future<void> monitoredOperation(String filePath) async {
   monitor.startTiming('file_load');
-  final audioFile = await Phonic.fromFile(filePath);
+  final audioFile = await Phonic.fromFileAsync(filePath);
   monitor.endTiming('file_load');
 
   try {

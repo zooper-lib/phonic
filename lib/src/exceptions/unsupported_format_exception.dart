@@ -24,7 +24,7 @@ import 'phonic_exception.dart';
 /// ### Exception Handling
 /// ```dart
 /// try {
-///   final audioFile = await Phonic.fromFile('unknown.xyz');
+///   final audioFile = await Phonic.fromFileAsync('unknown.xyz');
 /// } on UnsupportedFormatException catch (e) {
 ///   print('Unsupported format: ${e.message}');
 ///   // Provide user-friendly error message

@@ -15,7 +15,7 @@ void main() {
 
       // Step 1: Read original
       print('Step 1: Reading original file...');
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
 
       final originalGenreTags = audioFile.getTags(TagKey.genre);
       print('  Original genre tags count: ${originalGenreTags.length}');
@@ -35,7 +35,7 @@ void main() {
 
       // Step 3: Read back
       print('\nStep 3: Reading back...');
-      final audioFile2 = await Phonic.fromFile('test/fixtures/mp4/genre_test.mp4');
+      final audioFile2 = await Phonic.fromFileAsync('test/fixtures/mp4/genre_test.mp4');
 
       final roundTripGenreTags = audioFile2.getTags(TagKey.genre);
       print('  Round-trip genre tags count: ${roundTripGenreTags.length}');

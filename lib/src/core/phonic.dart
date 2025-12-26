@@ -58,7 +58,7 @@ import 'phonic_audio_file_impl.dart';
 /// ### Loading from File
 /// ```dart
 /// // Load audio file from filesystem
-/// final audioFile = await Phonic.fromFile('/path/to/song.mp3');
+/// final audioFile = await Phonic.fromFileAsync('/path/to/song.mp3');
 ///
 /// // Read metadata
 /// final title = audioFile.getTag(TagKey.title);
@@ -78,7 +78,7 @@ import 'phonic_audio_file_impl.dart';
 /// ```dart
 /// // Load from byte array (e.g., from network, database)
 /// final bytes = await downloadAudioFile();
-/// final audioFile = Phonic.fromBytes(bytes, 'song.mp3');
+/// final audioFile = await Phonic.fromBytesAsync(bytes, 'song.mp3');
 ///
 /// // Modify metadata
 /// audioFile.setTag(TitleTag('New Title'));
@@ -98,7 +98,7 @@ import 'phonic_audio_file_impl.dart';
 /// ### Error Handling
 /// ```dart
 /// try {
-///   final audioFile = await Phonic.fromFile('unknown_format.xyz');
+///   final audioFile = await Phonic.fromFileAsync('unknown_format.xyz');
 ///   // Use audioFile...
 /// } on UnsupportedFormatException catch (e) {
 ///   // Handle unsupported format: e.message
@@ -113,7 +113,7 @@ import 'phonic_audio_file_impl.dart';
 ///
 /// for (final filePath in files) {
 ///   try {
-///     final audioFile = await Phonic.fromFile(filePath);
+///     final audioFile = await Phonic.fromFileAsync(filePath);
 ///
 ///     // Process metadata
 ///     final title = audioFile.getTag(TagKey.title);
@@ -218,14 +218,14 @@ class Phonic {
   /// Example:
   /// ```dart
   /// // Basic usage
-  /// final audioFile = await Phonic.fromFile('/music/song.mp3');
+  /// final audioFile = await Phonic.fromFileAsync('/music/song.mp3');
   /// final title = audioFile.getTag(TagKey.title);
   /// final titleValue = title?.value;
   /// audioFile.dispose();
   ///
   /// // With error handling
   /// try {
-  ///   final audioFile = await Phonic.fromFile(filePath);
+  ///   final audioFile = await Phonic.fromFileAsync(filePath);
   ///   // Process the file...
   ///   audioFile.dispose();
   /// } on FileSystemException catch (e) {
@@ -238,17 +238,13 @@ class Phonic {
   /// for (final path in audioPaths) {
   ///   PhonicAudioFile? audioFile;
   ///   try {
-  ///     audioFile = await Phonic.fromFile(path);
+  ///     audioFile = await Phonic.fromFileAsync(path);
   ///     await processAudioFile(audioFile);
   ///   } finally {
   ///     audioFile?.dispose();
   ///   }
   /// }
   /// ```
-  /// Alias for [fromFileAsync]. Prefer [fromFileAsync] for async naming consistency.
-  static Future<PhonicAudioFile> fromFile(String path) => fromFileAsync(path);
-
-  /// Creates a PhonicAudioFile instance from a file path.
   static Future<PhonicAudioFile> fromFileAsync(String path) async {
     if (path.isEmpty) {
       throw ArgumentError.value(path, 'path', 'Path cannot be empty');
@@ -260,7 +256,7 @@ class Phonic {
       final fileBytes = await file.readAsBytes();
 
       // Create from bytes with filename hint for format detection
-      return fromBytes(fileBytes, path);
+      return await fromBytesAsync(fileBytes, path);
     } on FileSystemException {
       // Re-throw filesystem exceptions as-is
       rethrow;
@@ -329,15 +325,15 @@ class Phonic {
   /// ```dart
   /// // From file bytes
   /// final bytes = await File('song.mp3').readAsBytes();
-  /// final audioFile = Phonic.fromBytes(bytes, 'song.mp3');
+  /// final audioFile = await Phonic.fromBytesAsync(bytes, 'song.mp3');
   ///
   /// // From network
   /// final response = await http.get(Uri.parse('https://example.com/song.mp3'));
-  /// final audioFile = Phonic.fromBytes(response.bodyBytes, 'downloaded.mp3');
+  /// final audioFile = await Phonic.fromBytesAsync(response.bodyBytes, 'downloaded.mp3');
   ///
   /// // From database
   /// final bytes = await database.getAudioBlob(songId);
-  /// final audioFile = Phonic.fromBytes(bytes); // No filename hint
+  /// final audioFile = await Phonic.fromBytesAsync(bytes); // No filename hint
   ///
   /// // Process and cleanup
   /// try {
@@ -351,7 +347,7 @@ class Phonic {
   /// ### Advanced Usage
   /// ```dart
   /// // Custom processing with format-specific handling
-  /// final audioFile = Phonic.fromBytes(audioBytes, filename);
+  /// final audioFile = await Phonic.fromBytesAsync(audioBytes, filename);
   ///
   /// // Check detected format
   /// final strategy = _detectFormatStrategy(audioBytes, filename);
@@ -370,7 +366,10 @@ class Phonic {
   ///
   /// audioFile.dispose();
   /// ```
-  static PhonicAudioFile fromBytes(Uint8List bytes, [String? filename]) {
+  static Future<PhonicAudioFile> fromBytesAsync(
+    Uint8List bytes, [
+    String? filename,
+  ]) async {
     if (bytes.isEmpty) {
       throw ArgumentError.value(bytes, 'bytes', 'Bytes cannot be empty');
     }
@@ -384,7 +383,10 @@ class Phonic {
     // Create merge policy from format strategy
     final mergePolicy = MergePolicy.fromStrategy(formatStrategy);
 
-    // Create and return the implementation
+    // Create and return the implementation.
+    //
+    // We fully load tags before returning so callers can immediately read
+    // metadata without relying on background work completion.
     final audioFile = PhonicAudioFileImpl(
       fileBytes: bytes,
       formatStrategy: formatStrategy,
@@ -392,9 +394,7 @@ class Phonic {
       mergePolicy: mergePolicy,
     );
 
-    // Automatically load tags from the file for user convenience.
-    // This is fire-and-forget because fromBytes() is synchronous.
-    unawaited(audioFile.extractContainersAndDecodeAsync());
+    await audioFile.extractContainersAndDecodeAsync();
 
     return audioFile;
   }
@@ -742,7 +742,7 @@ class Phonic {
   ///
   /// ## API Compatibility
   ///
-  /// Returns the same `PhonicAudioFile` interface as `fromBytes()`, making
+  /// Returns the same `PhonicAudioFile` interface as `fromBytesAsync()`, making
   /// it a drop-in replacement for performance-critical scenarios.
   ///
   /// Parameters:
@@ -801,7 +801,7 @@ class Phonic {
     }
 
     // Reconstruct PhonicAudioFile from isolate result
-    return IsolateProcessor.reconstructFromResult(result, bytes, filename);
+    return IsolateProcessor.reconstructFromResultAsync(result, bytes, filename);
   }
 
   /// Clears the internal codec registry cache.

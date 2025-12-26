@@ -21,7 +21,7 @@ void main() {
       test('Load and modify MP4 metadata', () async {
         if (mp4FixtureFiles.isEmpty) return;
 
-        final audioFile = await Phonic.fromFile(mp4FixtureFiles.first);
+        final audioFile = await Phonic.fromFileAsync(mp4FixtureFiles.first);
 
         try {
           audioFile.setTag(const TitleTag('MP4 Test Title'));
@@ -50,7 +50,7 @@ void main() {
       test('MP4 multi-valued genre tags', () async {
         if (mp4FixtureFiles.isEmpty) return;
 
-        final audioFile = await Phonic.fromFile(mp4FixtureFiles.first);
+        final audioFile = await Phonic.fromFileAsync(mp4FixtureFiles.first);
 
         try {
           audioFile.setTag(GenreTag(const ['Electronic', 'Ambient', 'Test']));
@@ -68,7 +68,7 @@ void main() {
       test('MP4 artwork handling', () async {
         if (mp4FixtureFiles.isEmpty) return;
 
-        final audioFile = await Phonic.fromFile(mp4FixtureFiles.first);
+        final audioFile = await Phonic.fromFileAsync(mp4FixtureFiles.first);
 
         try {
           final testArtwork = ArtworkData(
@@ -95,7 +95,7 @@ void main() {
       test('Metadata survives encode/decode cycle', () async {
         if (mp4FixtureFiles.isEmpty) return;
 
-        final audioFile = await Phonic.fromFile(mp4FixtureFiles.first);
+        final audioFile = await Phonic.fromFileAsync(mp4FixtureFiles.first);
 
         try {
           final testData = {
@@ -121,7 +121,7 @@ void main() {
 
           audioFile.dispose();
 
-          final decodedFile = Phonic.fromBytes(encodedBytes);
+          final decodedFile = await Phonic.fromBytesAsync(encodedBytes);
 
           expect(decodedFile.getTag(TagKey.title)?.value, equals(testData['title']));
           expect(decodedFile.getTag(TagKey.artist)?.value, equals(testData['artist']));
@@ -142,7 +142,7 @@ void main() {
         test('Encoding with ${strategy.name} strategy', () async {
           if (mp4FixtureFiles.isEmpty) return;
 
-          final audioFile = await Phonic.fromFile(mp4FixtureFiles.first);
+          final audioFile = await Phonic.fromFileAsync(mp4FixtureFiles.first);
 
           try {
             audioFile.setTag(const TitleTag('Strategy Test'));
@@ -171,7 +171,7 @@ void main() {
         var processedCount = 0;
 
         for (final file in mp4FixtureFiles) {
-          final audioFile = await Phonic.fromFile(file);
+          final audioFile = await Phonic.fromFileAsync(file);
 
           try {
             audioFile.setTag(const AlbumTag('Batch Test'));

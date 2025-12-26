@@ -32,7 +32,7 @@ void main() {
         final bytes = _createMinimalMp3WithMetadata();
 
         // Process with standard method
-        final audioFile1 = Phonic.fromBytes(bytes, 'test.mp3');
+        final audioFile1 = await Phonic.fromBytesAsync(bytes, 'test.mp3');
         final title1 = audioFile1.getTag(TagKey.title)?.value;
         final artist1 = audioFile1.getTag(TagKey.artist)?.value;
         audioFile1.dispose();
@@ -124,7 +124,7 @@ void main() {
         final bytes = _createMp3WithVariousTags();
 
         // Standard method
-        final audioFile1 = Phonic.fromBytes(bytes);
+        final audioFile1 = await Phonic.fromBytesAsync(bytes);
         final tagCount1 = audioFile1.getAllTags().length;
         audioFile1.dispose();
 

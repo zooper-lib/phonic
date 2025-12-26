@@ -54,7 +54,7 @@ part '../tags/year_tag.dart';
 /// The generic type parameter [T] ensures type safety for tag values:
 /// - String for text fields (title, artist, album, etc.)
 /// - int for numeric fields (trackNumber, year, rating, etc.)
-/// - List<String> for multi-valued text fields (genre)
+/// - `List<String>` for multi-valued text fields (genre)
 /// - ArtworkData for artwork fields
 /// - Other specialized types as needed
 ///
@@ -107,11 +107,11 @@ sealed class MetadataTag<T> extends Equatable {
   /// and corresponds to the semantic meaning of the tag key:
   /// - Text fields use String values (title, artist, album, etc.)
   /// - Numeric fields use int values (trackNumber, year, rating, etc.)
-  /// - Multi-valued text fields use List<String> values (genre)
+  /// - Multi-valued text fields use `List<String>` values (genre)
   /// - Artwork fields use ArtworkData values
   /// - Custom fields may use specialized types
   ///
-  /// For List<String> values like GenreTag, the list is made immutable
+  /// For `List<String>` values like GenreTag, the list is made immutable
   /// to ensure thread safety and prevent accidental modifications.
   ///
   /// Values are immutable once created. To change a value, create a new

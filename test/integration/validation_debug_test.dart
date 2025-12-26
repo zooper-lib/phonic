@@ -23,7 +23,7 @@ void main() {
         print('\n=== DEBUGGING ${testFile.split('/').last} ===');
 
         try {
-          final audioFile = await Phonic.fromFile(testFile);
+          final audioFile = await Phonic.fromFileAsync(testFile);
 
           // Show original metadata
           final titleTag = audioFile.getTag(TagKey.title) as TitleTag?;
@@ -78,7 +78,7 @@ void main() {
       final testFile = testFiles.first;
       print('\n=== TESTING VALIDATION LEVELS on ${testFile.split('/').last} ===');
 
-      final audioFile = await Phonic.fromFile(testFile);
+      final audioFile = await Phonic.fromFileAsync(testFile);
       audioFile.setTag(const TitleTag('Validation Test'));
 
       for (final level in ValidationLevel.values) {
@@ -104,7 +104,7 @@ void main() {
 
       for (final strategy in EncodingStrategy.values) {
         try {
-          final audioFile = await Phonic.fromFile(testFile);
+          final audioFile = await Phonic.fromFileAsync(testFile);
           audioFile.setTag(const TitleTag('Strategy Test'));
 
           final options = EncodingOptions(

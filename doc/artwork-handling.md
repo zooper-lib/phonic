@@ -437,7 +437,7 @@ Future<void> processArtworkBatch(List<String> audioFiles) async {
 
   try {
     for (final filePath in audioFiles) {
-      final audioFile = await Phonic.fromFile(filePath);
+      final audioFile = await Phonic.fromFileAsync(filePath);
 
       try {
         // Process artwork with cache

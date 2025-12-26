@@ -18,7 +18,7 @@
 /// import 'package:phonic/phonic.dart';
 ///
 /// // Load audio file and read metadata
-/// final audioFile = await Phonic.fromFile('song.mp3');
+/// final audioFile = await Phonic.fromFileAsync('song.mp3');
 /// final title = audioFile.getTag(TagKey.title);
 /// final artist = audioFile.getTag(TagKey.artist);
 /// final genres = audioFile.getTags(TagKey.genre);

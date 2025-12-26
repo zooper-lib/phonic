@@ -172,7 +172,7 @@ Future<PhonicAudioFile> loadAudioFile(String path) async {
     return Phonic.fromFileInIsolate(path);
   } else {
     print('Using standard method for small file');
-    return Phonic.fromFile(path);
+    return Phonic.fromFileAsync(path);
   }
 }
 ```
@@ -263,7 +263,7 @@ The isolate methods return the exact same `PhonicAudioFile` interface:
 
 ```dart
 // These are functionally identical after loading:
-final audioFile1 = await Phonic.fromFile('song.mp3');
+final audioFile1 = await Phonic.fromFileAsync('song.mp3');
 final audioFile2 = await Phonic.fromFileInIsolate('song.mp3');
 
 // Both support the same operations:
@@ -297,7 +297,7 @@ Future<void> processLibrary(List<String> files) async {
 final smallFile = await Phonic.fromFileInIsolate('small.mp3'); // 50KB
 
 // ✅ Good: Use standard method for small files
-final smallFile = await Phonic.fromFile('small.mp3');
+final smallFile = await Phonic.fromFileAsync('small.mp3');
 ```
 
 ### 3. Dispose Properly
@@ -336,7 +336,7 @@ Migrating is straightforward - just add `InIsolate` to the method name:
 
 ```dart
 // Before
-final audioFile = await Phonic.fromFile(path);
+final audioFile = await Phonic.fromFileAsync(path);
 
 // After
 final audioFile = await Phonic.fromFileInIsolate(path);
@@ -350,7 +350,7 @@ You can mix both approaches:
 
 ```dart
 // Use standard for synchronous reads
-final config = await Phonic.fromFile('config.mp3');
+final config = await Phonic.fromFileAsync('config.mp3');
 
 // Use isolate for user-initiated operations
 final userFile = await Phonic.fromFileInIsolate(userSelectedPath);

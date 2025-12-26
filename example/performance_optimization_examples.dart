@@ -48,7 +48,7 @@ Future<void> lazyLoadingOptimization() async {
 
   try {
     // Create file with large artwork
-    final audioFile = Phonic.fromBytes(_createMp3WithLargeArtwork(), 'large_artwork.mp3');
+    final audioFile = await Phonic.fromBytesAsync(_createMp3WithLargeArtwork(), 'large_artwork.mp3');
 
     print('File loaded in ${stopwatch.elapsedMilliseconds}ms');
     stopwatch.reset();
@@ -116,7 +116,7 @@ Future<void> batchProcessingOptimization() async {
   for (final (filename, bytes) in testFiles) {
     PhonicAudioFile? audioFile;
     try {
-      audioFile = Phonic.fromBytes(bytes, filename);
+      audioFile = await Phonic.fromBytesAsync(bytes, filename);
 
       // Quick metadata extraction
       final title = audioFile.getTag(TagKey.title);
@@ -149,7 +149,7 @@ Future<void> batchProcessingOptimization() async {
     try {
       // Load batch
       for (final (filename, bytes) in batch) {
-        final audioFile = Phonic.fromBytes(bytes, filename);
+        final audioFile = await Phonic.fromBytesAsync(bytes, filename);
         batchFiles.add(audioFile);
       }
 
@@ -208,14 +208,14 @@ Future<void> cachingStrategies() async {
   final stopwatch = Stopwatch()..start();
 
   // First file load - codec registry created
-  final audioFile1 = Phonic.fromBytes(_createTestMp3(1), 'test1.mp3');
+  final audioFile1 = await Phonic.fromBytesAsync(_createTestMp3(1), 'test1.mp3');
   final firstLoadTime = stopwatch.elapsedMilliseconds;
   audioFile1.dispose();
 
   stopwatch.reset();
 
   // Second file load - codec registry reused
-  final audioFile2 = Phonic.fromBytes(_createTestMp3(2), 'test2.mp3');
+  final audioFile2 = await Phonic.fromBytesAsync(_createTestMp3(2), 'test2.mp3');
   final secondLoadTime = stopwatch.elapsedMilliseconds;
   audioFile2.dispose();
 
@@ -225,7 +225,7 @@ Future<void> cachingStrategies() async {
 
   // Strategy 2: Metadata caching for repeated access
   print('\nStrategy 2: Metadata caching simulation');
-  final audioFile = Phonic.fromBytes(_createTestMp3(1), 'cached.mp3');
+  final audioFile = await Phonic.fromBytesAsync(_createTestMp3(1), 'cached.mp3');
 
   stopwatch.reset();
   // First access - parsing required
@@ -249,7 +249,7 @@ Future<void> cachingStrategies() async {
 
   stopwatch.reset();
   for (int i = 0; i < sameFormatFiles.length; i++) {
-    final audioFile = Phonic.fromBytes(sameFormatFiles[i], 'same_format_$i.mp3');
+    final audioFile = await Phonic.fromBytesAsync(sameFormatFiles[i], 'same_format_$i.mp3');
     audioFile.dispose();
   }
   final totalTime = stopwatch.elapsedMilliseconds;
@@ -269,7 +269,7 @@ Future<void> resourceManagement() async {
   print('Pattern 1: RAII with try-finally');
   PhonicAudioFile? audioFile;
   try {
-    audioFile = Phonic.fromBytes(_createTestMp3(1), 'raii.mp3');
+    audioFile = await Phonic.fromBytesAsync(_createTestMp3(1), 'raii.mp3');
 
     // Use the resource
     final title = audioFile.getTag(TagKey.title);
@@ -287,7 +287,7 @@ Future<void> resourceManagement() async {
 
   // Pre-create resources
   for (int i = 0; i < poolSize; i++) {
-    final resource = Phonic.fromBytes(_createTestMp3(i), 'pool_$i.mp3');
+    final resource = await Phonic.fromBytesAsync(_createTestMp3(i), 'pool_$i.mp3');
     resourcePool.add(resource);
   }
   print('  Created resource pool with $poolSize items');
@@ -311,7 +311,7 @@ Future<void> resourceManagement() async {
 
   // Create resources with weak references
   for (int i = 0; i < 3; i++) {
-    final audioFile = Phonic.fromBytes(_createTestMp3(i), 'weak_$i.mp3');
+    final audioFile = await Phonic.fromBytesAsync(_createTestMp3(i), 'weak_$i.mp3');
     weakReferences.add(WeakReference(audioFile));
 
     // Simulate some processing
@@ -348,7 +348,7 @@ Future<void> performanceMonitoring() async {
   try {
     // Time file loading
     final stopwatch = Stopwatch()..start();
-    audioFile = Phonic.fromBytes(_createMp3WithLargeArtwork(), 'monitor.mp3');
+    audioFile = await Phonic.fromBytesAsync(_createMp3WithLargeArtwork(), 'monitor.mp3');
     operations['load'] = stopwatch.elapsedMilliseconds;
 
     // Time tag reading
@@ -388,7 +388,7 @@ Future<void> performanceMonitoring() async {
   // Load multiple files
   final files = <PhonicAudioFile>[];
   for (int i = 0; i < 10; i++) {
-    files.add(Phonic.fromBytes(_createTestMp3(i), 'memory_$i.mp3'));
+    files.add(await Phonic.fromBytesAsync(_createTestMp3(i), 'memory_$i.mp3'));
   }
   memorySnapshots['after_loading'] = _getSimulatedMemoryUsage();
 
@@ -418,7 +418,7 @@ Future<void> performanceMonitoring() async {
   while (DateTime.now().isBefore(endTime)) {
     PhonicAudioFile? testFile;
     try {
-      testFile = Phonic.fromBytes(_createTestMp3(operationCount), 'throughput_$operationCount.mp3');
+      testFile = await Phonic.fromBytesAsync(_createTestMp3(operationCount), 'throughput_$operationCount.mp3');
       final title = testFile.getTag(TagKey.title);
       if (title != null) operationCount++;
     } finally {
@@ -449,7 +449,7 @@ Future<void> largeCollectionHandling() async {
   for (int i = 0; i < collectionSize; i++) {
     PhonicAudioFile? audioFile;
     try {
-      audioFile = Phonic.fromBytes(_createTestMp3(i), 'collection_$i.mp3');
+      audioFile = await Phonic.fromBytesAsync(_createTestMp3(i), 'collection_$i.mp3');
 
       // Quick metadata extraction
       final title = audioFile.getTag(TagKey.title);
@@ -484,7 +484,7 @@ Future<void> largeCollectionHandling() async {
     for (int i = batchStart; i < batchEnd; i++) {
       PhonicAudioFile? audioFile;
       try {
-        audioFile = Phonic.fromBytes(_createTestMp3(i), 'batch_$i.mp3');
+        audioFile = await Phonic.fromBytesAsync(_createTestMp3(i), 'batch_$i.mp3');
         final title = audioFile.getTag(TagKey.title);
         if (title != null) {
           batchResults.add(title.value);
@@ -512,7 +512,7 @@ Future<void> largeCollectionHandling() async {
     PhonicAudioFile? audioFile;
     try {
       final filename = 'indexed_$i.mp3';
-      audioFile = Phonic.fromBytes(_createTestMp3(i), filename);
+      audioFile = await Phonic.fromBytesAsync(_createTestMp3(i), filename);
 
       // Extract key metadata for index
       final metadata = <String, String>{};
@@ -549,7 +549,7 @@ Future<void> memoryPressureHandling() async {
   for (int i = 0; i < fileCount; i++) {
     PhonicAudioFile? audioFile;
     try {
-      audioFile = Phonic.fromBytes(_createTestMp3(i), 'pressure_$i.mp3');
+      audioFile = await Phonic.fromBytesAsync(_createTestMp3(i), 'pressure_$i.mp3');
       currentMemoryUsage += 100; // Simulate memory usage
       maxMemoryUsage = maxMemoryUsage > currentMemoryUsage ? maxMemoryUsage : currentMemoryUsage;
 
@@ -577,7 +577,7 @@ Future<void> memoryPressureHandling() async {
   for (int i = 0; i < 30; i++) {
     PhonicAudioFile? audioFile;
     try {
-      audioFile = Phonic.fromBytes(_createTestMp3(i), 'threshold_$i.mp3');
+      audioFile = await Phonic.fromBytesAsync(_createTestMp3(i), 'threshold_$i.mp3');
       currentMemoryUsage += 150; // Simulate larger memory usage
 
       // Check memory threshold
@@ -620,7 +620,7 @@ Future<void> memoryPressureHandling() async {
       // Process immediately
       PhonicAudioFile? audioFile;
       try {
-        audioFile = Phonic.fromBytes(_createTestMp3(i), 'budget_$i.mp3');
+        audioFile = await Phonic.fromBytesAsync(_createTestMp3(i), 'budget_$i.mp3');
         budgetUsed += estimatedCost;
 
         final title = audioFile.getTag(TagKey.title);
@@ -694,7 +694,7 @@ Uint8List _createMp3WithLargeArtwork() {
 Stream<ProcessingResult> _processFilesAsStream(List<(String, Uint8List)> files) async* {
   for (final (filename, bytes) in files) {
     try {
-      final audioFile = Phonic.fromBytes(bytes, filename);
+      final audioFile = await Phonic.fromBytesAsync(bytes, filename);
       final title = audioFile.getTag(TagKey.title);
       audioFile.dispose();
 

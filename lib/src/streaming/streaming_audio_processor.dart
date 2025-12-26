@@ -132,7 +132,7 @@ class StreamingAudioProcessor {
 
         try {
           // Load audio file
-          audioFile = await Phonic.fromFile(filePath);
+          audioFile = await Phonic.fromFileAsync(filePath);
 
           // Process the file
           final result = await processor(audioFile, i, filePaths.length);
@@ -206,7 +206,7 @@ class StreamingAudioProcessor {
 
         try {
           // Load audio file
-          audioFile = await Phonic.fromFile(filePath);
+          audioFile = await Phonic.fromFileAsync(filePath);
 
           // Process the file
           final result = await processor(audioFile, i, filePaths.length);

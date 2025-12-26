@@ -13,14 +13,14 @@ void main() {
     const mp4FixturePath = 'test/fixtures/mp4/23.mp4';
 
     test('Step 1: Can we load the MP4 file?', () async {
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
       expect(audioFile, isNotNull);
       print('✓ MP4 file loaded successfully');
       audioFile.dispose();
     });
 
     test('Step 2: Can we read existing metadata from MP4?', () async {
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
 
       print('Reading existing metadata...');
       print('  Title: ${audioFile.getTag(TagKey.title)?.value ?? "None"}');
@@ -32,7 +32,7 @@ void main() {
     });
 
     test('Step 3: Can we modify metadata without encoding?', () async {
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
 
       audioFile.setTag(const TitleTag('Test Title'));
       audioFile.setTag(const ArtistTag('Test Artist'));
@@ -46,7 +46,7 @@ void main() {
     });
 
     test('Step 4: What happens when we encode MP4 (no validation)?', () async {
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
 
       audioFile.setTag(const TitleTag('Diagnostic Test'));
       audioFile.setTag(const ArtistTag('Diagnostic Artist'));
@@ -74,7 +74,7 @@ void main() {
     });
 
     test('Step 5: Can we decode our own encoded MP4?', () async {
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
 
       audioFile.setTag(const TitleTag('Decode Test'));
       audioFile.setTag(const ArtistTag('Decode Artist'));
@@ -91,7 +91,7 @@ void main() {
       print('Attempting to decode our encoded MP4...');
 
       try {
-        final decodedFile = Phonic.fromBytes(encodedBytes);
+        final decodedFile = await Phonic.fromBytesAsync(encodedBytes);
 
         print('✓ Decoded successfully!');
         print('  Title: ${decodedFile.getTag(TagKey.title)?.value ?? "LOST"}');
@@ -107,7 +107,7 @@ void main() {
     });
 
     test('Step 6: Minimal MP4 encode test', () async {
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
 
       // Set just ONE tag
       audioFile.setTag(const TitleTag('Single Tag Test'));
@@ -121,7 +121,7 @@ void main() {
       audioFile.dispose();
 
       // Try to decode
-      final decodedFile = Phonic.fromBytes(encodedBytes);
+      final decodedFile = await Phonic.fromBytesAsync(encodedBytes);
       final titleAfter = decodedFile.getTag(TagKey.title)?.value;
 
       print('Single tag test result:');
@@ -139,7 +139,7 @@ void main() {
     });
 
     test('Step 7: Check MP4 atom structure (if possible)', () async {
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
 
       audioFile.setTag(const TitleTag('Structure Test'));
 
@@ -172,7 +172,7 @@ void main() {
       final originalBytes = await File(mp4FixturePath).readAsBytes();
 
       // Encode with no changes
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
       final encodedBytes = await audioFile.encode(
         const EncodingOptions(
           strategy: EncodingStrategy.preserveExisting,

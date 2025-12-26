@@ -26,7 +26,7 @@ import 'memory_usage_report.dart';
 ///
 /// // Process files and monitor memory
 /// for (final file in audioFiles) {
-///   final audioFile = await Phonic.fromFile(file);
+///   final audioFile = await Phonic.fromFileAsync(file);
 ///   // ... process file
 ///   monitor.recordCheckpoint('file_${audioFiles.indexOf(file)}');
 /// }

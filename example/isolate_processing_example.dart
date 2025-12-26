@@ -128,7 +128,7 @@ Future<void> performanceComparison() async {
     // Standard processing
     print('Standard processing...');
     var stopwatch = Stopwatch()..start();
-    var audioFile = await Phonic.fromFile(testFile.path);
+    var audioFile = await Phonic.fromFileAsync(testFile.path);
     stopwatch.stop();
     final standardTime = stopwatch.elapsedMilliseconds;
     audioFile.dispose();
@@ -225,7 +225,7 @@ Future<void> mixedProcessingStrategy() async {
       print('\n  $name (${sizeKB.toStringAsFixed(1)}KB) - using $method method');
 
       final stopwatch = Stopwatch()..start();
-      final audioFile = useIsolate ? await Phonic.fromFileInIsolateAsync(file.path) : await Phonic.fromFile(file.path);
+      final audioFile = useIsolate ? await Phonic.fromFileInIsolateAsync(file.path) : await Phonic.fromFileAsync(file.path);
       stopwatch.stop();
 
       final title = audioFile.getTag(TagKey.title);

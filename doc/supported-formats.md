@@ -20,7 +20,7 @@ MP3 files can contain multiple metadata containers:
 
 ```dart
 // MP3 files may have both ID3v1 and ID3v2 tags
-final audioFile = await Phonic.fromFile('song.mp3');
+final audioFile = await Phonic.fromFileAsync('song.mp3');
 
 // Check which containers are present
 final allTags = audioFile.getAllTags();
@@ -286,7 +286,7 @@ Future<void> demonstrateFormatDetection() async {
 
   for (final filePath in testFiles) {
     try {
-      final audioFile = await Phonic.fromFile(filePath);
+      final audioFile = await Phonic.fromFileAsync(filePath);
 
       // Check detected format
       final tags = audioFile.getAllTags();

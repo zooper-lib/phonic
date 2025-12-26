@@ -28,7 +28,7 @@ import 'phonic_audio_file.dart';
 /// final cache = AudioFileCache(maxCacheSize: 1000);
 ///
 /// // Store audio file in cache
-/// final audioFile = await Phonic.fromFile('song.mp3');
+/// final audioFile = await Phonic.fromFileAsync('song.mp3');
 /// cache.put('song.mp3', audioFile);
 ///
 /// // Retrieve from cache
@@ -48,7 +48,7 @@ import 'phonic_audio_file.dart';
 /// for (final path in filePaths) {
 ///   var audioFile = cache.get(path);
 ///   if (audioFile == null) {
-///     audioFile = await Phonic.fromFile(path);
+///     audioFile = await Phonic.fromFileAsync(path);
 ///     cache.put(path, audioFile);
 ///   }
 ///   // Process audioFile...

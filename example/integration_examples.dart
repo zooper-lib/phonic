@@ -202,7 +202,7 @@ Future<void> metadataSynchronizationService() async {
     // Sync individual track
     print('\nSyncing individual track:');
     final trackFile = _createRockSong();
-    final audioFile = Phonic.fromBytes(trackFile, 'sync_test.mp3');
+    final audioFile = await Phonic.fromBytesAsync(trackFile, 'sync_test.mp3');
 
     final syncResult = await syncService.syncTrack(audioFile);
     print('  Sync sources used: ${syncResult.sourcesUsed.length}');
@@ -216,9 +216,9 @@ Future<void> metadataSynchronizationService() async {
     // Batch synchronization
     print('\nBatch synchronization:');
     final batchFiles = [
-      Phonic.fromBytes(_createRockSong(), 'rock.mp3'),
-      Phonic.fromBytes(_createJazzSong(), 'jazz.flac'),
-      Phonic.fromBytes(_createClassicalSong(), 'classical.m4a'),
+      await Phonic.fromBytesAsync(_createRockSong(), 'rock.mp3'),
+      await Phonic.fromBytesAsync(_createJazzSong(), 'jazz.flac'),
+      await Phonic.fromBytesAsync(_createClassicalSong(), 'classical.m4a'),
     ];
 
     final batchSyncResults = await syncService.syncBatch(batchFiles);
@@ -232,7 +232,10 @@ Future<void> metadataSynchronizationService() async {
 
     // Conflict resolution
     print('\nConflict resolution:');
-    final conflictFile = Phonic.fromBytes(_createConflictingSong(), 'conflict.mp3');
+    final conflictFile = await Phonic.fromBytesAsync(
+      _createConflictingSong(),
+      'conflict.mp3',
+    );
     final conflictResult = await syncService.syncTrack(conflictFile);
 
     if (conflictResult.conflicts.isNotEmpty) {
@@ -464,7 +467,7 @@ Future<void> audioAnalysisPipeline() async {
     // Analyze individual file
     print('\nAnalyzing individual audio file:');
     final analysisFile = _createRockSong();
-    final audioFile = Phonic.fromBytes(analysisFile, 'analysis_test.mp3');
+    final audioFile = await Phonic.fromBytesAsync(analysisFile, 'analysis_test.mp3');
 
     final analysisResult = await pipeline.analyze(audioFile);
     print('  Analysis completed in ${analysisResult.processingTime}ms');
@@ -480,9 +483,12 @@ Future<void> audioAnalysisPipeline() async {
     // Batch analysis
     print('\nBatch analysis:');
     final batchFiles = [
-      Phonic.fromBytes(_createRockSong(), 'rock_analysis.mp3'),
-      Phonic.fromBytes(_createJazzSong(), 'jazz_analysis.flac'),
-      Phonic.fromBytes(_createClassicalSong(), 'classical_analysis.m4a'),
+      await Phonic.fromBytesAsync(_createRockSong(), 'rock_analysis.mp3'),
+      await Phonic.fromBytesAsync(_createJazzSong(), 'jazz_analysis.flac'),
+      await Phonic.fromBytesAsync(
+        _createClassicalSong(),
+        'classical_analysis.m4a',
+      ),
     ];
 
     final batchResults = await pipeline.analyzeBatch(batchFiles);
@@ -538,9 +544,12 @@ Future<void> backupAndRestoreSystem() async {
     // Create backup
     print('Creating metadata backup:');
     final sourceFiles = [
-      Phonic.fromBytes(_createRockSong(), 'backup_rock.mp3'),
-      Phonic.fromBytes(_createJazzSong(), 'backup_jazz.flac'),
-      Phonic.fromBytes(_createClassicalSong(), 'backup_classical.m4a'),
+      await Phonic.fromBytesAsync(_createRockSong(), 'backup_rock.mp3'),
+      await Phonic.fromBytesAsync(_createJazzSong(), 'backup_jazz.flac'),
+      await Phonic.fromBytesAsync(
+        _createClassicalSong(),
+        'backup_classical.m4a',
+      ),
     ];
 
     final backupResult = await backupSystem.createBackup(
@@ -630,7 +639,7 @@ class MusicLibrary {
   final List<Playlist> _playlists = [];
 
   Future<void> addFile(String path, Uint8List data) async {
-    final audioFile = Phonic.fromBytes(data, path.split('/').last);
+    final audioFile = await Phonic.fromBytesAsync(data, path.split('/').last);
     final track = LibraryTrack.fromAudioFile(path, audioFile);
     _tracks.add(track);
     audioFile.dispose();
