@@ -5,8 +5,8 @@ formatter:
   # Keep trailing commas.
   trailing_commas: preserve
 
-  # Set the line length
-  line-length: 160
+  # Set the maximum line length.
+  page_width: 160
 
 # Customize additional linter rules.
 linter:
@@ -34,23 +34,12 @@ linter:
     prefer_final_fields: true
     prefer_final_locals: true
 
-    # Avoid empty catch clauses.
-    avoid_empty_catches: true
-
-    # **Error Prevention**
-    # Disallow the use of deprecated members.
-    deprecated_member_use: true
-
     # Enforce non-nullable types where possible.
     always_require_non_null_named_parameters: true
 
     # **Documentation**
     # Require documentation for public members.
     public_member_api_docs: false
-
-    # **Formatting**
-    # Enforce consistent indentation (2 spaces).
-    indent: 4
 
     # **Other Useful Rules**
     # Enforce sorting of directives (e.g., imports).
@@ -59,9 +48,6 @@ linter:
     # Prefer using `isEmpty` and `isNotEmpty` over `length` comparisons.
     prefer_is_empty: true
     prefer_is_not_empty: true
-
-    # Limit the number of lines in a file for better readability.
-    file_length: 500
 
     # **Disable Rules (if necessary)**
     # Uncomment the following lines to disable specific lints.
@@ -81,5 +67,3 @@ analyzer:
   # Enable experimental language features if needed.
   # For example, to enable null safety (if not already enabled).
   language:
-    enable-experiment:
-      - non-nullable

@@ -109,7 +109,7 @@ void main() {
           audioFile.setTag(TitleTag(testData['title'] as String));
           audioFile.setTag(ArtistTag(testData['artist'] as String));
           audioFile.setTag(AlbumTag(testData['album'] as String));
-          audioFile.setTag(DateRecordedTag(testData['dateRecorded'] as String)); 
+          audioFile.setTag(DateRecordedTag(testData['dateRecorded'] as String));
           audioFile.setTag(TrackNumberTag(testData['trackNumber'] as int));
 
           final encodedBytes = await audioFile.encode(

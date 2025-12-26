@@ -190,13 +190,12 @@ class OpusAudioFile extends PhonicAudioFileImpl {
   /// - Artwork data uses lazy loading through OpusTags packet parsing
   OpusAudioFile.fromBytes(
     Uint8List fileBytes, {
-    bool isDirty = false,
+    super.isDirty,
   }) : super(
          fileBytes: fileBytes,
          formatStrategy: const OpusFormatStrategy(),
          codecRegistry: _createOpusCodecRegistry(),
          mergePolicy: MergePolicy.fromStrategy(const OpusFormatStrategy()),
-         isDirty: isDirty,
        );
 
   /// Creates a codec registry configured for Opus files with Vorbis Comments codec and locator.

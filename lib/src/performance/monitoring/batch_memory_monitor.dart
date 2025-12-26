@@ -161,7 +161,7 @@ class BatchMemoryMonitor {
     _processedCount++;
 
     if (_processedCount % _checkpointInterval == 0) {
-      _monitor.recordCheckpoint('batch_${_processedCount}');
+      _monitor.recordCheckpoint('batch_$_processedCount');
     }
   }
 

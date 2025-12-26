@@ -4,6 +4,7 @@
 /// 1. Identify specific validation problems
 /// 2. Provide precise user feedback
 /// 3. Handle different error types appropriately
+library;
 
 // ignore_for_file: avoid_print
 

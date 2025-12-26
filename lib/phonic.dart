@@ -57,7 +57,7 @@
 /// ```
 // ignore_for_file: directives_ordering
 
-library phonic;
+library;
 
 // Core API - Essential classes for library consumers
 export 'src/core/artwork_cache.dart';

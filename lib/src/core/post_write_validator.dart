@@ -1018,27 +1018,27 @@ class PostWriteValidator {
   /// Checks if a tag was lost due to format capability limitations.
   ///
   /// This method determines whether a missing tag was dropped because the target
-  /// format doesn't support it. For example, ID3v1 doesn't support artwork, 
+  /// format doesn't support it. For example, ID3v1 doesn't support artwork,
   /// musicalKey, bpm, or grouping tags.
   bool _wasLostDueToCapabilityLimitations(TagKey tagKey, FormatStrategy formatStrategy) {
     // First check if this is a commonly unsupported tag that should not cause errors
     const commonlyUnsupportedTags = {
       TagKey.musicalKey,
       TagKey.artwork,
-      TagKey.bpm, 
+      TagKey.bpm,
       TagKey.grouping,
       TagKey.encoder,
       TagKey.isrc,
       TagKey.lyrics,
       TagKey.albumArtist, // May not be supported in ID3v1
-      TagKey.composer,    // May not be supported in ID3v1
+      TagKey.composer, // May not be supported in ID3v1
     };
-    
+
     if (commonlyUnsupportedTags.contains(tagKey)) {
       // These tags are commonly dropped by format limitations
       return true;
     }
-    
+
     // Check if any of the target containers support this tag
     bool anySupport = false;
     for (final (containerKind, containerVersion) in formatStrategy.fanout) {
@@ -1052,7 +1052,7 @@ class PostWriteValidator {
         }
       }
     }
-    
+
     // If no container supports this tag, it was lost due to capability limitations
     return !anySupport;
   }
@@ -1111,7 +1111,7 @@ class PostWriteValidator {
   }
 
   /// Checks if a value change is acceptable truncation due to format limitations.
-  /// 
+  ///
   /// This method determines if the extracted value is a truncated version of the
   /// original value due to format constraints (e.g., ID3v1's 30-character limits).
   bool _isAcceptableTruncation(TagKey tagKey, dynamic originalValue, dynamic extractedValue, FormatStrategy? formatStrategy) {
@@ -1121,7 +1121,7 @@ class PostWriteValidator {
 
     final originalStr = originalValue;
     final extractedStr = extractedValue;
-    
+
     // Check if extracted is a prefix of original (indicating truncation)
     if (!originalStr.startsWith(extractedStr)) {
       return false;
@@ -1183,67 +1183,66 @@ class PostWriteValidator {
       }
       return true;
     }
-    
+
     // Handle null and empty string cases
     if (value1 == null && value2 == null) return true;
     if (value1 == null || value2 == null) {
       // Check if one is null and the other is empty string - they should be equivalent
-      if ((value1 == null && value2 is String && _isEffectivelyEmpty(value2)) ||
-          (value2 == null && value1 is String && _isEffectivelyEmpty(value1))) {
+      if ((value1 == null && value2 is String && _isEffectivelyEmpty(value2)) || (value2 == null && value1 is String && _isEffectivelyEmpty(value1))) {
         return true;
       }
       return false;
     }
-    
+
     // Normalize empty strings - some formats might represent empty differently
     if (value1 is String && value2 is String) {
       final isEmpty1 = _isEffectivelyEmpty(value1);
       final isEmpty2 = _isEffectivelyEmpty(value2);
-      
+
       // Both empty after normalization
       if (isEmpty1 && isEmpty2) return true;
-      
+
       // If one is empty and the other isn't, they're different
       if (isEmpty1 != isEmpty2) return false;
-      
+
       // Both non-empty, compare normalized strings
       return _normalizeString(value1) == _normalizeString(value2);
     }
-    
+
     return value1 == value2;
   }
-  
+
   /// Checks if a string is effectively empty (whitespace, control chars, or null bytes)
   bool _isEffectivelyEmpty(String str) {
     // Remove all control characters and whitespace
     final cleaned = str.replaceAll(RegExp(r'[\x00-\x20\x7F-\x9F]'), '');
     return cleaned.isEmpty;
   }
-  
+
   /// Normalizes a string by removing control characters and trimming
   String _normalizeString(String str) {
     return str.replaceAll(RegExp(r'[\x00-\x1F\x7F-\x9F]'), '').trim();
   }
 
   /// Checks if two tags are semantically equivalent.
-  /// 
+  ///
   /// This is a simplified implementation for basic semantic equivalence.
   /// It handles basic cases like Year/DateRecorded equivalence.
   bool _areTagsSemanticallyEquivalent(MetadataTag tag1, MetadataTag tag2) {
     // Direct equality check first
     if (tag1 == tag2) return true;
-    
+
     // Check for basic semantic equivalences
     if (tag1.key == TagKey.year && tag2.key == TagKey.dateRecorded) {
       // Year 2020 is equivalent to DateRecorded "2020"
       return tag1.value.toString() == tag2.value.toString().substring(0, 4);
     }
-    
+
     if (tag1.key == TagKey.dateRecorded && tag2.key == TagKey.year) {
-      // DateRecorded "2020" is equivalent to Year 2020  
+      // DateRecorded "2020" is equivalent to Year 2020
       return tag2.value.toString() == tag1.value.toString().substring(0, 4);
     }
-    
+
     // For other cases, require same key and similar values
     return tag1.key == tag2.key && tag1.value == tag2.value;
   }
