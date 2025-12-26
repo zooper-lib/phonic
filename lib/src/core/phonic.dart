@@ -1,26 +1,9 @@
-import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import '../exceptions/unsupported_format_exception.dart';
-import '../formats/flac/flac_format_strategy.dart';
-import '../formats/id3/id3v1_codec.dart';
-import '../formats/id3/id3v22_codec.dart';
-import '../formats/id3/id3v23_codec.dart';
-import '../formats/id3/id3v24_codec.dart';
-import '../formats/id3/mp3_format_strategy.dart';
-import '../formats/mp4/mp4_atoms_codec.dart';
-import '../formats/mp4/mp4_format_strategy.dart';
-import '../formats/vorbis/ogg_format_strategy.dart';
-import '../formats/vorbis/opus_format_strategy.dart';
-import '../formats/vorbis/vorbis_comments_codec.dart';
-import '../utils/locators/id3v1_locator.dart';
-import '../utils/locators/id3v2_locator.dart';
-import '../utils/locators/mp4_locator.dart';
-import '../utils/locators/ogg_vorbis_locator.dart';
-import '../utils/locators/vorbis_locator.dart';
-import 'codec_registry.dart';
-import 'format_strategy.dart';
+import 'codec_registry_provider.dart';
+import 'format_strategy_resolver.dart';
 import 'isolate_processor.dart';
 import 'merge_policy.dart';
 import 'phonic_audio_file.dart';
@@ -148,26 +131,6 @@ import 'phonic_audio_file_impl.dart';
 /// - File I/O is performed asynchronously where possible
 /// - Memory usage is optimized for large files through lazy loading
 class Phonic {
-  /// List of available format strategies for format detection.
-  ///
-  /// These strategies are tried in order during format detection to find
-  /// the most appropriate handler for a given audio file. The order is
-  /// optimized for common formats and detection reliability.
-  static final List<FormatStrategy> _formatStrategies = [
-    const Mp3FormatStrategy(),
-    const FlacFormatStrategy(),
-    const Mp4FormatStrategy(),
-    const OggFormatStrategy(),
-    const OpusFormatStrategy(),
-  ];
-
-  /// Cache of codec registries by format strategy type.
-  ///
-  /// This cache avoids recreating codec registries for the same format
-  /// strategy, improving performance when processing multiple files of
-  /// the same format.
-  static final Map<Type, CodecRegistry> _codecRegistryCache = {};
-
   /// Creates a PhonicAudioFile instance from a file path.
   ///
   /// This method reads the file from the filesystem, detects its format,
@@ -343,29 +306,6 @@ class Phonic {
   ///   audioFile.dispose();
   /// }
   /// ```
-  ///
-  /// ### Advanced Usage
-  /// ```dart
-  /// // Custom processing with format-specific handling
-  /// final audioFile = await Phonic.fromBytesAsync(audioBytes, filename);
-  ///
-  /// // Check detected format
-  /// final strategy = _detectFormatStrategy(audioBytes, filename);
-  /// final detectedFormat = strategy.mediaKind;
-  ///
-  /// // Format-specific operations
-  /// switch (strategy.mediaKind) {
-  ///   case MediaKind.mp3:
-  ///     // Handle MP3-specific features
-  ///     break;
-  ///   case MediaKind.flac:
-  ///     // Handle FLAC-specific features
-  ///     break;
-  ///   // ... other formats
-  /// }
-  ///
-  /// audioFile.dispose();
-  /// ```
   static Future<PhonicAudioFile> fromBytesAsync(
     Uint8List bytes, [
     String? filename,
@@ -374,11 +314,14 @@ class Phonic {
       throw ArgumentError.value(bytes, 'bytes', 'Bytes cannot be empty');
     }
 
-    // Detect the format strategy
-    final formatStrategy = _detectFormatStrategy(bytes, filename);
+    // Resolve the best format strategy.
+    final formatStrategy = FormatStrategyResolver.resolve(
+      bytes,
+      filename: filename,
+    );
 
-    // Get or create codec registry for this format
-    final codecRegistry = _getCodecRegistry(formatStrategy);
+    // Get or create codec registry for this format.
+    final codecRegistry = CodecRegistryProvider.getForStrategy(formatStrategy);
 
     // Create merge policy from format strategy
     final mergePolicy = MergePolicy.fromStrategy(formatStrategy);
@@ -397,210 +340,6 @@ class Phonic {
     await audioFile.extractContainersAndDecodeAsync();
 
     return audioFile;
-  }
-
-  /// Detects the appropriate format strategy for the given audio data.
-  ///
-  /// This method implements the format detection algorithm by testing each
-  /// available format strategy against the audio data. It uses both filename
-  /// hints (if available) and binary analysis to determine the best match.
-  ///
-  /// ## Detection Algorithm
-  ///
-  /// 1. **Extension Prioritization**: If filename is provided, strategies
-  ///    matching the file extension are tested first
-  /// 2. **Binary Testing**: Each strategy's canHandle method is called
-  /// 3. **First Match Wins**: The first strategy that can handle the data is selected
-  /// 4. **Fallback**: If no strategy matches, UnsupportedFormatException is thrown
-  ///
-  /// ## Strategy Testing Order
-  ///
-  /// Strategies are tested in this order for optimal performance:
-  /// - MP3 (most common format)
-  /// - FLAC (distinctive signature)
-  /// - MP4/M4A (common mobile format)
-  /// - OGG Vorbis (open format)
-  /// - Opus (newer format)
-  ///
-  /// Parameters:
-  /// - [bytes]: The audio file bytes to analyze
-  /// - [filename]: Optional filename for extension-based hints
-  ///
-  /// Returns:
-  /// - The FormatStrategy that can handle this audio format
-  ///
-  /// Throws:
-  /// - [UnsupportedFormatException] if no strategy can handle the format
-  static FormatStrategy _detectFormatStrategy(Uint8List bytes, String? filename) {
-    // Get file extension hint if filename is provided
-    String? extension;
-    if (filename != null && filename.contains('.')) {
-      extension = filename.split('.').last.toLowerCase();
-    }
-
-    // Create a prioritized list of strategies to test
-    final strategiesToTest = <FormatStrategy>[];
-
-    // First, add strategies that match the file extension (if any)
-    if (extension != null) {
-      for (final strategy in _formatStrategies) {
-        if (_strategyMatchesExtension(strategy, extension)) {
-          strategiesToTest.add(strategy);
-        }
-      }
-    }
-
-    // Then add remaining strategies
-    for (final strategy in _formatStrategies) {
-      if (!strategiesToTest.contains(strategy)) {
-        strategiesToTest.add(strategy);
-      }
-    }
-
-    // Test each strategy until one can handle the data
-    for (final strategy in strategiesToTest) {
-      if (strategy.canHandle(bytes)) {
-        return strategy;
-      }
-    }
-
-    // No strategy could handle this format
-    final context = filename != null ? 'file: $filename' : 'byte data';
-    throw UnsupportedFormatException(
-      'No format strategy can handle this audio data',
-      context: context,
-    );
-  }
-
-  /// Checks if a format strategy matches the given file extension.
-  ///
-  /// This helper method maps file extensions to format strategies to
-  /// optimize format detection when filename hints are available.
-  ///
-  /// Parameters:
-  /// - [strategy]: The format strategy to test
-  /// - [extension]: The file extension (without dot, lowercase)
-  ///
-  /// Returns:
-  /// - true if the strategy handles files with this extension
-  static bool _strategyMatchesExtension(FormatStrategy strategy, String extension) {
-    switch (strategy.mediaKind.name) {
-      case 'mp3':
-        return extension == 'mp3';
-      case 'flac':
-        return extension == 'flac';
-      case 'ogg':
-        return extension == 'ogg';
-      case 'opus':
-        return extension == 'opus';
-      case 'm4a':
-      case 'mp4':
-        return extension == 'm4a' || extension == 'mp4' || extension == 'aac';
-      default:
-        return false;
-    }
-  }
-
-  /// Gets or creates a codec registry for the specified format strategy.
-  ///
-  /// This method implements caching of codec registries to avoid recreating
-  /// the same registry multiple times for the same format. Each format
-  /// strategy type gets its own cached registry instance.
-  ///
-  /// ## Registry Contents
-  ///
-  /// Each codec registry contains:
-  /// - **Codecs**: Format-specific tag codecs for reading/writing containers
-  /// - **Locators**: Container locators for finding metadata in files
-  /// - **Capabilities**: Constraint definitions for each container type
-  ///
-  /// ## Caching Strategy
-  ///
-  /// - Registries are cached by format strategy type (not instance)
-  /// - Cache is static and persists for the application lifetime
-  /// - Thread-safe access through synchronized operations
-  /// - Memory usage is minimal as registries contain mostly static data
-  ///
-  /// Parameters:
-  /// - [formatStrategy]: The format strategy needing a codec registry
-  ///
-  /// Returns:
-  /// - A CodecRegistry configured for the format strategy
-  static CodecRegistry _getCodecRegistry(FormatStrategy formatStrategy) {
-    final strategyType = formatStrategy.runtimeType;
-
-    // Check cache first
-    final cached = _codecRegistryCache[strategyType];
-    if (cached != null) {
-      return cached;
-    }
-
-    // Create new registry for this format strategy
-    final registry = _createCodecRegistryForStrategy(formatStrategy);
-
-    // Cache for future use
-    _codecRegistryCache[strategyType] = registry;
-
-    return registry;
-  }
-
-  /// Creates a codec registry configured for the specified format strategy.
-  ///
-  /// This method creates a comprehensive codec registry containing all
-  /// available codecs and locators. While not all codecs may be used by
-  /// every format strategy, having them all available allows for maximum
-  /// flexibility and future extensibility.
-  ///
-  /// ## Registry Configuration
-  ///
-  /// The registry includes:
-  /// - **ID3 Codecs**: ID3v1, ID3v2.2, ID3v2.3, ID3v2.4 for MP3 files
-  /// - **Vorbis Codec**: For FLAC, OGG, and Opus files
-  /// - **MP4 Codec**: For MP4/M4A files
-  /// - **All Locators**: For finding containers in any supported format
-  ///
-  /// ## Design Rationale
-  ///
-  /// Using a comprehensive registry (rather than format-specific registries)
-  /// provides several benefits:
-  /// - **Simplicity**: Single registry creation logic
-  /// - **Flexibility**: Strategies can access any codec if needed
-  /// - **Future-proofing**: Easy to add new codecs without changing this logic
-  /// - **Testing**: Consistent registry setup across all formats
-  ///
-  /// Parameters:
-  /// - [formatStrategy]: The format strategy (used for future extensibility)
-  ///
-  /// Returns:
-  /// - A fully configured CodecRegistry with all available codecs and locators
-  static CodecRegistry _createCodecRegistryForStrategy(FormatStrategy formatStrategy) {
-    return CodecRegistry(
-      codecList: [
-        // ID3 codecs for MP3 files
-        const Id3v24Codec(),
-        const Id3v23Codec(),
-        const Id3v22Codec(),
-        const Id3v1Codec(),
-
-        // Vorbis Comments codec for FLAC, OGG, and Opus files
-        const VorbisCommentsCodec(),
-
-        // MP4 atoms codec for MP4/M4A files
-        const Mp4AtomsCodec(),
-      ],
-      containerLocatorList: [
-        // ID3 locators for MP3 files
-        Id3v2Locator(),
-        Id3v1Locator(),
-
-        // Vorbis locators for FLAC and OGG files
-        VorbisLocator(),
-        OggVorbisLocator(),
-
-        // MP4 locator for MP4/M4A files
-        Mp4Locator(),
-      ],
-    );
   }
 
   /// Creates a PhonicAudioFile instance from a file path using an isolate.
@@ -836,6 +575,6 @@ class Phonic {
   /// }
   /// ```
   static void clearCache() {
-    _codecRegistryCache.clear();
+    CodecRegistryProvider.clearCache();
   }
 }
