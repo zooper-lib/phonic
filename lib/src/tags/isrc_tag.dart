@@ -54,11 +54,10 @@ final class IsrcTag extends MetadataTag<String> {
   /// ```
   const IsrcTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.isrc,
-         provenance: provenance,
        );
 
   /// Creates a new IsrcTag instance with updated provenance information.

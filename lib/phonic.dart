@@ -55,11 +55,14 @@
 ///   // UTF-8 is supported for titles in ID3v2.4
 /// }
 /// ```
-// ignore_for_file: directives_ordering
-
 library;
 
-// Core API - Essential classes for library consumers
+export 'src/capabilities/id3v1_capability.dart';
+export 'src/capabilities/id3v22_capability.dart';
+export 'src/capabilities/id3v23_capability.dart';
+export 'src/capabilities/id3v24_capability.dart';
+export 'src/capabilities/mp4_capability.dart';
+export 'src/capabilities/vorbis_capability.dart';
 export 'src/core/artwork_cache.dart';
 export 'src/core/artwork_data.dart';
 export 'src/core/artwork_type.dart';
@@ -76,22 +79,22 @@ export 'src/core/tag_key.dart';
 export 'src/core/tag_provenance.dart';
 export 'src/core/tag_semantics.dart';
 export 'src/core/text_encoding.dart';
-
-// Capability system for format constraints
-export 'src/capabilities/id3v1_capability.dart';
-export 'src/capabilities/id3v22_capability.dart';
-export 'src/capabilities/id3v23_capability.dart';
-export 'src/capabilities/id3v24_capability.dart';
-export 'src/capabilities/mp4_capability.dart';
-export 'src/capabilities/vorbis_capability.dart';
-
-// Exception types
 export 'src/exceptions/corrupted_container_exception.dart';
 export 'src/exceptions/phonic_exception.dart';
 export 'src/exceptions/tag_validation_exception.dart';
 export 'src/exceptions/unsupported_format_exception.dart';
-
-// Validators for input validation and form integration
+export 'src/performance/memory/memory_efficient_tag_storage.dart';
+export 'src/performance/memory/string_interning.dart';
+export 'src/performance/monitoring/batch_memory_monitor.dart';
+export 'src/performance/monitoring/memory_usage_monitor.dart';
+export 'src/streaming/batch_audio_processor.dart';
+export 'src/streaming/cancellation_token.dart';
+export 'src/streaming/collection_analyzer.dart';
+export 'src/streaming/processing_result.dart';
+export 'src/streaming/streaming_audio_processor.dart';
+export 'src/streaming/streaming_config.dart';
+export 'src/streaming/streaming_progress.dart';
+export 'src/utils/lazy_artwork_loader.dart';
 export 'src/validators/album_validator.dart';
 export 'src/validators/artist_validator.dart';
 export 'src/validators/bpm_validator.dart';
@@ -104,21 +107,3 @@ export 'src/validators/text_validator.dart';
 export 'src/validators/title_validator.dart';
 export 'src/validators/track_number_validator.dart';
 export 'src/validators/year_validator.dart';
-
-// Utils
-export 'src/utils/lazy_artwork_loader.dart';
-
-// Streaming utilities for large collections
-export 'src/streaming/streaming_audio_processor.dart';
-export 'src/streaming/batch_audio_processor.dart';
-export 'src/streaming/collection_analyzer.dart';
-export 'src/streaming/streaming_config.dart';
-export 'src/streaming/processing_result.dart';
-export 'src/streaming/streaming_progress.dart';
-export 'src/streaming/cancellation_token.dart';
-
-// Performance optimization utilities
-export 'src/performance/memory/string_interning.dart';
-export 'src/performance/memory/memory_efficient_tag_storage.dart';
-export 'src/performance/monitoring/memory_usage_monitor.dart';
-export 'src/performance/monitoring/batch_memory_monitor.dart';

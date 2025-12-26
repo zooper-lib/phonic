@@ -45,7 +45,7 @@ Future<void> basicIsolateProcessing() async {
 
     // Process in isolate - UI remains responsive
     print('Processing file in background isolate...');
-    final audioFile = await Phonic.fromFileInIsolate(testFile.path);
+    final audioFile = await Phonic.fromFileInIsolateAsync(testFile.path);
 
     // Access tags normally - same API as standard method
     final title = audioFile.getTag(TagKey.title);
@@ -87,7 +87,7 @@ Future<void> parallelBatchProcessing() async {
     // Process all files in parallel using isolates
     // Each file processes in its own isolate simultaneously
     final futures = testFiles.map((file) {
-      return Phonic.fromFileInIsolate(file.path);
+      return Phonic.fromFileInIsolateAsync(file.path);
     });
 
     final audioFiles = await Future.wait(futures);
@@ -136,7 +136,7 @@ Future<void> performanceComparison() async {
     // Isolate processing
     print('Isolate processing...');
     stopwatch = Stopwatch()..start();
-    audioFile = await Phonic.fromFileInIsolate(testFile.path);
+    audioFile = await Phonic.fromFileInIsolateAsync(testFile.path);
     stopwatch.stop();
     final isolateTime = stopwatch.elapsedMilliseconds;
     audioFile.dispose();
@@ -169,7 +169,7 @@ Future<void> errorHandlingExample() async {
   // Test 1: Non-existent file
   try {
     print('Test 1: Processing non-existent file...');
-    await Phonic.fromFileInIsolate('/non/existent/file.mp3');
+    await Phonic.fromFileInIsolateAsync('/non/existent/file.mp3');
     print('  ERROR: Should have thrown exception!');
   } on FileSystemException catch (e) {
     print('  ✓ Caught FileSystemException: ${e.message}');
@@ -179,7 +179,7 @@ Future<void> errorHandlingExample() async {
   try {
     print('\nTest 2: Processing unsupported format...');
     final unsupportedBytes = Uint8List.fromList([0x00, 0x01, 0x02, 0x03]);
-    await Phonic.fromBytesInIsolate(unsupportedBytes, 'test.xyz');
+    await Phonic.fromBytesInIsolateAsync(unsupportedBytes, 'test.xyz');
     print('  ERROR: Should have thrown exception!');
   } on UnsupportedFormatException catch (e) {
     print('  ✓ Caught UnsupportedFormatException: ${e.message}');
@@ -189,7 +189,7 @@ Future<void> errorHandlingExample() async {
   try {
     print('\nTest 3: Processing empty bytes...');
     final emptyBytes = Uint8List(0);
-    await Phonic.fromBytesInIsolate(emptyBytes);
+    await Phonic.fromBytesInIsolateAsync(emptyBytes);
     print('  ERROR: Should have thrown exception!');
   } on ArgumentError catch (e) {
     print('  ✓ Caught ArgumentError: ${e.message}');
@@ -225,7 +225,7 @@ Future<void> mixedProcessingStrategy() async {
       print('\n  $name (${sizeKB.toStringAsFixed(1)}KB) - using $method method');
 
       final stopwatch = Stopwatch()..start();
-      final audioFile = useIsolate ? await Phonic.fromFileInIsolate(file.path) : await Phonic.fromFile(file.path);
+      final audioFile = useIsolate ? await Phonic.fromFileInIsolateAsync(file.path) : await Phonic.fromFile(file.path);
       stopwatch.stop();
 
       final title = audioFile.getTag(TagKey.title);

@@ -1,9 +1,3 @@
-/// Utility functions for working with metadata tags and tag capabilities.
-///
-/// This module provides helper functions for analyzing tag properties,
-/// determining multi-valued behavior, and working with tag semantics
-/// across different container formats.
-
 import 'tag_capability.dart';
 import 'tag_key.dart';
 

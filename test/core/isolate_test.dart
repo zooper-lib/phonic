@@ -11,7 +11,7 @@ void main() {
         final bytes = _createMinimalMp3WithMetadata();
 
         // Process in isolate
-        final audioFile = await Phonic.fromBytesInIsolate(bytes, 'test.mp3');
+        final audioFile = await Phonic.fromBytesInIsolateAsync(bytes, 'test.mp3');
 
         // Verify we got a valid audio file
         expect(audioFile, isA<PhonicAudioFile>());
@@ -38,7 +38,7 @@ void main() {
         audioFile1.dispose();
 
         // Process with isolate method
-        final audioFile2 = await Phonic.fromBytesInIsolate(bytes, 'test.mp3');
+        final audioFile2 = await Phonic.fromBytesInIsolateAsync(bytes, 'test.mp3');
         final title2 = audioFile2.getTag(TagKey.title)?.value;
         final artist2 = audioFile2.getTag(TagKey.artist)?.value;
         audioFile2.dispose();
@@ -54,7 +54,7 @@ void main() {
         // so if that works (which is tested elsewhere), isolate version works too.
         final bytes = _createMinimalMp3WithMetadata();
 
-        final audioFile = await Phonic.fromBytesInIsolate(bytes, 'test.mp3');
+        final audioFile = await Phonic.fromBytesInIsolateAsync(bytes, 'test.mp3');
 
         // Verify basic tags work
         expect(audioFile.getTag(TagKey.title)?.value, equals('Test Title'));
@@ -70,9 +70,9 @@ void main() {
 
         // Process all in parallel
         final futures = [
-          Phonic.fromBytesInIsolate(bytes1, 'file1.mp3'),
-          Phonic.fromBytesInIsolate(bytes2, 'file2.mp3'),
-          Phonic.fromBytesInIsolate(bytes3, 'file3.mp3'),
+          Phonic.fromBytesInIsolateAsync(bytes1, 'file1.mp3'),
+          Phonic.fromBytesInIsolateAsync(bytes2, 'file2.mp3'),
+          Phonic.fromBytesInIsolateAsync(bytes3, 'file3.mp3'),
         ];
 
         final audioFiles = await Future.wait(futures);
@@ -92,7 +92,7 @@ void main() {
         final emptyBytes = Uint8List(0);
 
         expect(
-          () => Phonic.fromBytesInIsolate(emptyBytes),
+          () => Phonic.fromBytesInIsolateAsync(emptyBytes),
           throwsA(isA<ArgumentError>()),
         );
       });
@@ -101,7 +101,7 @@ void main() {
         final unsupportedBytes = Uint8List.fromList([0x00, 0x01, 0x02, 0x03]);
 
         expect(
-          () => Phonic.fromBytesInIsolate(unsupportedBytes, 'test.xyz'),
+          () => Phonic.fromBytesInIsolateAsync(unsupportedBytes, 'test.xyz'),
           throwsA(isA<UnsupportedFormatException>()),
         );
       });
@@ -110,12 +110,12 @@ void main() {
         final bytes = _createMinimalMp3WithMetadata();
 
         // Without filename
-        final audioFile1 = await Phonic.fromBytesInIsolate(bytes);
+        final audioFile1 = await Phonic.fromBytesInIsolateAsync(bytes);
         expect(audioFile1, isA<PhonicAudioFile>());
         audioFile1.dispose();
 
         // With filename hint
-        final audioFile2 = await Phonic.fromBytesInIsolate(bytes, 'song.mp3');
+        final audioFile2 = await Phonic.fromBytesInIsolateAsync(bytes, 'song.mp3');
         expect(audioFile2, isA<PhonicAudioFile>());
         audioFile2.dispose();
       });
@@ -129,7 +129,7 @@ void main() {
         audioFile1.dispose();
 
         // Isolate method
-        final audioFile2 = await Phonic.fromBytesInIsolate(bytes);
+        final audioFile2 = await Phonic.fromBytesInIsolateAsync(bytes);
         final tagCount2 = audioFile2.getAllTags().length;
         audioFile2.dispose();
 
@@ -139,7 +139,7 @@ void main() {
 
       test('returned instance supports standard operations', () async {
         final bytes = _createMinimalMp3WithMetadata();
-        final audioFile = await Phonic.fromBytesInIsolate(bytes, 'test.mp3');
+        final audioFile = await Phonic.fromBytesInIsolateAsync(bytes, 'test.mp3');
 
         // Should be able to read tags
         expect(() => audioFile.getTag(TagKey.title), returnsNormally);
@@ -164,7 +164,7 @@ void main() {
         ];
 
         for (final (format, bytes) in testCases) {
-          final audioFile = await Phonic.fromBytesInIsolate(bytes, 'test.$format');
+          final audioFile = await Phonic.fromBytesInIsolateAsync(bytes, 'test.$format');
           expect(audioFile, isA<PhonicAudioFile>(), reason: 'Failed for $format');
           audioFile.dispose();
         }
@@ -176,7 +176,7 @@ void main() {
         final bytes = _createMinimalMp3WithMetadata();
 
         final stopwatch = Stopwatch()..start();
-        final audioFile = await Phonic.fromBytesInIsolate(bytes);
+        final audioFile = await Phonic.fromBytesInIsolateAsync(bytes);
         stopwatch.stop();
 
         // Should complete quickly even with isolate overhead

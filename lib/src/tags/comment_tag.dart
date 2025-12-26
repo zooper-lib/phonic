@@ -50,11 +50,10 @@ final class CommentTag extends MetadataTag<String> {
   /// ```
   const CommentTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.comment,
-         provenance: provenance,
        );
 
   /// Creates a new CommentTag instance with updated provenance information.

@@ -438,6 +438,7 @@ void main() {
       test('handles compatibility with existing GenreTag parsing', () {
         // Ensure compatibility with the existing GenreTag._parseGenreString method
         final testCases = [
+          // ignore: unnecessary_string_escapes
           'Rock\0Alternative\0Indie', // ID3v2.4
           'Rock/Alternative/Indie', // ID3v2.3
           'Rock;Alternative;Indie', // MP4

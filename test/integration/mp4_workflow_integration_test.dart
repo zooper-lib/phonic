@@ -121,7 +121,7 @@ void main() {
 
           audioFile.dispose();
 
-          final decodedFile = await Phonic.fromBytes(encodedBytes);
+          final decodedFile = Phonic.fromBytes(encodedBytes);
 
           expect(decodedFile.getTag(TagKey.title)?.value, equals(testData['title']));
           expect(decodedFile.getTag(TagKey.artist)?.value, equals(testData['artist']));

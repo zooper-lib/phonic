@@ -49,11 +49,10 @@ final class GroupingTag extends MetadataTag<String> {
   /// ```
   const GroupingTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.grouping,
-         provenance: provenance,
        );
 
   /// Creates a new GroupingTag instance with updated provenance information.

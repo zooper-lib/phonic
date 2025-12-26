@@ -55,8 +55,8 @@ void main() {
     });
 
     test('equality comparison excludes data loader', () {
-      final loader1 = () async => Uint8List.fromList([1, 2, 3]);
-      final loader2 = () async => Uint8List.fromList([4, 5, 6]);
+      Future<Uint8List> loader1() async => Uint8List.fromList([1, 2, 3]);
+      Future<Uint8List> loader2() async => Uint8List.fromList([4, 5, 6]);
 
       final artwork1 = ArtworkData(
         mimeType: MimeType.jpeg.standardName,
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('equality comparison includes all metadata fields', () {
-      final loader = () async => Uint8List.fromList([1, 2, 3]);
+      Future<Uint8List> loader() async => Uint8List.fromList([1, 2, 3]);
 
       final artwork1 = ArtworkData(
         mimeType: MimeType.jpeg.standardName,

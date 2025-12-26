@@ -71,11 +71,10 @@ final class ArtistTag extends MetadataTag<String> {
   /// ```
   const ArtistTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.artist,
-         provenance: provenance,
        );
 
   /// Creates a new ArtistTag instance with updated provenance information.

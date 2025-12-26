@@ -190,13 +190,12 @@ class FlacAudioFile extends PhonicAudioFileImpl {
   /// - Artwork data uses lazy loading through METADATA_BLOCK_PICTURE parsing
   FlacAudioFile.fromBytes(
     Uint8List fileBytes, {
-    bool isDirty = false,
+    super.isDirty,
   }) : super(
          fileBytes: fileBytes,
          formatStrategy: const FlacFormatStrategy(),
          codecRegistry: _createFlacCodecRegistry(),
          mergePolicy: MergePolicy.fromStrategy(const FlacFormatStrategy()),
-         isDirty: isDirty,
        );
 
   /// Creates a codec registry configured for FLAC files with Vorbis Comments codec and locator.

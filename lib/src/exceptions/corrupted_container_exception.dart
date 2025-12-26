@@ -125,7 +125,7 @@ final class CorruptedContainerException extends PhonicException {
   ///   context: 'file: song.mp3, container: ID3v2.4, frame: APIC'
   /// );
   /// ```
-  const CorruptedContainerException(String message, {this.byteOffset, String? context}) : super(message, context: context);
+  const CorruptedContainerException(super.message, {this.byteOffset, super.context});
 
   /// Returns a string representation of this exception.
   ///

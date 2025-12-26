@@ -91,7 +91,7 @@ void main() {
       print('Attempting to decode our encoded MP4...');
 
       try {
-        final decodedFile = await Phonic.fromBytes(encodedBytes);
+        final decodedFile = Phonic.fromBytes(encodedBytes);
 
         print('✓ Decoded successfully!');
         print('  Title: ${decodedFile.getTag(TagKey.title)?.value ?? "LOST"}');
@@ -121,7 +121,7 @@ void main() {
       audioFile.dispose();
 
       // Try to decode
-      final decodedFile = await Phonic.fromBytes(encodedBytes);
+      final decodedFile = Phonic.fromBytes(encodedBytes);
       final titleAfter = decodedFile.getTag(TagKey.title)?.value;
 
       print('Single tag test result:');

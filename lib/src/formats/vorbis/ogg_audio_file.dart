@@ -190,13 +190,12 @@ class OggAudioFile extends PhonicAudioFileImpl {
   /// - Artwork data uses lazy loading through comment packet parsing
   OggAudioFile.fromBytes(
     Uint8List fileBytes, {
-    bool isDirty = false,
+    super.isDirty,
   }) : super(
          fileBytes: fileBytes,
          formatStrategy: const OggFormatStrategy(),
          codecRegistry: _createOggCodecRegistry(),
          mergePolicy: MergePolicy.fromStrategy(const OggFormatStrategy()),
-         isDirty: isDirty,
        );
 
   /// Creates a codec registry configured for OGG Vorbis files with Vorbis Comments codec and locator.

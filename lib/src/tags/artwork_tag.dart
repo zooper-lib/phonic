@@ -79,11 +79,10 @@ final class ArtworkTag extends MetadataTag<ArtworkData> {
   /// ```
   const ArtworkTag(
     ArtworkData value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.artwork,
-         provenance: provenance,
        );
 
   /// Creates a new ArtworkTag instance with updated provenance information.

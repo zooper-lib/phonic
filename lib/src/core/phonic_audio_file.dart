@@ -468,7 +468,11 @@ abstract class PhonicAudioFile {
   ///
   ///   await File('output.mp3').writeAsBytes(bytes);
   /// ```
-  Future<Uint8List> encode([EncodingOptions? options]);
+  /// Alias for [encodeAsync]. Prefer [encodeAsync] for async naming consistency.
+  Future<Uint8List> encode([EncodingOptions? options]) => encodeAsync(options);
+
+  /// Encodes the audio file with the current in-memory metadata.
+  Future<Uint8List> encodeAsync([EncodingOptions? options]);
 
   /// Gets the raw audio data without metadata containers.
   ///

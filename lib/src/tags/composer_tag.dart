@@ -49,11 +49,10 @@ final class ComposerTag extends MetadataTag<String> {
   /// ```
   const ComposerTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.composer,
-         provenance: provenance,
        );
 
   /// Creates a new ComposerTag instance with updated provenance information.

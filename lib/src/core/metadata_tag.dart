@@ -209,6 +209,12 @@ sealed class MetadataTag<T> extends Equatable {
   /// @returns A future that completes with a tag ready for synchronous encoding
   Future<MetadataTag<T>> prepareForEncoding() async => this;
 
+  /// Prepares the tag for synchronous encoding by loading any async data.
+  ///
+  /// This method delegates to [prepareForEncoding] to preserve overrides of the
+  /// legacy method name.
+  Future<MetadataTag<T>> prepareForEncodingAsync() => prepareForEncoding();
+
   @override
   List<Object?> get props => [value, key, provenance];
 
@@ -216,6 +222,6 @@ sealed class MetadataTag<T> extends Equatable {
   String toString() {
     final valueStr = value.toString();
     final provenanceStr = provenance.toString();
-    return '${runtimeType}($valueStr, provenance: $provenanceStr)';
+    return '$runtimeType($valueStr, provenance: $provenanceStr)';
   }
 }

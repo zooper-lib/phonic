@@ -258,7 +258,7 @@ void main() {
         for (final strategy in EncodingStrategy.values) {
           final success = results[strategy] ?? false;
           final size = sizes[strategy];
-          print('  ${strategy.name}: ${success ? '✓' : '✗'} ${size != null ? '(${size} bytes)' : ''}');
+          print('  ${strategy.name}: ${success ? '✓' : '✗'} ${size != null ? '($size bytes)' : ''}');
         }
 
         // Test that all strategies at least attempt encoding (even if validation fails)

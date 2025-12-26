@@ -121,7 +121,7 @@ class PostWriteValidator {
   ///
   /// Throws:
   /// - [ArgumentError] if required parameters are null or invalid
-  Future<ValidationResult> validateEncodedFile({
+  Future<ValidationResult> validateEncodedFileAsync({
     required Uint8List encodedBytes,
     required List<MetadataTag> originalTags,
     required FormatStrategy formatStrategy,
@@ -1115,34 +1115,60 @@ class PostWriteValidator {
   /// This method determines if the extracted value is a truncated version of the
   /// original value due to format constraints (e.g., ID3v1's 30-character limits).
   bool _isAcceptableTruncation(TagKey tagKey, dynamic originalValue, dynamic extractedValue, FormatStrategy? formatStrategy) {
-    if (formatStrategy == null || originalValue is! String || extractedValue is! String) {
+    if (originalValue is! String || extractedValue is! String) {
       return false;
     }
 
-    final originalStr = originalValue;
-    final extractedStr = extractedValue;
+    final originalStr = _normalizeString(originalValue);
+    final extractedStr = _normalizeString(extractedValue);
+
+    // Only treat a *shorter* prefix as truncation.
+    if (extractedStr.length >= originalStr.length) {
+      return false;
+    }
 
     // Check if extracted is a prefix of original (indicating truncation)
     if (!originalStr.startsWith(extractedStr)) {
       return false;
     }
 
-    // Check if any target container has length limitations that would cause this truncation
-    for (final (containerKind, containerVersion) in formatStrategy.fanout) {
-      final codec = codecRegistry.findCodec(containerKind, containerVersion);
-      if (codec != null) {
-        final semantics = codec.capability.semanticsByKey[tagKey];
-        if (semantics?.maxTextLength != null) {
-          final maxLength = semantics!.maxTextLength!;
-          // If the extracted length matches the format limit and original exceeds it
-          if (extractedStr.length <= maxLength && originalStr.length > maxLength) {
-            return true;
+    // Prefer capability-derived limits when available.
+    if (formatStrategy != null) {
+      bool sawAnyLimit = false;
+
+      // Check if any target container has length limitations that would cause this truncation
+      for (final (containerKind, containerVersion) in formatStrategy.fanout) {
+        final codec = codecRegistry.findCodec(containerKind, containerVersion);
+        if (codec != null) {
+          final semantics = codec.capability.semanticsByKey[tagKey];
+          if (semantics?.maxTextLength != null) {
+            sawAnyLimit = true;
+            final maxLength = semantics!.maxTextLength!;
+            // If the extracted length matches the format limit and original exceeds it
+            if (extractedStr.length <= maxLength && originalStr.length > maxLength) {
+              return true;
+            }
           }
         }
       }
+
+      // If we saw limits but none explain the truncation, treat it as unexpected.
+      if (sawAnyLimit) {
+        return false;
+      }
     }
 
-    return false;
+    // Fallback: some formats/strategies may truncate text without a declared maxTextLength.
+    // In that case, treat common ID3v1-limited text fields as acceptable truncation.
+    const truncationAllowedKeys = {
+      TagKey.title,
+      TagKey.artist,
+      TagKey.album,
+      TagKey.comment,
+      TagKey.year,
+    };
+
+    return truncationAllowedKeys.contains(tagKey);
   }
 
   bool _isRequiredField(TagKey tagKey) {

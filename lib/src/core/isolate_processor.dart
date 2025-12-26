@@ -16,17 +16,23 @@ class IsolateProcessor {
   static Future<_IsolateProcessingResult> processInIsolate(
     Uint8List bytes,
     String? filename,
+  ) => processInIsolateAsync(bytes, filename);
+
+  /// Processes audio file bytes in an isolate.
+  static Future<_IsolateProcessingResult> processInIsolateAsync(
+    Uint8List bytes,
+    String? filename,
   ) async {
     final request = _IsolateProcessingRequest(
       fileBytes: bytes,
       filename: filename,
     );
 
-    return _runInIsolate(request);
+    return _runInIsolateAsync(request);
   }
 
   /// Runs the processing logic.
-  static Future<_IsolateProcessingResult> _runInIsolate(
+  static Future<_IsolateProcessingResult> _runInIsolateAsync(
     _IsolateProcessingRequest request,
   ) async {
     return _processInIsolate(request);

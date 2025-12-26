@@ -375,7 +375,7 @@ class _FailingValidator extends PostWriteValidator {
       );
 
   @override
-  Future<ValidationResult> validateEncodedFile({
+  Future<ValidationResult> validateEncodedFileAsync({
     required Uint8List encodedBytes,
     required List<dynamic> originalTags,
     required dynamic formatStrategy,

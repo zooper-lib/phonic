@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -244,7 +245,11 @@ class Phonic {
   ///   }
   /// }
   /// ```
-  static Future<PhonicAudioFile> fromFile(String path) async {
+  /// Alias for [fromFileAsync]. Prefer [fromFileAsync] for async naming consistency.
+  static Future<PhonicAudioFile> fromFile(String path) => fromFileAsync(path);
+
+  /// Creates a PhonicAudioFile instance from a file path.
+  static Future<PhonicAudioFile> fromFileAsync(String path) async {
     if (path.isEmpty) {
       throw ArgumentError.value(path, 'path', 'Path cannot be empty');
     }
@@ -387,9 +392,9 @@ class Phonic {
       mergePolicy: mergePolicy,
     );
 
-    // Automatically load tags from the file for user convenience
-    // This makes tags immediately available after factory creation
-    audioFile.extractContainersAndDecode();
+    // Automatically load tags from the file for user convenience.
+    // This is fire-and-forget because fromBytes() is synchronous.
+    unawaited(audioFile.extractContainersAndDecodeAsync());
 
     return audioFile;
   }
@@ -675,7 +680,8 @@ class Phonic {
   ///   print('Unsupported format: ${e.message}');
   /// }
   /// ```
-  static Future<PhonicAudioFile> fromFileInIsolate(String path) async {
+  /// Creates a PhonicAudioFile instance from a file path using an isolate.
+  static Future<PhonicAudioFile> fromFileInIsolateAsync(String path) async {
     if (path.isEmpty) {
       throw ArgumentError.value(path, 'path', 'Path cannot be empty');
     }
@@ -687,7 +693,7 @@ class Phonic {
       final fileBytes = await file.readAsBytes();
 
       // Process in isolate with filename hint
-      return fromBytesInIsolate(fileBytes, path);
+      return fromBytesInIsolateAsync(fileBytes, path);
     } on FileSystemException {
       // Re-throw filesystem exceptions as-is
       rethrow;
@@ -770,7 +776,7 @@ class Phonic {
   ///   ),
   /// );
   /// ```
-  static Future<PhonicAudioFile> fromBytesInIsolate(
+  static Future<PhonicAudioFile> fromBytesInIsolateAsync(
     Uint8List bytes, [
     String? filename,
   ]) async {
@@ -779,7 +785,7 @@ class Phonic {
     }
 
     // Process in isolate
-    final result = await IsolateProcessor.processInIsolate(bytes, filename);
+    final result = await IsolateProcessor.processInIsolateAsync(bytes, filename);
 
     // Check for errors from isolate
     if (!result.success) {

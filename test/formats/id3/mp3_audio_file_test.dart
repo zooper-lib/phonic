@@ -82,7 +82,7 @@ void main() {
         final mp3File = Mp3AudioFile.fromBytes(mp3Bytes);
 
         // Extract containers and decode tags
-        await mp3File.extractContainersAndDecode();
+        await mp3File.extractContainersAndDecodeAsync();
 
         final titleTag = mp3File.getTag(TagKey.title);
         expect(titleTag, isNotNull);
@@ -101,7 +101,7 @@ void main() {
         final mp3File = Mp3AudioFile.fromBytes(mp3Bytes);
 
         // Extract containers and decode tags
-        await mp3File.extractContainersAndDecode();
+        await mp3File.extractContainersAndDecodeAsync();
 
         final titleTag = mp3File.getTag(TagKey.title);
         expect(titleTag, isNotNull);
@@ -119,7 +119,7 @@ void main() {
         final mp3File = Mp3AudioFile.fromBytes(mp3Bytes);
 
         // Extract containers and decode tags
-        await mp3File.extractContainersAndDecode();
+        await mp3File.extractContainersAndDecodeAsync();
 
         // ID3v2.4 should take precedence over ID3v1
         final titleTag = mp3File.getTag(TagKey.title);
@@ -134,7 +134,7 @@ void main() {
         final mp3File = Mp3AudioFile.fromBytes(mp3Bytes);
 
         // Extract containers and decode tags
-        await mp3File.extractContainersAndDecode();
+        await mp3File.extractContainersAndDecodeAsync();
 
         final allTags = mp3File.getAllTags();
         expect(allTags.length, greaterThan(0));
@@ -199,7 +199,7 @@ void main() {
           mergePolicy: MergePolicy.fromStrategy(const Mp3FormatStrategy()),
           validator: disabledValidator,
         );
-        await verifyFile.extractContainersAndDecode();
+        await verifyFile.extractContainersAndDecodeAsync();
 
         final titleTag = verifyFile.getTag(TagKey.title);
         expect(titleTag, isNotNull);
@@ -242,7 +242,7 @@ void main() {
         final mp3File = Mp3AudioFile.fromBytes(mp3Bytes);
 
         // Extract containers and decode tags
-        await mp3File.extractContainersAndDecode();
+        await mp3File.extractContainersAndDecodeAsync();
 
         // Verify tag exists
         expect(mp3File.getTag(TagKey.title), isNotNull);

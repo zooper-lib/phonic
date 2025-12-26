@@ -975,7 +975,10 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   /// }
   /// ```
   @override
-  Future<Uint8List> encode([EncodingOptions? options]) async {
+  Future<Uint8List> encode([EncodingOptions? options]) => encodeAsync(options);
+
+  @override
+  Future<Uint8List> encodeAsync([EncodingOptions? options]) async {
     // Use preserveExisting strategy by default for maximum compatibility
     final encodingOptions = options ?? const EncodingOptions.preserveExisting();
 
@@ -988,7 +991,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
       final preparedTags = <MetadataTag>[];
       for (final tag in tagsToWrite) {
         if (tag.requiresAsyncPreparation) {
-          final preparedTag = await tag.prepareForEncoding();
+          final preparedTag = await tag.prepareForEncodingAsync();
           preparedTags.add(preparedTag);
         } else {
           preparedTags.add(tag);
@@ -1004,7 +1007,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
       // Step 4: Assemble the file with updated metadata containers
       // The FileAssembler will normalize tags for each target container individually
       // based on the container's capabilities, ensuring proper encoding for each format.
-      final assembledFile = await fileAssembler.assembleFile(
+      final assembledFile = await fileAssembler.assembleFileAsync(
         originalFileBytes: _fileBytes,
         tagsToWrite: preparedTags,
         formatStrategy: formatStrategy,
@@ -1021,7 +1024,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
 
       // Step 5: Validate the assembled file structure for integrity
       // Use custom target containers instead of default fan-out
-      final validationResult = await _validator.validateEncodedFile(
+      final validationResult = await _validator.validateEncodedFileAsync(
         encodedBytes: assembledFile,
         originalTags: tagsToWrite,
         formatStrategy: formatStrategy,
@@ -1345,7 +1348,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   ///
   /// @throws [UnsupportedFormatException] if the file format is not supported
   /// @throws [CorruptedContainerException] if critical container corruption prevents processing
-  Future<void> extractContainersAndDecode() async {
+  Future<void> extractContainersAndDecodeAsync() async {
     // Get precedence order from format strategy
     final precedence = formatStrategy.precedence;
 

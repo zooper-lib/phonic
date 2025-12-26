@@ -63,7 +63,7 @@ void main() {
         validator: validator,
       );
 
-      await audioFile.extractContainersAndDecode();
+      await audioFile.extractContainersAndDecodeAsync();
 
       // Verify initial genre
       final initialGenre = audioFile.getTag(TagKey.genre) as GenreTag?;
@@ -84,7 +84,7 @@ void main() {
         validator: validator,
       );
 
-      await verifyFile.extractContainersAndDecode();
+      await verifyFile.extractContainersAndDecodeAsync();
 
       // Verify the genre is correctly updated
       final finalGenre = verifyFile.getTag(TagKey.genre) as GenreTag?;
@@ -107,7 +107,7 @@ void main() {
         validator: validator,
       );
 
-      await audioFile.extractContainersAndDecode();
+      await audioFile.extractContainersAndDecodeAsync();
 
       // Set genre using fromString which parses comma delimiter
       audioFile.setTag(GenreTag.fromString('Blues, RNB'));
@@ -122,7 +122,7 @@ void main() {
         validator: validator,
       );
 
-      await verifyFile.extractContainersAndDecode();
+      await verifyFile.extractContainersAndDecodeAsync();
 
       final finalGenre = verifyFile.getTag(TagKey.genre) as GenreTag?;
       expect(finalGenre?.value, equals(['Blues', 'RNB']));
@@ -139,7 +139,7 @@ void main() {
         validator: validator,
       );
 
-      await audioFile.extractContainersAndDecode();
+      await audioFile.extractContainersAndDecodeAsync();
 
       // Set multi-genre tag
       audioFile.setTag(GenreTag(const ['Electronic', 'Ambient', 'Techno']));
@@ -167,7 +167,7 @@ void main() {
         validator: validator,
       );
 
-      await verifyFile.extractContainersAndDecode();
+      await verifyFile.extractContainersAndDecodeAsync();
       final mergedGenre = verifyFile.getTag(TagKey.genre) as GenreTag?;
 
       // After merge, should have all genres from ID3v2 (which has precedence)

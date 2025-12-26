@@ -82,7 +82,7 @@ final class UnsupportedFormatException extends PhonicException {
   ///   context: 'file: audio.wma, detected: Windows Media Audio'
   /// );
   /// ```
-  const UnsupportedFormatException(String message, {String? context}) : super(message, context: context);
+  const UnsupportedFormatException(super.message, {super.context});
 
   /// Returns a string representation of this exception.
   ///

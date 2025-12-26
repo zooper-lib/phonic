@@ -60,11 +60,10 @@ final class LyricsTag extends MetadataTag<String> {
   /// ```
   const LyricsTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.lyrics,
-         provenance: provenance,
        );
 
   /// Creates a new LyricsTag instance with updated provenance information.
