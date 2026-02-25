@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.3.0] - 2026-02-25
+
 ### Added
 
 - Isolate-based processing methods for non-blocking metadata extraction
