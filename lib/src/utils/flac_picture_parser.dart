@@ -534,9 +534,9 @@ class FlacPictureMetadata {
     if (isPossiblyVector) {
       return 'Vector';
     } else if (isIndexedColor) {
-      return '${colorDepth}-bit indexed ($numberOfColors colors)';
+      return '$colorDepth-bit indexed ($numberOfColors colors)';
     } else {
-      return '${colorDepth}-bit';
+      return '$colorDepth-bit';
     }
   }
 

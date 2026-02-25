@@ -70,11 +70,10 @@ final class TrackNumberTag extends MetadataTag<int> {
   /// ```
   TrackNumberTag(
     int value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: validator.validateOrThrow(value),
          key: TagKey.trackNumber,
-         provenance: provenance,
        );
 
   /// Creates a new TrackNumberTag instance with updated provenance information.

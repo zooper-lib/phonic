@@ -43,7 +43,7 @@ Future<void> basicTagReading() async {
 
   try {
     // Load a real sample audio file
-    final audioFile = await Phonic.fromFile('sample1.mp3');
+    final audioFile = await Phonic.fromFileAsync('sample1.mp3');
 
     // Read basic text tags
     final titleTag = audioFile.getTag(TagKey.title);
@@ -95,7 +95,7 @@ Future<void> modifyingTags() async {
 
   try {
     // Load a real sample audio file
-    final audioFile = await Phonic.fromFile('sample1.mp3');
+    final audioFile = await Phonic.fromFileAsync('sample1.mp3');
 
     print('Original tags:');
     final originalTitle = audioFile.getTag(TagKey.title);
@@ -159,7 +159,7 @@ Future<void> multiValuedTags() async {
   print('-----------------------------');
 
   try {
-    final audioFile = await Phonic.fromFile('sample2.mp3');
+    final audioFile = await Phonic.fromFileAsync('sample2.mp3');
 
     // Create multi-genre tags using different methods
     print('Creating genre tags:');
@@ -219,7 +219,7 @@ Future<void> artworkHandling() async {
   print('-------------------');
 
   try {
-    final audioFile = await Phonic.fromFile('sample3.mp3');
+    final audioFile = await Phonic.fromFileAsync('sample3.mp3');
 
     // Create artwork with lazy loading
     final artworkData = ArtworkData(
@@ -294,7 +294,7 @@ Future<void> encodingOptions() async {
   print('----------------------------');
 
   try {
-    final audioFile = await Phonic.fromFile('sample1.mp3');
+    final audioFile = await Phonic.fromFileAsync('sample1.mp3');
 
     // Add some test metadata
     audioFile.setTag(const AlbumTag('Test Album'));
@@ -445,7 +445,7 @@ Future<void> batchProcessing() async {
     PhonicAudioFile? audioFile;
     try {
       // Load the file
-      audioFile = await Phonic.fromFile(filePath);
+      audioFile = await Phonic.fromFileAsync(filePath);
 
       // Read existing metadata
       final title = audioFile.getTag(TagKey.title);

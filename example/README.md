@@ -17,7 +17,7 @@ This directory contains comprehensive examples demonstrating how to use the Phon
 - Proper resource management and disposal
 
 **Key concepts covered**:
-- `Phonic.fromFile()` and `Phonic.fromBytes()` factory methods
+- `Phonic.fromFileAsync()` and `Phonic.fromBytes()` factory methods
 - Tag reading with `getTag()` and `getTags()`
 - Tag modification with `setTag()`
 - Multi-valued tags like `GenreTag`
@@ -184,7 +184,7 @@ Always dispose of `PhonicAudioFile` instances to free resources:
 ```dart
 PhonicAudioFile? audioFile;
 try {
-  audioFile = await Phonic.fromFile('song.mp3');
+  audioFile = await Phonic.fromFileAsync('song.mp3');
   // Use audioFile...
 } finally {
   audioFile?.dispose();
@@ -197,7 +197,7 @@ Use specific exception types for targeted error handling:
 
 ```dart
 try {
-  final audioFile = await Phonic.fromFile('song.mp3');
+  final audioFile = await Phonic.fromFileAsync('song.mp3');
   // Process file...
 } on UnsupportedFormatException catch (e) {
   // Handle unsupported format
@@ -221,7 +221,7 @@ for (int i = 0; i < files.length; i += batchSize) {
   try {
     // Load batch
     for (final file in batch) {
-      batchFiles.add(await Phonic.fromFile(file));
+      batchFiles.add(await Phonic.fromFileAsync(file));
     }
     
     // Process batch...

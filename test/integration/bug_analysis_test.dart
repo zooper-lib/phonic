@@ -43,7 +43,7 @@ void main() {
 
         try {
           print('Testing file: ${testFile.split('/').last}');
-          audioFile = await Phonic.fromFile(testFile);
+          audioFile = await Phonic.fromFileAsync(testFile);
 
           // First, let's see what's in this file
           final existingTags = audioFile.getAllTags();
@@ -163,7 +163,7 @@ Integration tests will continue to fail until these core bugs are resolved.
       PhonicAudioFile? audioFile;
 
       try {
-        audioFile = await Phonic.fromFile(testFile);
+        audioFile = await Phonic.fromFileAsync(testFile);
 
         print('Original tags:');
         final originalAlbum = audioFile.getTag(TagKey.album);
@@ -213,7 +213,7 @@ Integration tests will continue to fail until these core bugs are resolved.
       PhonicAudioFile? audioFile;
 
       try {
-        audioFile = await Phonic.fromFile(testFile);
+        audioFile = await Phonic.fromFileAsync(testFile);
 
         print('File: ${testFile.split('/').last}');
 

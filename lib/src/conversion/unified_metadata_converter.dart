@@ -288,13 +288,13 @@ class UnifiedMetadataConverter implements MetadataConverter {
       containerKind: ContainerKind.id3v1,
       containerVersion: 'v1',
       semanticsByKey: {
-        TagKey.title: const TagSemantics(maxTextLength: 30),
-        TagKey.artist: const TagSemantics(maxTextLength: 30),
-        TagKey.album: const TagSemantics(maxTextLength: 30),
-        TagKey.year: const TagSemantics(maxTextLength: 4),
-        TagKey.comment: const TagSemantics(maxTextLength: 30),
-        TagKey.trackNumber: const TagSemantics(minValue: 1, maxValue: 255),
-        TagKey.genre: const TagSemantics(minValue: 0, maxValue: 255),
+        TagKey.title: TagSemantics(maxTextLength: 30),
+        TagKey.artist: TagSemantics(maxTextLength: 30),
+        TagKey.album: TagSemantics(maxTextLength: 30),
+        TagKey.year: TagSemantics(maxTextLength: 4),
+        TagKey.comment: TagSemantics(maxTextLength: 30),
+        TagKey.trackNumber: TagSemantics(minValue: 1, maxValue: 255),
+        TagKey.genre: TagSemantics(minValue: 0, maxValue: 255),
       },
     );
 

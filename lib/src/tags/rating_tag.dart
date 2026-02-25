@@ -96,11 +96,10 @@ final class RatingTag extends MetadataTag<int> {
   /// ```
   RatingTag(
     int value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: validator.validateOrThrow(value),
          key: TagKey.rating,
-         provenance: provenance,
        );
 
   /// Creates a new RatingTag instance with updated provenance information.

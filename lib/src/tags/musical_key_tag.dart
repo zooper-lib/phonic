@@ -63,11 +63,10 @@ final class MusicalKeyTag extends MetadataTag<String> {
   /// ```
   const MusicalKeyTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.musicalKey,
-         provenance: provenance,
        );
 
   /// Creates a new MusicalKeyTag instance with updated provenance information.

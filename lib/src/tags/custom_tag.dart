@@ -59,11 +59,10 @@ final class CustomTag extends MetadataTag<String> {
   /// ```
   const CustomTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.custom,
-         provenance: provenance,
        );
 
   /// Creates a new CustomTag instance with updated provenance information.

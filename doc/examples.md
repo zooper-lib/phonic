@@ -11,7 +11,7 @@ import 'package:phonic/phonic.dart';
 import 'dart:io';
 
 Future<void> readBasicMetadata() async {
-  final audioFile = await Phonic.fromFile('song.mp3');
+  final audioFile = await Phonic.fromFileAsync('song.mp3');
 
   try {
     // Read basic text metadata
@@ -48,7 +48,7 @@ Future<void> readBasicMetadata() async {
 
 ```dart
 Future<void> writeBasicMetadata() async {
-  final audioFile = await Phonic.fromFile('input.mp3');
+  final audioFile = await Phonic.fromFileAsync('input.mp3');
 
   try {
     // Set basic metadata
@@ -83,7 +83,7 @@ Future<void> writeBasicMetadata() async {
 
 ```dart
 Future<void> extractArtwork() async {
-  final audioFile = await Phonic.fromFile('song_with_artwork.mp3');
+  final audioFile = await Phonic.fromFileAsync('song_with_artwork.mp3');
 
   try {
     final artworkTags = audioFile.getTags(TagKey.artwork);
@@ -140,7 +140,7 @@ Future<void> extractArtwork() async {
 
 ```dart
 Future<void> addArtwork() async {
-  final audioFile = await Phonic.fromFile('song.mp3');
+  final audioFile = await Phonic.fromFileAsync('song.mp3');
 
   try {
     // Check if artwork file exists
@@ -200,7 +200,7 @@ Future<void> processMusicLibrary() async {
 
   for (final filePath in audioFiles) {
     try {
-      final audioFile = await Phonic.fromFile(filePath);
+      final audioFile = await Phonic.fromFileAsync(filePath);
 
       try {
         // Process each file
@@ -376,7 +376,7 @@ Future<void> organizeByAlbum() async {
 }
 
 Future<void> organizeFile(String sourceFile, String targetBasePath) async {
-  final audioFile = await Phonic.fromFile(sourceFile);
+  final audioFile = await Phonic.fromFileAsync(sourceFile);
 
   try {
     // Extract metadata for organization
@@ -469,7 +469,7 @@ Future<void> createAlbumCollection() async {
   // Process each track in the album
   for (int i = 0; i < albumTracks.length; i++) {
     final filePath = albumTracks[i];
-    final audioFile = await Phonic.fromFile(filePath);
+    final audioFile = await Phonic.fromFileAsync(filePath);
 
     try {
       // Set consistent album information
@@ -520,7 +520,7 @@ Future<void> convertMp3ToFlac() async {
   // This example shows metadata preservation during format conversion
   // Note: Audio conversion would require additional libraries
 
-  final mp3File = await Phonic.fromFile('song.mp3');
+  final mp3File = await Phonic.fromFileAsync('song.mp3');
 
   try {
     // Extract all metadata from MP3
@@ -660,7 +660,7 @@ Future<List<ValidationIssue>> validateAudioFile(String filePath) async {
   final issues = <ValidationIssue>[];
 
   try {
-    final audioFile = await Phonic.fromFile(filePath);
+    final audioFile = await Phonic.fromFileAsync(filePath);
 
     try {
       // Check required fields
@@ -773,7 +773,7 @@ class MusicPlayerIntegration {
     }
 
     try {
-      final audioFile = await Phonic.fromFile(filePath);
+      final audioFile = await Phonic.fromFileAsync(filePath);
 
       try {
         final metadata = {
@@ -810,7 +810,7 @@ class MusicPlayerIntegration {
 
   Future<Uint8List?> getAlbumArt(String filePath) async {
     try {
-      final audioFile = await Phonic.fromFile(filePath);
+      final audioFile = await Phonic.fromFileAsync(filePath);
 
       try {
         final artworkTag = audioFile.getTag(TagKey.artwork) as ArtworkTag?;
@@ -866,7 +866,7 @@ Future<void> processPodcastEpisodes() async {
 }
 
 Future<void> processPodcastEpisode(String filePath) async {
-  final audioFile = await Phonic.fromFile(filePath);
+  final audioFile = await Phonic.fromFileAsync(filePath);
 
   try {
     // Extract episode information from filename if metadata is missing

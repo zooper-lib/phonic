@@ -71,11 +71,10 @@ final class DiscNumberTag extends MetadataTag<int> {
   /// ```
   DiscNumberTag(
     int value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: validator.validateOrThrow(value),
          key: TagKey.discNumber,
-         provenance: provenance,
        );
 
   /// Creates a new DiscNumberTag instance with updated provenance information.

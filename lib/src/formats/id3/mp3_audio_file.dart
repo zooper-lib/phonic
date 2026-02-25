@@ -167,13 +167,12 @@ class Mp3AudioFile extends PhonicAudioFileImpl {
   /// - Codec and locator instances are lightweight and shared
   Mp3AudioFile.fromBytes(
     Uint8List fileBytes, {
-    bool isDirty = false,
+    super.isDirty,
   }) : super(
          fileBytes: fileBytes,
          formatStrategy: const Mp3FormatStrategy(),
          codecRegistry: _createMp3CodecRegistry(),
          mergePolicy: MergePolicy.fromStrategy(const Mp3FormatStrategy()),
-         isDirty: isDirty,
        );
 
   /// Creates a codec registry configured for MP3 files with all ID3 codecs and locators.

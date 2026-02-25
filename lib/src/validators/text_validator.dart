@@ -62,7 +62,7 @@ class TextValidator extends TagValidator<String> {
     if (error.containsKey(emptyError)) {
       final details = error[emptyError] as Map<String, dynamic>;
       final actual = details['actual'] as String;
-      return '$fieldName cannot be empty. Actual: "${actual}"';
+      return '$fieldName cannot be empty. Actual: "$actual"';
     }
     return 'Invalid $fieldName value';
   }

@@ -80,11 +80,10 @@ final class BpmTag extends MetadataTag<int> {
   /// ```
   BpmTag(
     int value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: validator.validateOrThrow(value),
          key: TagKey.bpm,
-         provenance: provenance,
        );
 
   /// Creates a new BpmTag instance with updated provenance information.

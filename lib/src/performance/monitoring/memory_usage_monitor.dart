@@ -26,7 +26,7 @@ import 'memory_usage_report.dart';
 ///
 /// // Process files and monitor memory
 /// for (final file in audioFiles) {
-///   final audioFile = await Phonic.fromFile(file);
+///   final audioFile = await Phonic.fromFileAsync(file);
 ///   // ... process file
 ///   monitor.recordCheckpoint('file_${audioFiles.indexOf(file)}');
 /// }
@@ -197,7 +197,7 @@ class MemoryUsageMonitor {
     try {
       // Try to get RSS memory usage (Resident Set Size)
       if (Platform.isLinux || Platform.isMacOS) {
-        final result = Process.runSync('ps', ['-o', 'rss=', '-p', '${pid}']);
+        final result = Process.runSync('ps', ['-o', 'rss=', '-p', '$pid']);
         if (result.exitCode == 0) {
           final rssKB = int.tryParse(result.stdout.toString().trim());
           if (rssKB != null) {

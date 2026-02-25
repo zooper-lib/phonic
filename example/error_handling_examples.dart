@@ -57,7 +57,7 @@ Future<void> unsupportedFormatHandling() async {
   for (final (filename, bytes) in unsupportedFiles) {
     try {
       print('Attempting to load: $filename');
-      final audioFile = Phonic.fromBytes(bytes, filename);
+      final audioFile = await Phonic.fromBytesAsync(bytes, filename);
       print('  ✓ Unexpectedly succeeded');
       audioFile.dispose();
     } on UnsupportedFormatException catch (e) {
@@ -85,7 +85,7 @@ Future<void> unsupportedFormatHandling() async {
 
   for (final (filename, bytes) in mixedFiles) {
     try {
-      final audioFile = Phonic.fromBytes(bytes, filename);
+      final audioFile = await Phonic.fromBytesAsync(bytes, filename);
       final title = audioFile.getTag(TagKey.title);
       print('  ✓ $filename: ${title?.value ?? "No title"}');
       audioFile.dispose();
@@ -118,7 +118,7 @@ Future<void> corruptedContainerHandling() async {
   for (final (filename, bytes) in corruptedFiles) {
     try {
       print('Processing potentially corrupted file: $filename');
-      final audioFile = Phonic.fromBytes(bytes, filename);
+      final audioFile = await Phonic.fromBytesAsync(bytes, filename);
 
       // Try to read tags
       final allTags = audioFile.getAllTags();
@@ -151,7 +151,7 @@ Future<void> corruptedContainerHandling() async {
   print('\nPartial recovery example:');
   try {
     final partiallyCorrupted = _createPartiallyCorruptedMp3();
-    final audioFile = Phonic.fromBytes(partiallyCorrupted, 'partial.mp3');
+    final audioFile = await Phonic.fromBytesAsync(partiallyCorrupted, 'partial.mp3');
 
     // Some containers might be readable while others are corrupted
     final tags = audioFile.getAllTags();
@@ -175,7 +175,7 @@ Future<void> tagValidationErrors() async {
   print('------------------------');
 
   try {
-    final audioFile = Phonic.fromBytes(_createValidMp3(), 'test.mp3');
+    final audioFile = await Phonic.fromBytesAsync(_createValidMp3(), 'test.mp3');
 
     // Test various validation scenarios
     final validationTests = [
@@ -238,9 +238,9 @@ Future<void> fileSystemErrorHandling() async {
 
   // Simulate various file system scenarios
   final fileSystemTests = [
-    ('Non-existent file', () => Phonic.fromFile('/nonexistent/path/file.mp3')),
-    ('Empty path', () => Phonic.fromFile('')),
-    ('Directory instead of file', () => Phonic.fromFile('/')),
+    ('Non-existent file', () => Phonic.fromFileAsync('/nonexistent/path/file.mp3')),
+    ('Empty path', () => Phonic.fromFileAsync('')),
+    ('Directory instead of file', () => Phonic.fromFileAsync('/')),
   ];
 
   for (final (description, testFunction) in fileSystemTests) {
@@ -276,11 +276,11 @@ Future<void> fileSystemErrorHandling() async {
       print('Attempting to load: $path');
       if (path == 'valid_fallback.mp3') {
         // Simulate successful fallback
-        audioFile = Phonic.fromBytes(_createValidMp3(), path);
+        audioFile = await Phonic.fromBytesAsync(_createValidMp3(), path);
         print('  ✓ Successfully loaded fallback file');
         break;
       } else {
-        audioFile = await Phonic.fromFile(path);
+        audioFile = await Phonic.fromFileAsync(path);
         print('  ✓ Successfully loaded');
         break;
       }
@@ -310,7 +310,7 @@ Future<void> memoryConstraintHandling() async {
     print('Processing large file with memory constraints...');
 
     final largeFile = _createLargeAudioFile();
-    final audioFile = Phonic.fromBytes(largeFile, 'large_file.mp3');
+    final audioFile = await Phonic.fromBytesAsync(largeFile, 'large_file.mp3');
 
     print('Large file loaded: ${largeFile.length} bytes');
 
@@ -349,7 +349,7 @@ Future<void> memoryConstraintHandling() async {
     for (int i = 0; i < batchFiles.length; i++) {
       PhonicAudioFile? batchFile;
       try {
-        batchFile = Phonic.fromBytes(batchFiles[i], 'batch_$i.mp3');
+        batchFile = await Phonic.fromBytesAsync(batchFiles[i], 'batch_$i.mp3');
 
         // Process quickly and dispose
         final title = batchFile.getTag(TagKey.title);
@@ -378,7 +378,7 @@ Future<void> recoveryStrategies() async {
   print('Strategy 1: Graceful degradation');
   try {
     final problematicFile = _createProblematicMp3();
-    final audioFile = Phonic.fromBytes(problematicFile, 'problematic.mp3');
+    final audioFile = await Phonic.fromBytesAsync(problematicFile, 'problematic.mp3');
 
     // Try to read what we can
     final tags = audioFile.getAllTags();
@@ -402,16 +402,16 @@ Future<void> recoveryStrategies() async {
   final retryFile = _createAmbiguousFile();
 
   final strategies = [
-    ('Direct format detection', () => Phonic.fromBytes(retryFile, 'file.mp3')),
-    ('Alternative extension', () => Phonic.fromBytes(retryFile, 'file.flac')),
-    ('No extension hint', () => Phonic.fromBytes(retryFile)),
+    ('Direct format detection', () => Phonic.fromBytesAsync(retryFile, 'file.mp3')),
+    ('Alternative extension', () => Phonic.fromBytesAsync(retryFile, 'file.flac')),
+    ('No extension hint', () => Phonic.fromBytesAsync(retryFile)),
   ];
 
   PhonicAudioFile? successfulFile;
   for (final (strategyName, strategy) in strategies) {
     try {
       print('  Trying: $strategyName');
-      successfulFile = strategy();
+      successfulFile = await strategy();
       print('    ✓ Success');
       break;
     } catch (e) {
@@ -430,7 +430,7 @@ Future<void> recoveryStrategies() async {
   print('\nStrategy 3: Partial data extraction');
   try {
     final partialFile = _createPartiallyValidFile();
-    final audioFile = Phonic.fromBytes(partialFile, 'partial.mp3');
+    final audioFile = await Phonic.fromBytesAsync(partialFile, 'partial.mp3');
 
     // Extract what we can, ignore what we can't
     final extractedData = <String, dynamic>{};
@@ -466,7 +466,7 @@ Future<void> edgeCasesAndBoundaryConditions() async {
   // Edge case 1: Empty tags
   print('Edge case 1: Empty and null values');
   try {
-    final audioFile = Phonic.fromBytes(_createValidMp3(), 'test.mp3');
+    final audioFile = await Phonic.fromBytesAsync(_createValidMp3(), 'test.mp3');
 
     // Test empty string handling
     audioFile.setTag(const TitleTag(''));
@@ -484,7 +484,7 @@ Future<void> edgeCasesAndBoundaryConditions() async {
   // Edge case 2: Unicode and special characters
   print('\nEdge case 2: Unicode and special characters');
   try {
-    final audioFile = Phonic.fromBytes(_createValidMp3(), 'unicode.mp3');
+    final audioFile = await Phonic.fromBytesAsync(_createValidMp3(), 'unicode.mp3');
 
     // Test various Unicode characters
     audioFile.setTag(const TitleTag('🎵 Song with Emoji 🎶'));
@@ -501,7 +501,7 @@ Future<void> edgeCasesAndBoundaryConditions() async {
   // Edge case 3: Boundary values
   print('\nEdge case 3: Boundary values');
   try {
-    final audioFile = Phonic.fromBytes(_createValidMp3(), 'boundary.mp3');
+    final audioFile = await Phonic.fromBytesAsync(_createValidMp3(), 'boundary.mp3');
 
     // Test boundary values for numeric fields
     audioFile.setTag(RatingTag(0)); // Minimum rating
@@ -520,7 +520,7 @@ Future<void> edgeCasesAndBoundaryConditions() async {
   // Edge case 4: Very long strings
   print('\nEdge case 4: Very long strings');
   try {
-    final audioFile = Phonic.fromBytes(_createValidMp3(), 'long.mp3');
+    final audioFile = await Phonic.fromBytesAsync(_createValidMp3(), 'long.mp3');
 
     final veryLongTitle = 'A' * 1000; // 1000 character title
     final veryLongComment = 'B' * 5000; // 5000 character comment
@@ -537,7 +537,7 @@ Future<void> edgeCasesAndBoundaryConditions() async {
   // Edge case 5: Rapid operations
   print('\nEdge case 5: Rapid operations');
   try {
-    final audioFile = Phonic.fromBytes(_createValidMp3(), 'rapid.mp3');
+    final audioFile = await Phonic.fromBytesAsync(_createValidMp3(), 'rapid.mp3');
 
     // Perform many rapid operations
     for (int i = 0; i < 100; i++) {

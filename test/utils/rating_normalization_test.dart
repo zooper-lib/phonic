@@ -1,9 +1,3 @@
-/// Unit tests for rating normalization utilities.
-///
-/// This test suite verifies the correct conversion of rating values between
-/// different container-specific scales and the unified 0-100 scale used by
-/// the Phonic API.
-
 import 'package:phonic/src/capabilities/id3v23_capability.dart';
 import 'package:phonic/src/capabilities/id3v24_capability.dart';
 import 'package:phonic/src/capabilities/vorbis_capability.dart';

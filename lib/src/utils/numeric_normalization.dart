@@ -1,21 +1,3 @@
-/// Numeric value normalization utilities for audio metadata fields.
-///
-/// This module provides utilities for normalizing, validating, and clamping
-/// numeric values used in audio metadata tags. It ensures that numeric values
-/// conform to reasonable ranges and container-specific constraints while
-/// providing consistent validation across all numeric tag types.
-///
-/// The module handles validation and normalization for:
-/// - Track numbers (must be > 0)
-/// - Disc numbers (must be > 0)
-/// - BPM values (1-999 range)
-/// - Rating values (0-100 range)
-/// - Year values (1900-2100 range)
-///
-/// Container-specific constraints are handled through capability-based
-/// validation, allowing different formats to enforce their own limits
-/// while maintaining consistency in the unified API.
-
 import '../core/container_kind.dart';
 import '../core/tag_capability.dart';
 import '../core/tag_key.dart';

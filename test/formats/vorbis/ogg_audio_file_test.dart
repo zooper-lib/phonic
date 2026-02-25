@@ -65,7 +65,7 @@ void main() {
         final oggFile = OggAudioFile.fromBytes(oggBytes);
 
         // Extract containers and decode tags (should not throw)
-        await oggFile.extractContainersAndDecode();
+        await oggFile.extractContainersAndDecodeAsync();
 
         final allTags = oggFile.getAllTags();
         expect(allTags, isEmpty);

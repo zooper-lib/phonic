@@ -22,7 +22,7 @@ Base class for all Phonic-specific exceptions:
 
 ```dart
 try {
-  final audioFile = await Phonic.fromFile('song.mp3');
+  final audioFile = await Phonic.fromFileAsync('song.mp3');
   // ... use audioFile
 } on PhonicException catch (e) {
   print('Phonic error: ${e.message}');
@@ -40,7 +40,7 @@ Thrown when file format is not supported:
 
 ```dart
 try {
-  final audioFile = await Phonic.fromFile('video.mp4');
+  final audioFile = await Phonic.fromFileAsync('video.mp4');
 } on UnsupportedFormatException catch (e) {
   print('Format not supported: ${e.message}');
   print('File: ${e.filePath}');
@@ -59,7 +59,7 @@ Thrown when file structure is corrupted or invalid:
 
 ```dart
 try {
-  final audioFile = await Phonic.fromFile('corrupted.mp3');
+  final audioFile = await Phonic.fromFileAsync('corrupted.mp3');
 } on CorruptedContainerException catch (e) {
   print('File is corrupted: ${e.message}');
   print('Container type: ${e.containerKind}');
@@ -106,7 +106,7 @@ try {
 ```dart
 Future<PhonicAudioFile?> safeFileLoad(String filePath) async {
   try {
-    return await Phonic.fromFile(filePath);
+    return await Phonic.fromFileAsync(filePath);
 
   } on FileSystemException catch (e) {
     switch (e.osError?.errorCode) {
@@ -216,7 +216,7 @@ Future<void> _processFileWithMemoryChecks(String filePath, MemoryUsageMonitor mo
   PhonicAudioFile? audioFile;
 
   try {
-    audioFile = await Phonic.fromFile(filePath);
+    audioFile = await Phonic.fromFileAsync(filePath);
 
     // Check memory after loading
     if (monitor.getCurrentUsage().usagePercent > 90.0) {
@@ -238,7 +238,7 @@ Future<void> _processFileWithMemoryChecks(String filePath, MemoryUsageMonitor mo
 ```dart
 Future<PhonicAudioFile?> loadWithTimeout(String filePath, {Duration timeout = const Duration(seconds: 30)}) async {
   try {
-    return await Phonic.fromFile(filePath).timeout(
+    return await Phonic.fromFileAsync(filePath).timeout(
       timeout,
       onTimeout: () {
         throw TimeoutException('File loading timed out', timeout);
@@ -359,7 +359,7 @@ Future<PhonicAudioFile?> loadWithRecovery(String filePath, {int maxRetries = 3})
         await Future.delayed(Duration(milliseconds: 500 * attempt));
       }
 
-      return await Phonic.fromFile(filePath);
+      return await Phonic.fromFileAsync(filePath);
 
     } on CorruptedContainerException catch (e) {
       lastException = e;
@@ -446,7 +446,7 @@ Uint8List? _applyCorruptionFixes(Uint8List bytes, CorruptedContainerException er
 Future<void> interactiveErrorHandling(List<String> files) async {
   for (final filePath in files) {
     try {
-      final audioFile = await Phonic.fromFile(filePath);
+      final audioFile = await Phonic.fromFileAsync(filePath);
       // Process file...
       audioFile.dispose();
 
@@ -740,7 +740,7 @@ enum LogLevel { info, warning, error }
 final logger = ErrorLogger();
 
 try {
-  final audioFile = await Phonic.fromFile(filePath);
+  final audioFile = await Phonic.fromFileAsync(filePath);
   // ...
 } on UnsupportedFormatException catch (e) {
   logger.logError('loadFile', e, context: {'filePath': filePath});

@@ -7,6 +7,7 @@
 /// MP4 metadata provides comprehensive support through a hierarchical atom
 /// structure with both standardized iTunes-compatible atoms and extensible
 /// freeform atoms for custom metadata.
+library;
 
 import '../core/container_kind.dart';
 import '../core/tag_capability.dart';

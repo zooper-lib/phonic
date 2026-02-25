@@ -314,7 +314,7 @@ class TagCapability {
   @override
   String toString() {
     final versionStr = containerVersion.isNotEmpty ? ' $containerVersion' : '';
-    return 'TagCapability(${containerKind.name}$versionStr: ${supportedFieldCount} fields)';
+    return 'TagCapability(${containerKind.name}$versionStr: $supportedFieldCount fields)';
   }
 
   /// Checks equality with another [TagCapability] instance.

@@ -1,13 +1,3 @@
-/// ID3v2.3 metadata format capability definition.
-///
-/// This file defines the capabilities and constraints of the ID3v2.3 metadata
-/// format, including supported fields, encoding limitations, and value ranges.
-///
-/// ID3v2.3 is a widely-supported metadata format that provides significant
-/// improvements over ID3v1 while maintaining broad compatibility. It supports
-/// variable-length fields, multiple text encodings (except UTF-8), and
-/// extensive metadata including artwork and custom fields.
-
 import '../core/container_kind.dart';
 import '../core/tag_capability.dart';
 import '../core/tag_key.dart';

@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 /// A string interning system that reduces memory usage by storing only one copy
 /// of identical strings.
 ///
@@ -53,7 +51,7 @@ class StringInterning {
   ///
   /// We use a LinkedHashSet to maintain insertion order, which can be helpful
   /// for debugging and provides predictable iteration behavior.
-  final Set<String> _internedStrings = LinkedHashSet<String>();
+  final Set<String> _internedStrings = <String>{};
 
   /// Statistics tracking for memory usage analysis.
   int _totalInterningRequests = 0;

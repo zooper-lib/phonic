@@ -252,7 +252,7 @@ final titleValue = extractItunesAtomValue(bytes, atomType: '©nam');
 expect(titleValue, equals('Peaches & Cream (Intro) (Clean)'));
 
 // Step 3: Full integration
-final audioFile = await Phonic.fromFile('test/fixtures/mp4/23.mp4');
+final audioFile = await Phonic.fromFileAsync('test/fixtures/mp4/23.mp4');
 expect(audioFile.getTag(TagKey.title)?.value, 
        equals('Peaches & Cream (Intro) (Clean)'));
 ```

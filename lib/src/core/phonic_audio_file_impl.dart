@@ -77,7 +77,7 @@ import 'tag_semantics.dart';
 /// - **Extensibility**: Supports custom merge rules and normalization strategies
 ///
 /// ### In-Memory Tag Storage
-/// - **Structure**: Map<TagKey, List<MetadataTag>> for efficient access
+/// - **Structure**: `Map<TagKey, List<MetadataTag>>` for efficient access
 /// - **Benefits**: O(1) tag lookup, support for multi-valued fields, provenance preservation
 /// - **Memory Efficiency**: Lazy loading for large payloads, string interning for common values
 ///
@@ -203,7 +203,7 @@ import 'tag_semantics.dart';
 /// for (final filePath in files) {
 ///   PhonicAudioFile? audioFile;
 ///   try {
-///     audioFile = await Phonic.fromFile(filePath);
+///     audioFile = await Phonic.fromFileAsync(filePath);
 ///
 ///     // Process metadata
 ///     final title = audioFile.getTag(TagKey.title);
@@ -975,7 +975,10 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   /// }
   /// ```
   @override
-  Future<Uint8List> encode([EncodingOptions? options]) async {
+  Future<Uint8List> encode([EncodingOptions? options]) => encodeAsync(options);
+
+  @override
+  Future<Uint8List> encodeAsync([EncodingOptions? options]) async {
     // Use preserveExisting strategy by default for maximum compatibility
     final encodingOptions = options ?? const EncodingOptions.preserveExisting();
 
@@ -988,7 +991,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
       final preparedTags = <MetadataTag>[];
       for (final tag in tagsToWrite) {
         if (tag.requiresAsyncPreparation) {
-          final preparedTag = await tag.prepareForEncoding();
+          final preparedTag = await tag.prepareForEncodingAsync();
           preparedTags.add(preparedTag);
         } else {
           preparedTags.add(tag);
@@ -1004,7 +1007,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
       // Step 4: Assemble the file with updated metadata containers
       // The FileAssembler will normalize tags for each target container individually
       // based on the container's capabilities, ensuring proper encoding for each format.
-      final assembledFile = await fileAssembler.assembleFile(
+      final assembledFile = await fileAssembler.assembleFileAsync(
         originalFileBytes: _fileBytes,
         tagsToWrite: preparedTags,
         formatStrategy: formatStrategy,
@@ -1021,11 +1024,12 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
 
       // Step 5: Validate the assembled file structure for integrity
       // Use custom target containers instead of default fan-out
-      final validationResult = await _validator.validateEncodedFile(
+      final validationResult = await _validator.validateEncodedFileAsync(
         encodedBytes: assembledFile,
         originalTags: tagsToWrite,
         formatStrategy: formatStrategy,
         expectedContainers: targetContainers,
+        validationLevel: encodingOptions.validationLevel,
       );
 
       // Step 6: Handle validation results
@@ -1168,7 +1172,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   ///
   /// ### Single File Processing
   /// ```dart
-  /// final audioFile = await Phonic.fromFile('song.mp3');
+  /// final audioFile = await Phonic.fromFileAsync('song.mp3');
   /// try {
   ///   // Work with the audio file
   ///   audioFile.setTag(TitleTag('New Title'));
@@ -1183,7 +1187,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   /// ### Batch Processing
   /// ```dart
   /// for (final filePath in audioFiles) {
-  ///   final audioFile = await Phonic.fromFile(filePath);
+  ///   final audioFile = await Phonic.fromFileAsync(filePath);
   ///   try {
   ///     // Process the file
   ///     processAudioFile(audioFile);
@@ -1200,7 +1204,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   /// try {
   ///   // Load multiple files
   ///   for (final path in filePaths) {
-  ///     audioFiles.add(await Phonic.fromFile(path));
+  ///     audioFiles.add(await Phonic.fromFileAsync(path));
   ///   }
   ///   // Work with collection...
   /// } finally {
@@ -1345,7 +1349,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   ///
   /// @throws [UnsupportedFormatException] if the file format is not supported
   /// @throws [CorruptedContainerException] if critical container corruption prevents processing
-  Future<void> extractContainersAndDecode() async {
+  Future<void> extractContainersAndDecodeAsync() async {
     // Get precedence order from format strategy
     final precedence = formatStrategy.precedence;
 
@@ -1533,7 +1537,7 @@ class PhonicAudioFileImpl implements PhonicAudioFile {
   /// Example:
   /// ```dart
   /// // Extract audio data for processing
-  /// final audioFile = await Phonic.fromFile('song.mp3');
+  /// final audioFile = await Phonic.fromFileAsync('song.mp3');
   /// final rawAudio = audioFile.audioData;
   ///
   /// // Process raw audio (e.g., apply effects, analyze waveform)

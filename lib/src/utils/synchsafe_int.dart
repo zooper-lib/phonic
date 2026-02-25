@@ -83,7 +83,7 @@ class SynchsafeInt {
   /// Encodes a regular integer into synchsafe format as a Uint8List.
   ///
   /// This is a convenience method that returns the encoded bytes as a Uint8List
-  /// instead of a List<int>.
+  /// instead of a `List<int>`.
   ///
   /// ## Parameters
   /// - [value]: The integer to encode (0 to 268,435,455)
@@ -155,7 +155,7 @@ class SynchsafeInt {
 
   /// Decodes a synchsafe integer from a Uint8List.
   ///
-  /// This is a convenience method that accepts a Uint8List instead of List<int>.
+  /// This is a convenience method that accepts a Uint8List instead of `List<int>`.
   /// The bytes must contain exactly 4 bytes in big-endian order.
   ///
   /// ## Parameters
@@ -248,7 +248,7 @@ class SynchsafeInt {
 
   /// Checks if a Uint8List represents a valid synchsafe integer.
   ///
-  /// This is a convenience method that accepts a Uint8List instead of List<int>.
+  /// This is a convenience method that accepts a Uint8List instead of `List<int>`.
   ///
   /// ## Parameters
   /// - [bytes]: The bytes to validate

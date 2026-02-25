@@ -24,7 +24,7 @@ import 'phonic_exception.dart';
 /// ### Exception Handling
 /// ```dart
 /// try {
-///   final audioFile = await Phonic.fromFile('unknown.xyz');
+///   final audioFile = await Phonic.fromFileAsync('unknown.xyz');
 /// } on UnsupportedFormatException catch (e) {
 ///   print('Unsupported format: ${e.message}');
 ///   // Provide user-friendly error message
@@ -82,7 +82,7 @@ final class UnsupportedFormatException extends PhonicException {
   ///   context: 'file: audio.wma, detected: Windows Media Audio'
   /// );
   /// ```
-  const UnsupportedFormatException(String message, {String? context}) : super(message, context: context);
+  const UnsupportedFormatException(super.message, {super.context});
 
   /// Returns a string representation of this exception.
   ///

@@ -1,21 +1,3 @@
-/// Date normalization utilities for converting between different date formats.
-///
-/// This module provides utilities for converting date values between the
-/// unified ISO-8601 format used by the Phonic API and the container-specific
-/// date formats used by different audio metadata formats.
-///
-/// The unified API uses ISO-8601 format for consistency and interoperability,
-/// but different container formats use different internal representations:
-/// - ID3v2.4: TDRC frame with ISO-8601 format
-/// - ID3v2.3: Separate TYER/TDAT/TIME frames for year/date/time components
-/// - ID3v2.2: TYE frame for year only
-/// - Vorbis Comments: DATE field with ISO-8601 format
-/// - MP4 atoms: ©day atom with ISO-8601 format
-/// - ID3v1: Year field (4 digits, limited range)
-///
-/// This module handles the conversion between these formats while preserving
-/// precision and handling edge cases appropriately.
-
 /// Utility class for date format conversion and normalization.
 ///
 /// This class provides static methods for converting date values between

@@ -1,12 +1,3 @@
-/// Vorbis Comments metadata format capability definition.
-///
-/// This file defines the capabilities and constraints of the Vorbis Comments
-/// metadata format, which is used in FLAC, OGG Vorbis, and Opus audio files.
-///
-/// Vorbis Comments provide a flexible key-value structure with full Unicode
-/// support and native multi-valued field capabilities, making them one of
-/// the most flexible metadata formats supported by the library.
-
 import '../core/container_kind.dart';
 import '../core/tag_capability.dart';
 import '../core/tag_key.dart';

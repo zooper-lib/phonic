@@ -725,17 +725,17 @@ void main() {
 
       test('handles music streaming service rating equivalents', () {
         // Common rating systems from streaming services
-        final spotify_dislike = RatingTag(0); // Spotify dislike
-        final spotify_like = RatingTag(100); // Spotify like
+        final spotifyDislike = RatingTag(0); // Spotify dislike
+        final spotifyLike = RatingTag(100); // Spotify like
         final apple_1star = RatingTag(20); // Apple Music 1 star
         final apple_5star = RatingTag(100); // Apple Music 5 stars
-        final lastfm_love = RatingTag(100); // Last.fm love
+        final lastfmLove = RatingTag(100); // Last.fm love
 
-        expect(spotify_dislike.value, equals(0));
-        expect(spotify_like.value, equals(100));
+        expect(spotifyDislike.value, equals(0));
+        expect(spotifyLike.value, equals(100));
         expect(apple_1star.value, equals(20));
         expect(apple_5star.value, equals(100));
-        expect(lastfm_love.value, equals(100));
+        expect(lastfmLove.value, equals(100));
       });
     });
 
