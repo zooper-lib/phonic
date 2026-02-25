@@ -34,9 +34,6 @@ linter:
     prefer_final_fields: true
     prefer_final_locals: true
 
-    # Enforce non-nullable types where possible.
-    always_require_non_null_named_parameters: true
-
     # **Documentation**
     # Require documentation for public members.
     public_member_api_docs: false
