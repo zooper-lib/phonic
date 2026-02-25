@@ -157,7 +157,7 @@ class Id3v24Codec implements TagCodec {
       final frameDataEnd = frameDataOffset + header.tagSize - (frameDataOffset - Id3v2HeaderParser.headerSize);
       if (frameDataEnd > containerBytes.length) {
         throw CorruptedContainerException(
-          'ID3v2.4 tag size extends beyond container: ${frameDataEnd} > ${containerBytes.length}',
+          'ID3v2.4 tag size extends beyond container: $frameDataEnd > ${containerBytes.length}',
           byteOffset: frameDataOffset,
           context: 'ID3v2.4 frame data extraction',
         );

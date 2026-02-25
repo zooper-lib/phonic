@@ -28,7 +28,7 @@ dart pub get
 
 ### Workflow
 
-1. **Load** an audio file using `Phonic.fromFile()` or `Phonic.fromBytes()`
+1. **Load** an audio file using `Phonic.fromFileAsync()` or `Phonic.fromBytes()`
 2. **Read** metadata using `getTag()` or `getTags()`
 3. **Modify** metadata using `setTag()` or `removeTag()`
 4. **Save** changes using `encode()` and write to file
@@ -44,7 +44,7 @@ import 'package:phonic/phonic.dart';
 
 void main() async {
   // Load an audio file
-  final audioFile = await Phonic.fromFile('song.mp3');
+  final audioFile = await Phonic.fromFileAsync('song.mp3');
 
   // Read basic metadata
   final title = audioFile.getTag(TagKey.title);
@@ -67,7 +67,7 @@ void main() async {
 
 ```dart
 // Load from file system
-final audioFile = await Phonic.fromFile('/path/to/song.mp3');
+final audioFile = await Phonic.fromFileAsync('/path/to/song.mp3');
 
 // The library automatically detects the format
 // Supports: MP3, FLAC, OGG, Opus, MP4/M4A
@@ -87,7 +87,7 @@ final audioFile = Phonic.fromBytes(bytes, 'song.mp3');
 
 ```dart
 try {
-  final audioFile = await Phonic.fromFile('song.mp3');
+  final audioFile = await Phonic.fromFileAsync('song.mp3');
   // Use the audio file...
   audioFile.dispose();
 } on UnsupportedFormatException catch (e) {
@@ -228,7 +228,7 @@ import 'package:phonic/phonic.dart';
 
 Future<void> updateMetadata(String filePath) async {
   // Load the file
-  final audioFile = await Phonic.fromFile(filePath);
+  final audioFile = await Phonic.fromFileAsync(filePath);
 
   try {
     // Read current metadata
@@ -262,7 +262,7 @@ Always call `dispose()` when you're done with an audio file:
 
 ```dart
 // Manual cleanup
-final audioFile = await Phonic.fromFile('song.mp3');
+final audioFile = await Phonic.fromFileAsync('song.mp3');
 try {
   // Use the audio file...
 } finally {
@@ -274,7 +274,7 @@ Future<T> withAudioFile<T>(
   String path,
   Future<T> Function(PhonicAudioFile) action,
 ) async {
-  final audioFile = await Phonic.fromFile(path);
+  final audioFile = await Phonic.fromFileAsync(path);
   try {
     return await action(audioFile);
   } finally {
@@ -299,9 +299,9 @@ Phonic automatically detects audio formats based on:
 
 ```dart
 // Format is detected automatically
-final mp3File = await Phonic.fromFile('song.mp3');     // ID3v1/v2
-final flacFile = await Phonic.fromFile('song.flac');   // Vorbis Comments
-final m4aFile = await Phonic.fromFile('song.m4a');     // MP4 atoms
+final mp3File = await Phonic.fromFileAsync('song.mp3');     // ID3v1/v2
+final flacFile = await Phonic.fromFileAsync('song.flac');   // Vorbis Comments
+final m4aFile = await Phonic.fromFileAsync('song.m4a');     // MP4 atoms
 
 // For bytes, provide filename hint
 final audioFile = Phonic.fromBytes(bytes, 'song.ogg'); // Helps detection
@@ -312,7 +312,7 @@ final audioFile = Phonic.fromBytes(bytes, 'song.ogg'); // Helps detection
 ```dart
 Future<void> safeReadMetadata(String filePath) async {
   try {
-    final audioFile = await Phonic.fromFile(filePath);
+    final audioFile = await Phonic.fromFileAsync(filePath);
 
     try {
       // Read metadata safely
@@ -353,7 +353,7 @@ Now that you understand the basics:
 
 ```dart
 Map<String, String> getBasicMetadata(String filePath) async {
-  final audioFile = await Phonic.fromFile(filePath);
+  final audioFile = await Phonic.fromFileAsync(filePath);
 
   try {
     return {
@@ -373,7 +373,7 @@ Map<String, String> getBasicMetadata(String filePath) async {
 ```dart
 Future<void> updateAlbumInfo(List<String> tracks, String album, String artist) async {
   for (final track in tracks) {
-    final audioFile = await Phonic.fromFile(track);
+    final audioFile = await Phonic.fromFileAsync(track);
 
     try {
       audioFile.setTag(AlbumTag(album));

@@ -15,7 +15,7 @@ void main() {
       // Step 1: Read original file
       print('=== MP4 Round-Trip Test ===\n');
       print('Step 1: Reading original file...');
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
 
       final originalTitle = audioFile.getTag(TagKey.title)?.value;
       final originalGenre = audioFile.getTags(TagKey.genre);
@@ -39,7 +39,7 @@ void main() {
 
       // Step 4: Read the new file back
       print('\nStep 4: Reading modified file...');
-      final audioFile2 = await Phonic.fromFile(outputPath);
+      final audioFile2 = await Phonic.fromFileAsync(outputPath);
 
       final roundTripTitle = audioFile2.getTag(TagKey.title)?.value;
       final roundTripGenre = audioFile2.getTags(TagKey.genre);

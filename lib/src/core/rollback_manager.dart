@@ -353,5 +353,5 @@ class RollbackStackInfo {
 /// Exception thrown when rollback operations fail.
 class RollbackException extends PhonicException {
   /// Creates a new RollbackException.
-  const RollbackException(String message, {String? context}) : super(message, context: context);
+  const RollbackException(super.message, {super.context});
 }

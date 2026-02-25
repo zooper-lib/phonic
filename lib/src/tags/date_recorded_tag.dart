@@ -95,11 +95,10 @@ final class DateRecordedTag extends MetadataTag<String> {
   /// ```
   DateRecordedTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: validator.validateOrThrow(value),
          key: TagKey.dateRecorded,
-         provenance: provenance,
        );
 
   /// Creates a new DateRecordedTag instance with updated provenance information.

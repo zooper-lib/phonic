@@ -7,6 +7,7 @@
 /// limited capabilities compared to later versions. It uses 3-character frame
 /// IDs and has restricted encoding support, but provides the foundation for
 /// variable-length metadata fields that improved upon ID3v1.
+library;
 
 import '../core/container_kind.dart';
 import '../core/tag_capability.dart';

@@ -356,7 +356,7 @@ void main() {
         );
 
         // Simulate loading existing tags
-        await fullAudioFile.extractContainersAndDecode();
+        await fullAudioFile.extractContainersAndDecodeAsync();
 
         // Act - Modify tags
         fullAudioFile.setTag(const TitleTag('Modified Title'));

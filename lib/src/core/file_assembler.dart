@@ -184,7 +184,7 @@ class FileAssembler {
   ///   // Handle container corruption
   /// }
   /// ```
-  Future<Uint8List> assembleFile({
+  Future<Uint8List> assembleFileAsync({
     required Uint8List originalFileBytes,
     required List<MetadataTag> tagsToWrite,
     required FormatStrategy formatStrategy,

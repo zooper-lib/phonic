@@ -102,7 +102,7 @@ void main() {
 
         try {
           // Load file
-          audioFile = await Phonic.fromFile(testFile);
+          audioFile = await Phonic.fromFileAsync(testFile);
           expect(audioFile, isNotNull);
 
           // Read original metadata
@@ -147,7 +147,7 @@ void main() {
         PhonicAudioFile? audioFile;
 
         try {
-          audioFile = await Phonic.fromFile(testFile);
+          audioFile = await Phonic.fromFileAsync(testFile);
 
           // Test genre modifications
           final originalGenres = audioFile.getTags(TagKey.genre);
@@ -174,7 +174,7 @@ void main() {
         PhonicAudioFile? audioFile;
 
         try {
-          audioFile = await Phonic.fromFile(testFile);
+          audioFile = await Phonic.fromFileAsync(testFile);
 
           // Check existing artwork
           final existingArtwork = audioFile.getTags(TagKey.artwork);
@@ -208,7 +208,7 @@ void main() {
         for (final testFile in fixtureFiles.take(5)) {
           PhonicAudioFile? audioFile;
           try {
-            audioFile = await Phonic.fromFile(testFile);
+            audioFile = await Phonic.fromFileAsync(testFile);
 
             // Make aggressive changes that might cause issues
             audioFile.setTag(TitleTag('A' * 1000)); // Very long title
@@ -247,7 +247,7 @@ void main() {
         for (final testFile in fixtureFiles.take(5)) {
           PhonicAudioFile? audioFile;
           try {
-            audioFile = await Phonic.fromFile(testFile);
+            audioFile = await Phonic.fromFileAsync(testFile);
 
             // Quick modifications
             audioFile.setTag(const AlbumTag('Batch Test'));
@@ -291,7 +291,7 @@ void main() {
 
         try {
           // Load file
-          audioFile = await Phonic.fromFile(testFile);
+          audioFile = await Phonic.fromFileAsync(testFile);
           expect(audioFile, isNotNull);
 
           // Test the exact frame mapping conflict scenario:
@@ -341,7 +341,7 @@ void main() {
 
         try {
           // Load file
-          audioFile = await Phonic.fromFile(testFile);
+          audioFile = await Phonic.fromFileAsync(testFile);
           expect(audioFile, isNotNull);
 
           // Set basic metadata
@@ -388,7 +388,7 @@ void main() {
 
         try {
           // Load original file
-          audioFile = await Phonic.fromFile(testFile);
+          audioFile = await Phonic.fromFileAsync(testFile);
           expect(audioFile, isNotNull);
 
           // Set a YearTag - this might get converted to DateRecordedTag during ID3v2.4 encoding
@@ -477,7 +477,7 @@ Future<WorkflowResult> _testFileWorkflow(
 
   try {
     // Phase 1: Load file
-    audioFile = await Phonic.fromFile(filePath);
+    audioFile = await Phonic.fromFileAsync(filePath);
 
     // Phase 2: Modify metadata
     audioFile.setTag(const TitleTag('Workflow Test Title'));

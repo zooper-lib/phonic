@@ -21,7 +21,7 @@ void main() {
     final tags = codec.readFromContainer(ilstData);
 
     print('Original tags read: ${tags.length}');
-    final genreTag = tags.where((t) => t.key == 'genre').firstOrNull;
+    final genreTag = tags.where((t) => t.key == TagKey.genre).firstOrNull;
     if (genreTag != null) {
       print('Genre tag found: ${genreTag.value}');
     }

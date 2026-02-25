@@ -191,7 +191,7 @@ class EncodingPreparation {
     for (final tag in tags) {
       if (tag.requiresAsyncPreparation) {
         // Async prepare this tag (e.g., load artwork data)
-        final preparedTag = await tag.prepareForEncoding();
+        final preparedTag = await tag.prepareForEncodingAsync();
         preparedTags.add(preparedTag);
       } else {
         // Tag doesn't need async preparation, use as-is

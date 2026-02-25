@@ -438,7 +438,7 @@ class ByteReader {
     if (_position + requiredBytes > _bytes.length) {
       throw RangeError(
         'Insufficient bytes: need $requiredBytes, '
-        'but only ${remaining} remaining at position $_position',
+        'but only $remaining remaining at position $_position',
       );
     }
   }

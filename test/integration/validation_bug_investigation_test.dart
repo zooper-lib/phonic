@@ -22,7 +22,7 @@ void main() {
       print('\n=== TESTING WITHOUT VALIDATION: ${testFile.split('/').last} ===');
 
       // Create an audio file instance with minimal validation
-      final audioFile = await Phonic.fromFile(testFile);
+      final audioFile = await Phonic.fromFileAsync(testFile);
 
       // Modify some tags
       audioFile.setTag(const TitleTag('Test Without Validation'));
@@ -50,7 +50,7 @@ void main() {
           print('✓ Manual encoding successful! File size: ${tempFile.lengthSync()} bytes');
 
           // Verify the file can be loaded
-          final verificationFile = await Phonic.fromFile(tempFile.path);
+          final verificationFile = await Phonic.fromFileAsync(tempFile.path);
           final savedTitle = verificationFile.getTag(TagKey.title) as TitleTag?;
           print('✓ Verification successful! Saved title: ${savedTitle?.value}');
 
@@ -79,7 +79,7 @@ void main() {
       final testFile = testFiles.first;
       print('\n=== INVESTIGATING VALIDATION ERRORS: ${testFile.split('/').last} ===');
 
-      final audioFile = await Phonic.fromFile(testFile);
+      final audioFile = await Phonic.fromFileAsync(testFile);
 
       // Check what containers exist in the original file
       print('Original containers in file:');
@@ -137,7 +137,7 @@ void main() {
       print('\n=== PROVING FIXTURE FILES ARE FINE ===');
 
       // Load the original file and show its properties
-      final originalFile = await Phonic.fromFile(testFile);
+      final originalFile = await Phonic.fromFileAsync(testFile);
 
       print('Original file loaded successfully ✓');
       print('Title: ${(originalFile.getTag(TagKey.title) as TitleTag?)?.value ?? "None"}');

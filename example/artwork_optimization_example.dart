@@ -116,7 +116,7 @@ Future<void> _demonstrateStreaming() async {
     }
   }
 
-  print('Streaming complete: processed ${chunkCount} chunks\n');
+  print('Streaming complete: processed $chunkCount chunks\n');
 }
 
 /// Demonstrates optimized artwork data with smart strategy selection.

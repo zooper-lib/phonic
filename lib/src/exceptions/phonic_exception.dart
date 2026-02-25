@@ -28,7 +28,7 @@
 /// ```dart
 /// try {
 ///   // Some Phonic library operation
-///   final audioFile = await Phonic.fromFile('audio.mp3');
+///   final audioFile = await Phonic.fromFileAsync('audio.mp3');
 /// } on PhonicException catch (e) {
 ///   print('Phonic error: ${e.message}');
 ///   if (e.context != null) {

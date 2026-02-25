@@ -1,3 +1,17 @@
+## [Unreleased]
+
+### Added
+
+- Isolate-based processing methods for non-blocking metadata extraction
+  - `Phonic.fromFileInIsolate()` - Load and process audio files in background isolates
+  - `Phonic.fromBytesInIsolate()` - Process audio bytes in background isolates
+  - Non-blocking API prevents UI freezing during large file processing
+  - Enables true parallel processing of multiple files
+  - Same `PhonicAudioFile` interface as standard methods (drop-in replacement)
+  - Comprehensive documentation in `doc/isolate-processing.md`
+  - Example code in `example/isolate_processing_example.dart`
+  - Full test coverage with 11 isolate-specific tests
+
 ## [1.2.1] - 2025.10.14
 
 ### Fixed

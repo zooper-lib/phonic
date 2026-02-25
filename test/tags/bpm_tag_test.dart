@@ -612,13 +612,13 @@ void main() {
 
       test('handles common DJ mixing BPM values', () {
         // Test BPM values commonly used in DJ mixing
-        final hip_hop = BpmTag(85); // Hip-hop
+        final hipHop = BpmTag(85); // Hip-hop
         final pop = BpmTag(120); // Pop music
         final house = BpmTag(128); // House
         final techno = BpmTag(140); // Techno
         final dnb = BpmTag(174); // Drum & Bass
 
-        expect(hip_hop.value, equals(85));
+        expect(hipHop.value, equals(85));
         expect(pop.value, equals(120));
         expect(house.value, equals(128));
         expect(techno.value, equals(140));
@@ -710,7 +710,7 @@ void main() {
       test('handles genre-specific BPM ranges', () {
         // Different music genres and their typical BPM ranges
         final reggae = BpmTag(70); // Reggae
-        final hip_hop = BpmTag(85); // Hip-hop
+        final hipHop = BpmTag(85); // Hip-hop
         final funk = BpmTag(100); // Funk
         final rock = BpmTag(120); // Rock
         final house = BpmTag(128); // House
@@ -719,7 +719,7 @@ void main() {
         final dnb = BpmTag(175); // Drum & Bass
 
         expect(reggae.value, equals(70));
-        expect(hip_hop.value, equals(85));
+        expect(hipHop.value, equals(85));
         expect(funk.value, equals(100));
         expect(rock.value, equals(120));
         expect(house.value, equals(128));

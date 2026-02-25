@@ -17,7 +17,7 @@ void main() {
     const mp4FixturePath = 'test/fixtures/mp4/23.mp4';
 
     test('What metadata does the library actually read?', () async {
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
 
       print('=== MP4 Metadata Reading Test ===');
       print('File: $mp4FixturePath');
@@ -88,7 +88,7 @@ void main() {
     });
 
     test('Can we at least detect the MP4 container type?', () async {
-      final audioFile = await Phonic.fromFile(mp4FixturePath);
+      final audioFile = await Phonic.fromFileAsync(mp4FixturePath);
 
       // Try to access any container information
       print('Container detection test:');

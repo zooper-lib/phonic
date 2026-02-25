@@ -54,7 +54,7 @@ void main() {
         );
 
         // Execute the method
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify containers were processed in precedence order
         expect(locator1.extractCallCount, equals(1));
@@ -85,7 +85,7 @@ void main() {
         );
 
         // Execute the method
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify no containers were processed
         expect(audioFile.inMemoryTagsByKey, isEmpty);
@@ -112,7 +112,7 @@ void main() {
         );
 
         // Execute the method
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify container was not processed
         expect(locator.extractCallCount, equals(0));
@@ -140,7 +140,7 @@ void main() {
         );
 
         // Execute the method
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify extraction was attempted but codec was not called
         expect(locator.extractCallCount, equals(1));
@@ -168,7 +168,7 @@ void main() {
         );
 
         // Execute the method
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify extraction was successful but no codec processing
         expect(locator.extractCallCount, equals(1));
@@ -196,7 +196,7 @@ void main() {
         );
 
         // Execute the method
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify container bytes were cached
         final cachedBytes = audioFile.loadedContainersByKindAndVersion[(ContainerKind.id3v2, '2.4')];
@@ -236,7 +236,7 @@ void main() {
         );
 
         // Execute the method
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify ID3v2 title takes precedence over ID3v1 (based on format strategy precedence)
         final titleTag = audioFile.getTag(TagKey.title) as TitleTag?;
@@ -266,7 +266,7 @@ void main() {
         );
 
         // Execute the method - should not throw
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify graceful handling - container bytes cached but no tags loaded
         expect(audioFile.loadedContainersByKindAndVersion, isEmpty);
@@ -294,7 +294,7 @@ void main() {
         );
 
         // Execute the method - should not throw
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify graceful handling - no processing occurred
         expect(audioFile.loadedContainersByKindAndVersion, isEmpty);
@@ -328,7 +328,7 @@ void main() {
         );
 
         // Execute the method
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify tags are organized by key
         expect(audioFile.getTags(TagKey.title), hasLength(1));
@@ -368,7 +368,7 @@ void main() {
         expect(audioFile.inMemoryTagsByKey, hasLength(2));
 
         // Execute the method
-        await audioFile.extractContainersAndDecode();
+        await audioFile.extractContainersAndDecodeAsync();
 
         // Verify old tags were cleared and new ones loaded
         expect(audioFile.getTag(TagKey.title)?.value, equals('Mock Title'));

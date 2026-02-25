@@ -47,7 +47,7 @@ Future<void> mp3FormatExample() async {
   try {
     // Create MP3 with multiple ID3 versions
     final mp3Bytes = _createMp3WithMultipleId3();
-    final audioFile = Phonic.fromBytes(mp3Bytes, 'sample.mp3');
+    final audioFile = await Phonic.fromBytesAsync(mp3Bytes, 'sample.mp3');
 
     print('MP3 format detected');
 
@@ -101,7 +101,7 @@ Future<void> flacFormatExample() async {
 
   try {
     final flacBytes = _createFlacWithVorbisComments();
-    final audioFile = Phonic.fromBytes(flacBytes, 'sample.flac');
+    final audioFile = await Phonic.fromBytesAsync(flacBytes, 'sample.flac');
 
     print('FLAC format detected');
 
@@ -151,7 +151,7 @@ Future<void> oggVorbisFormatExample() async {
 
   try {
     final oggBytes = _createOggVorbis();
-    final audioFile = Phonic.fromBytes(oggBytes, 'sample.ogg');
+    final audioFile = await Phonic.fromBytesAsync(oggBytes, 'sample.ogg');
 
     print('OGG Vorbis format detected');
 
@@ -184,7 +184,7 @@ Future<void> opusFormatExample() async {
 
   try {
     final opusBytes = _createOpusFile();
-    final audioFile = Phonic.fromBytes(opusBytes, 'sample.opus');
+    final audioFile = await Phonic.fromBytesAsync(opusBytes, 'sample.opus');
 
     print('Opus format detected');
 
@@ -214,7 +214,7 @@ Future<void> mp4FormatExample() async {
 
   try {
     final mp4Bytes = _createMp4WithAtoms();
-    final audioFile = Phonic.fromBytes(mp4Bytes, 'sample.m4a');
+    final audioFile = await Phonic.fromBytesAsync(mp4Bytes, 'sample.m4a');
 
     print('MP4/M4A format detected');
 
@@ -271,7 +271,7 @@ Future<void> formatDetectionExample() async {
 
   for (final (filename, bytes) in testFiles) {
     try {
-      final audioFile = Phonic.fromBytes(bytes, filename);
+      final audioFile = await Phonic.fromBytesAsync(bytes, filename);
 
       // Format detection happens automatically
       print('File: $filename');
@@ -308,7 +308,7 @@ Future<void> crossFormatCompatibilityExample() async {
   try {
     // Start with MP3 file
     final mp3Bytes = _createMp3WithMultipleId3();
-    final mp3File = Phonic.fromBytes(mp3Bytes, 'source.mp3');
+    final mp3File = await Phonic.fromBytesAsync(mp3Bytes, 'source.mp3');
 
     // Read metadata from MP3
     final title = mp3File.getTag(TagKey.title);
@@ -322,7 +322,7 @@ Future<void> crossFormatCompatibilityExample() async {
 
     // Create FLAC file and transfer metadata
     final flacBytes = _createFlacWithVorbisComments();
-    final flacFile = Phonic.fromBytes(flacBytes, 'target.flac');
+    final flacFile = await Phonic.fromBytesAsync(flacBytes, 'target.flac');
 
     // Transfer tags (format conversion handled automatically)
     if (title != null) flacFile.setTag(TitleTag(title.value));

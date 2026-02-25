@@ -52,7 +52,10 @@ class MockPhonicAudioFile implements PhonicAudioFile {
   }
 
   @override
-  Future<Uint8List> encode([EncodingOptions? options]) async {
+  Future<Uint8List> encode([EncodingOptions? options]) => encodeAsync(options);
+
+  @override
+  Future<Uint8List> encodeAsync([EncodingOptions? options]) async {
     return Uint8List.fromList([1, 2, 3, 4]); // Mock encoded data
   }
 

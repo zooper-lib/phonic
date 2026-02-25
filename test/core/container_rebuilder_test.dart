@@ -189,5 +189,3 @@ class _ThrowingCodec implements TagCodec {
     throw Exception('Test exception');
   }
 }
-
-

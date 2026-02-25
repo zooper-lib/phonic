@@ -36,7 +36,7 @@ dependencies:
 import 'package:phonic/phonic.dart';
 
 // Load and read metadata
-final audioFile = await Phonic.fromFile('song.mp3');
+final audioFile = await Phonic.fromFileAsync('song.mp3');
 final title = audioFile.getTag(TagKey.title);
 print('Title: ${title?.value}');
 

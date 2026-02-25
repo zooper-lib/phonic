@@ -30,7 +30,7 @@ import 'phonic_exception.dart';
 /// ### Exception Handling with Offset Information
 /// ```dart
 /// try {
-///   final audioFile = await Phonic.fromFile('damaged.mp3');
+///   final audioFile = await Phonic.fromFileAsync('damaged.mp3');
 /// } on CorruptedContainerException catch (e) {
 ///   print('Container corruption at byte ${e.byteOffset}: ${e.message}');
 ///   // Attempt recovery or skip to next container
@@ -59,7 +59,7 @@ import 'phonic_exception.dart';
 /// ```dart
 /// Future<PhonicAudioFile?> parseWithRecovery(String filePath) async {
 ///   try {
-///     return await Phonic.fromFile(filePath);
+///     return await Phonic.fromFileAsync(filePath);
 ///   } on CorruptedContainerException catch (e) {
 ///     // Try to skip corrupted container and parse others
 ///     if (e.byteOffset != null) {
@@ -125,7 +125,7 @@ final class CorruptedContainerException extends PhonicException {
   ///   context: 'file: song.mp3, container: ID3v2.4, frame: APIC'
   /// );
   /// ```
-  const CorruptedContainerException(String message, {this.byteOffset, String? context}) : super(message, context: context);
+  const CorruptedContainerException(super.message, {this.byteOffset, super.context});
 
   /// Returns a string representation of this exception.
   ///

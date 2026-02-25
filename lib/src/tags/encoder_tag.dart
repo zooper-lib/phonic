@@ -49,11 +49,10 @@ final class EncoderTag extends MetadataTag<String> {
   /// ```
   const EncoderTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.encoder,
-         provenance: provenance,
        );
 
   /// Creates a new EncoderTag instance with updated provenance information.

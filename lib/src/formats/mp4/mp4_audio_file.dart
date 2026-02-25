@@ -203,13 +203,12 @@ class Mp4AudioFile extends PhonicAudioFileImpl {
   /// - Artwork data uses lazy loading through covr atom parsing
   Mp4AudioFile.fromBytes(
     Uint8List fileBytes, {
-    bool isDirty = false,
+    super.isDirty,
   }) : super(
          fileBytes: fileBytes,
          formatStrategy: const Mp4FormatStrategy(),
          codecRegistry: _createMp4CodecRegistry(),
          mergePolicy: MergePolicy.fromStrategy(const Mp4FormatStrategy()),
-         isDirty: isDirty,
        );
 
   /// Creates a codec registry configured for MP4 files with MP4 atoms codec and locator.

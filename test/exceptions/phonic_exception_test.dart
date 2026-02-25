@@ -3,12 +3,12 @@ import 'package:test/test.dart';
 
 /// Concrete implementation of PhonicException for testing purposes.
 class TestPhonicException extends PhonicException {
-  const TestPhonicException(String message, {String? context}) : super(message, context: context);
+  const TestPhonicException(super.message, {super.context});
 }
 
 /// Another concrete implementation to test inheritance behavior.
 class AnotherTestException extends PhonicException {
-  const AnotherTestException(String message, {String? context}) : super(message, context: context);
+  const AnotherTestException(super.message, {super.context});
 }
 
 void main() {
@@ -381,8 +381,8 @@ class TestPhonicExceptionWithCode extends PhonicException {
   final int errorCode;
 
   const TestPhonicExceptionWithCode(
-    String message, {
+    super.message, {
     required this.errorCode,
-    String? context,
-  }) : super(message, context: context);
+    super.context,
+  });
 }

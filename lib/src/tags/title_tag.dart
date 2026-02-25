@@ -70,11 +70,10 @@ final class TitleTag extends MetadataTag<String> {
   /// ```
   const TitleTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.title,
-         provenance: provenance,
        );
 
   /// Creates a new TitleTag instance with updated provenance information.

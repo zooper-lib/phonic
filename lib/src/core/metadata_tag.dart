@@ -54,7 +54,7 @@ part '../tags/year_tag.dart';
 /// The generic type parameter [T] ensures type safety for tag values:
 /// - String for text fields (title, artist, album, etc.)
 /// - int for numeric fields (trackNumber, year, rating, etc.)
-/// - List<String> for multi-valued text fields (genre)
+/// - `List<String>` for multi-valued text fields (genre)
 /// - ArtworkData for artwork fields
 /// - Other specialized types as needed
 ///
@@ -107,11 +107,11 @@ sealed class MetadataTag<T> extends Equatable {
   /// and corresponds to the semantic meaning of the tag key:
   /// - Text fields use String values (title, artist, album, etc.)
   /// - Numeric fields use int values (trackNumber, year, rating, etc.)
-  /// - Multi-valued text fields use List<String> values (genre)
+  /// - Multi-valued text fields use `List<String>` values (genre)
   /// - Artwork fields use ArtworkData values
   /// - Custom fields may use specialized types
   ///
-  /// For List<String> values like GenreTag, the list is made immutable
+  /// For `List<String>` values like GenreTag, the list is made immutable
   /// to ensure thread safety and prevent accidental modifications.
   ///
   /// Values are immutable once created. To change a value, create a new
@@ -209,6 +209,12 @@ sealed class MetadataTag<T> extends Equatable {
   /// @returns A future that completes with a tag ready for synchronous encoding
   Future<MetadataTag<T>> prepareForEncoding() async => this;
 
+  /// Prepares the tag for synchronous encoding by loading any async data.
+  ///
+  /// This method delegates to [prepareForEncoding] to preserve overrides of the
+  /// legacy method name.
+  Future<MetadataTag<T>> prepareForEncodingAsync() => prepareForEncoding();
+
   @override
   List<Object?> get props => [value, key, provenance];
 
@@ -216,6 +222,6 @@ sealed class MetadataTag<T> extends Equatable {
   String toString() {
     final valueStr = value.toString();
     final provenanceStr = provenance.toString();
-    return '${runtimeType}($valueStr, provenance: $provenanceStr)';
+    return '$runtimeType($valueStr, provenance: $provenanceStr)';
   }
 }

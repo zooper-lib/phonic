@@ -55,7 +55,7 @@ void main() {
         final formatStrategy = _MockMp3FormatStrategy();
 
         // Act
-        final result = await assembler.assembleFile(
+        final result = await assembler.assembleFileAsync(
           originalFileBytes: originalFile,
           tagsToWrite: tags,
           formatStrategy: formatStrategy,
@@ -87,7 +87,7 @@ void main() {
         final formatStrategy = _MockFlacFormatStrategy();
 
         // Act
-        final result = await assembler.assembleFile(
+        final result = await assembler.assembleFileAsync(
           originalFileBytes: originalFile,
           tagsToWrite: tags,
           formatStrategy: formatStrategy,
@@ -106,7 +106,7 @@ void main() {
         final formatStrategy = _MockEmptyFormatStrategy();
 
         // Act
-        final result = await assembler.assembleFile(
+        final result = await assembler.assembleFileAsync(
           originalFileBytes: originalFile,
           tagsToWrite: tags,
           formatStrategy: formatStrategy,
@@ -124,7 +124,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => assembler.assembleFile(
+          () => assembler.assembleFileAsync(
             originalFileBytes: originalFile,
             tagsToWrite: tags,
             formatStrategy: formatStrategy,
@@ -147,7 +147,7 @@ void main() {
         };
 
         // Act
-        final result = await assembler.assembleFile(
+        final result = await assembler.assembleFileAsync(
           originalFileBytes: originalFile,
           tagsToWrite: tags,
           formatStrategy: formatStrategy,
@@ -168,7 +168,7 @@ void main() {
         final formatStrategy = _MockMp3FormatStrategy();
 
         // Act
-        final result = await assembler.assembleFile(
+        final result = await assembler.assembleFileAsync(
           originalFileBytes: originalFile,
           tagsToWrite: tags,
           formatStrategy: formatStrategy,
@@ -208,7 +208,7 @@ void main() {
 
         // Act & Assert
         expect(
-          () => assemblerWithEmptyRegistry.assembleFile(
+          () => assemblerWithEmptyRegistry.assembleFileAsync(
             originalFileBytes: originalFile,
             tagsToWrite: tags,
             formatStrategy: formatStrategy,
@@ -224,7 +224,7 @@ void main() {
         final formatStrategy = _MockInvalidFormatStrategy();
 
         // Act - validation is disabled for testing, so this should succeed
-        final result = await assembler.assembleFile(
+        final result = await assembler.assembleFileAsync(
           originalFileBytes: originalFile,
           tagsToWrite: tags,
           formatStrategy: formatStrategy,
@@ -246,7 +246,7 @@ void main() {
 
         // Act
         final stopwatch = Stopwatch()..start();
-        final result = await assembler.assembleFile(
+        final result = await assembler.assembleFileAsync(
           originalFileBytes: largeFile,
           tagsToWrite: tags,
           formatStrategy: formatStrategy,

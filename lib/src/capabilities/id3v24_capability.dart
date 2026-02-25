@@ -1,12 +1,3 @@
-/// ID3v2.4 metadata format capability definition.
-///
-/// This file defines the capabilities and constraints of the ID3v2.4 metadata
-/// format, including supported fields, encoding enhancements, and value ranges.
-///
-/// ID3v2.4 is the most advanced version of the ID3v2 specification, providing
-/// significant improvements over ID3v2.3 including UTF-8 encoding support,
-/// unified date handling, and enhanced frame structure.
-
 import '../core/container_kind.dart';
 import '../core/tag_capability.dart';
 import '../core/tag_key.dart';

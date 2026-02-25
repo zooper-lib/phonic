@@ -3,6 +3,9 @@
 import 'dart:typed_data';
 
 import 'package:phonic/src/core/codec_registry.dart';
+import 'package:phonic/src/core/container_kind.dart';
+import 'package:phonic/src/core/encoding_options.dart';
+import 'package:phonic/src/core/format_strategy.dart';
 import 'package:phonic/src/core/merge_policy.dart';
 import 'package:phonic/src/core/metadata_tag.dart';
 import 'package:phonic/src/core/phonic_audio_file_impl.dart';
@@ -375,13 +378,14 @@ class _FailingValidator extends PostWriteValidator {
       );
 
   @override
-  Future<ValidationResult> validateEncodedFile({
+  Future<ValidationResult> validateEncodedFileAsync({
     required Uint8List encodedBytes,
-    required List<dynamic> originalTags,
-    required dynamic formatStrategy,
-    List<dynamic>? expectedContainers,
+    required List<MetadataTag> originalTags,
+    required FormatStrategy formatStrategy,
+    List<(ContainerKind, String)>? expectedContainers,
+    ValidationLevel? validationLevel,
   }) async {
-    print('_FailingValidator.validateEncodedFile called - should fail!');
+    print('_FailingValidator.validateEncodedFileAsync called - should fail!');
     // Always return a failed validation result
     return const ValidationResult(
       isValid: false,

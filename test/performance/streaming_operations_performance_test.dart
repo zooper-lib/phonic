@@ -124,7 +124,7 @@ void main() {
 
           for (final filePath in batch) {
             try {
-              final audioFile = await Phonic.fromFile(filePath);
+              final audioFile = await Phonic.fromFileAsync(filePath);
               final allTags = audioFile.getAllTags();
               audioFile.dispose();
 

@@ -62,7 +62,7 @@ void main() {
         final opusFile = OpusAudioFile.fromBytes(opusBytes);
 
         // Extract containers and decode tags (should not throw)
-        await opusFile.extractContainersAndDecode();
+        await opusFile.extractContainersAndDecodeAsync();
 
         final allTags = opusFile.getAllTags();
         expect(allTags, isEmpty);

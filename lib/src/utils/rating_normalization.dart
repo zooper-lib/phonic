@@ -1,19 +1,3 @@
-/// Rating normalization utilities for converting between different rating scales.
-///
-/// This module provides utilities for converting rating values between the
-/// unified 0-100 scale used by the Phonic API and the container-specific
-/// scales used by different audio metadata formats.
-///
-/// The unified API uses a 0-100 scale for consistency and ease of use, but
-/// different container formats use different internal scales:
-/// - ID3v2 POPM frames: 0-255 scale
-/// - Vorbis Comments: 0-100 scale (text representation)
-/// - MP4 atoms: Various scales depending on implementation
-/// - ID3v1: Not supported
-///
-/// This module handles the conversion between these scales while preserving
-/// precision and handling edge cases appropriately.
-
 import '../core/container_kind.dart';
 import '../core/tag_capability.dart';
 import '../core/tag_key.dart';

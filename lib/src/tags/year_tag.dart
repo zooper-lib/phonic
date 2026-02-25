@@ -78,11 +78,10 @@ final class YearTag extends MetadataTag<int> {
   /// ```
   YearTag(
     int value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: validator.validateOrThrow(value),
          key: TagKey.year,
-         provenance: provenance,
        );
 
   /// Creates a new YearTag instance with updated provenance information.

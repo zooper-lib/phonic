@@ -71,7 +71,7 @@ class StreamingProgress {
   @override
   String toString() {
     final parts = <String>[
-      '${processed}/${total} (${percentage.toStringAsFixed(1)}%)',
+      '$processed/$total (${percentage.toStringAsFixed(1)}%)',
     ];
 
     if (currentItem != null) {

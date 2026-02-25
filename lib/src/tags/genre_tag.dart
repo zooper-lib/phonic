@@ -55,11 +55,10 @@ final class GenreTag extends MetadataTag<List<String>> {
   /// ```
   GenreTag(
     List<String> value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: List.unmodifiable(value),
          key: TagKey.genre,
-         provenance: provenance,
        );
 
   /// Convenience constructor for creating a single-genre tag.

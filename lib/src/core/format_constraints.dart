@@ -1,9 +1,3 @@
-/// Format-specific constraints and limitations for metadata containers.
-///
-/// This file contains enums and classes that define the structural limitations
-/// and constraints of various audio metadata formats. These constraints are used
-/// by capability definitions to validate and normalize metadata values.
-
 import 'text_encoding.dart';
 
 /// ID3v1 format constraints and structure definitions.

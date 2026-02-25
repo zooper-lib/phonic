@@ -6,6 +6,7 @@
 /// 2. Integration with reactive_forms
 /// 3. Custom error messages
 /// 4. Multiple validation scenarios
+library;
 
 // ignore_for_file: avoid_print
 

@@ -42,7 +42,7 @@ void main() {
         final emptyBytes = Uint8List(0);
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await validator.validateEncodedFile(
+        final result = await validator.validateEncodedFileAsync(
           encodedBytes: emptyBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -67,7 +67,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await validator.validateEncodedFile(
+        final result = await validator.validateEncodedFileAsync(
           encodedBytes: largeBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -81,7 +81,7 @@ void main() {
         final invalidBytes = Uint8List.fromList([0x00, 0x00, 0x00, 0x00]);
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await validator.validateEncodedFile(
+        final result = await validator.validateEncodedFileAsync(
           encodedBytes: invalidBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -101,7 +101,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await validator.validateEncodedFile(
+        final result = await validator.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -127,7 +127,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await validatorWithEmptyRegistry.validateEncodedFile(
+        final result = await validatorWithEmptyRegistry.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -169,7 +169,7 @@ void main() {
         final mp3Bytes = _createMinimalMp3WithId3v24();
         final originalTags = [TitleTag(veryLongString)];
 
-        final result = await testValidator.validateEncodedFile(
+        final result = await testValidator.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -222,7 +222,7 @@ void main() {
           const ArtistTag('Test Artist'),
         ];
 
-        final result = await testValidator.validateEncodedFile(
+        final result = await testValidator.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -250,7 +250,7 @@ void main() {
           GenreTag(const ['Electronic', 'Dance']), // Genre might be normalized
         ];
 
-        final result = await testValidator.validateEncodedFile(
+        final result = await testValidator.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -280,7 +280,7 @@ void main() {
 
         // Test with a scenario where validation might detect issues
         // For this test, we expect validation to work correctly with valid data
-        final result = await testValidator.validateEncodedFile(
+        final result = await testValidator.validateEncodedFileAsync(
           encodedBytes: originalBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -303,7 +303,7 @@ void main() {
           const TitleTag('Test Title'),
         ];
 
-        final result = await testValidator.validateEncodedFile(
+        final result = await testValidator.validateEncodedFileAsync(
           encodedBytes: originalBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -333,7 +333,7 @@ void main() {
           RatingTag(100), // Exact value that might be modified during round-trip
         ];
 
-        final result = await testValidator.validateEncodedFile(
+        final result = await testValidator.validateEncodedFileAsync(
           encodedBytes: originalBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -369,7 +369,7 @@ void main() {
           GenreTag(const ['Rock/Pop']), // Genre allows normalization
         ];
 
-        final result = await testValidator.validateEncodedFile(
+        final result = await testValidator.validateEncodedFileAsync(
           encodedBytes: originalBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -406,7 +406,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await shallowValidator.validateEncodedFile(
+        final result = await shallowValidator.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -428,7 +428,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await fullValidator.validateEncodedFile(
+        final result = await fullValidator.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -452,7 +452,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await faultyValidator.validateEncodedFile(
+        final result = await faultyValidator.validateEncodedFileAsync(
           encodedBytes: Uint8List(0), // This will cause validation to fail
           originalTags: originalTags,
           formatStrategy: formatStrategy,

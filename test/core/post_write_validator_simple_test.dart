@@ -42,7 +42,7 @@ void main() {
         final emptyBytes = Uint8List(0);
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await validator.validateEncodedFile(
+        final result = await validator.validateEncodedFileAsync(
           encodedBytes: emptyBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -67,7 +67,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await validator.validateEncodedFile(
+        final result = await validator.validateEncodedFileAsync(
           encodedBytes: largeBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -81,7 +81,7 @@ void main() {
         final invalidBytes = Uint8List.fromList([0x00, 0x00, 0x00, 0x00]);
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await validator.validateEncodedFile(
+        final result = await validator.validateEncodedFileAsync(
           encodedBytes: invalidBytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -101,7 +101,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await validator.validateEncodedFile(
+        final result = await validator.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -127,7 +127,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await validatorWithEmptyRegistry.validateEncodedFile(
+        final result = await validatorWithEmptyRegistry.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -151,7 +151,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await shallowValidator.validateEncodedFile(
+        final result = await shallowValidator.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,
@@ -173,7 +173,7 @@ void main() {
 
         final originalTags = [const TitleTag('Test Title')];
 
-        final result = await fullValidator.validateEncodedFile(
+        final result = await fullValidator.validateEncodedFileAsync(
           encodedBytes: mp3Bytes,
           originalTags: originalTags,
           formatStrategy: formatStrategy,

@@ -9,7 +9,7 @@ void main() {
     group('fromFile', () {
       test('should throw ArgumentError for empty path', () async {
         expect(
-          () => Phonic.fromFile(''),
+          () => Phonic.fromFileAsync(''),
           throwsA(
             isA<ArgumentError>().having(
               (e) => e.message,
@@ -22,7 +22,7 @@ void main() {
 
       test('should throw FileSystemException for non-existent file', () async {
         expect(
-          () => Phonic.fromFile('/non/existent/file.mp3'),
+          () => Phonic.fromFileAsync('/non/existent/file.mp3'),
           throwsA(isA<FileSystemException>()),
         );
       });
@@ -33,7 +33,7 @@ void main() {
         final tempFile = await _createTempFile('test.mp3', mp3Bytes);
 
         try {
-          final audioFile = await Phonic.fromFile(tempFile.path);
+          final audioFile = await Phonic.fromFileAsync(tempFile.path);
           expect(audioFile, isA<PhonicAudioFile>());
           audioFile.dispose();
         } finally {
@@ -54,7 +54,7 @@ void main() {
 
         try {
           expect(
-            () => Phonic.fromFile(tempFile.path),
+            () => Phonic.fromFileAsync(tempFile.path),
             throwsA(
               isA<UnsupportedFormatException>().having(
                 (e) => e.message,
@@ -75,10 +75,10 @@ void main() {
       });
     });
 
-    group('fromBytes', () {
-      test('should throw ArgumentError for empty bytes', () {
-        expect(
-          () => Phonic.fromBytes(Uint8List(0)),
+    group('fromBytesAsync', () {
+      test('should throw ArgumentError for empty bytes', () async {
+        await expectLater(
+          Phonic.fromBytesAsync(Uint8List(0)),
           throwsA(
             isA<ArgumentError>().having(
               (e) => e.message,
@@ -89,51 +89,51 @@ void main() {
         );
       });
 
-      test('should create PhonicAudioFile for valid MP3 bytes', () {
+      test('should create PhonicAudioFile for valid MP3 bytes', () async {
         final mp3Bytes = _createMinimalMp3WithId3v2();
-        final audioFile = Phonic.fromBytes(mp3Bytes, 'test.mp3');
+        final audioFile = await Phonic.fromBytesAsync(mp3Bytes, 'test.mp3');
 
         expect(audioFile, isA<PhonicAudioFile>());
         audioFile.dispose();
       });
 
-      test('should create PhonicAudioFile for valid MP3 bytes without filename', () {
+      test('should create PhonicAudioFile for valid MP3 bytes without filename', () async {
         final mp3Bytes = _createMinimalMp3WithId3v2();
-        final audioFile = Phonic.fromBytes(mp3Bytes);
+        final audioFile = await Phonic.fromBytesAsync(mp3Bytes);
 
         expect(audioFile, isA<PhonicAudioFile>());
         audioFile.dispose();
       });
 
-      test('should create PhonicAudioFile for valid FLAC bytes', () {
+      test('should create PhonicAudioFile for valid FLAC bytes', () async {
         final flacBytes = _createMinimalFlac();
-        final audioFile = Phonic.fromBytes(flacBytes, 'test.flac');
+        final audioFile = await Phonic.fromBytesAsync(flacBytes, 'test.flac');
 
         expect(audioFile, isA<PhonicAudioFile>());
         audioFile.dispose();
       });
 
-      test('should create PhonicAudioFile for valid OGG bytes', () {
+      test('should create PhonicAudioFile for valid OGG bytes', () async {
         final oggBytes = _createMinimalOgg();
-        final audioFile = Phonic.fromBytes(oggBytes, 'test.ogg');
+        final audioFile = await Phonic.fromBytesAsync(oggBytes, 'test.ogg');
 
         expect(audioFile, isA<PhonicAudioFile>());
         audioFile.dispose();
       });
 
-      test('should create PhonicAudioFile for valid MP4 bytes', () {
+      test('should create PhonicAudioFile for valid MP4 bytes', () async {
         final mp4Bytes = _createMinimalMp4();
-        final audioFile = Phonic.fromBytes(mp4Bytes, 'test.m4a');
+        final audioFile = await Phonic.fromBytesAsync(mp4Bytes, 'test.m4a');
 
         expect(audioFile, isA<PhonicAudioFile>());
         audioFile.dispose();
       });
 
-      test('should throw UnsupportedFormatException for unsupported format', () {
+      test('should throw UnsupportedFormatException for unsupported format', () async {
         final unsupportedBytes = Uint8List.fromList([0x00, 0x01, 0x02, 0x03]);
 
-        expect(
-          () => Phonic.fromBytes(unsupportedBytes, 'test.xyz'),
+        await expectLater(
+          Phonic.fromBytesAsync(unsupportedBytes, 'test.xyz'),
           throwsA(
             isA<UnsupportedFormatException>().having(
               (e) => e.message,
@@ -146,28 +146,28 @@ void main() {
     });
 
     group('format detection', () {
-      test('should prioritize extension-matching strategies', () {
+      test('should prioritize extension-matching strategies', () async {
         // Create bytes that could match multiple formats but use MP3 extension
         final ambiguousBytes = _createMinimalMp3WithId3v2();
-        final audioFile = Phonic.fromBytes(ambiguousBytes, 'test.mp3');
+        final audioFile = await Phonic.fromBytesAsync(ambiguousBytes, 'test.mp3');
 
         expect(audioFile, isA<PhonicAudioFile>());
         audioFile.dispose();
       });
 
-      test('should fall back to binary detection without filename', () {
+      test('should fall back to binary detection without filename', () async {
         final mp3Bytes = _createMinimalMp3WithId3v2();
-        final audioFile = Phonic.fromBytes(mp3Bytes);
+        final audioFile = await Phonic.fromBytesAsync(mp3Bytes);
 
         expect(audioFile, isA<PhonicAudioFile>());
         audioFile.dispose();
       });
 
-      test('should handle various MP4 extensions', () {
+      test('should handle various MP4 extensions', () async {
         final mp4Bytes = _createMinimalMp4();
 
         for (final extension in ['test.m4a', 'test.mp4', 'test.aac']) {
-          final audioFile = Phonic.fromBytes(mp4Bytes, extension);
+          final audioFile = await Phonic.fromBytesAsync(mp4Bytes, extension);
           expect(audioFile, isA<PhonicAudioFile>());
           audioFile.dispose();
         }
@@ -175,12 +175,12 @@ void main() {
     });
 
     group('codec registry caching', () {
-      test('should cache codec registries by format strategy type', () {
+      test('should cache codec registries by format strategy type', () async {
         final mp3Bytes1 = _createMinimalMp3WithId3v2();
         final mp3Bytes2 = _createMinimalMp3WithId3v2();
 
-        final audioFile1 = Phonic.fromBytes(mp3Bytes1, 'test1.mp3');
-        final audioFile2 = Phonic.fromBytes(mp3Bytes2, 'test2.mp3');
+        final audioFile1 = await Phonic.fromBytesAsync(mp3Bytes1, 'test1.mp3');
+        final audioFile2 = await Phonic.fromBytesAsync(mp3Bytes2, 'test2.mp3');
 
         // Both should be created successfully (registry caching working)
         expect(audioFile1, isA<PhonicAudioFile>());
@@ -190,15 +190,15 @@ void main() {
         audioFile2.dispose();
       });
 
-      test('should clear cache when requested', () {
+      test('should clear cache when requested', () async {
         final mp3Bytes = _createMinimalMp3WithId3v2();
-        final audioFile1 = Phonic.fromBytes(mp3Bytes, 'test1.mp3');
+        final audioFile1 = await Phonic.fromBytesAsync(mp3Bytes, 'test1.mp3');
 
         // Clear cache
         Phonic.clearCache();
 
         // Should still work after cache clear
-        final audioFile2 = Phonic.fromBytes(mp3Bytes, 'test2.mp3');
+        final audioFile2 = await Phonic.fromBytesAsync(mp3Bytes, 'test2.mp3');
 
         expect(audioFile1, isA<PhonicAudioFile>());
         expect(audioFile2, isA<PhonicAudioFile>());
@@ -209,11 +209,11 @@ void main() {
     });
 
     group('error handling', () {
-      test('should provide context in error messages', () {
+      test('should provide context in error messages', () async {
         final unsupportedBytes = Uint8List.fromList([0x00, 0x01, 0x02, 0x03]);
 
-        expect(
-          () => Phonic.fromBytes(unsupportedBytes, 'test.xyz'),
+        await expectLater(
+          Phonic.fromBytesAsync(unsupportedBytes, 'test.xyz'),
           throwsA(
             isA<UnsupportedFormatException>().having(
               (e) => e.context,
@@ -224,9 +224,9 @@ void main() {
         );
       });
 
-      test('should handle null filename gracefully', () {
+      test('should handle null filename gracefully', () async {
         final mp3Bytes = _createMinimalMp3WithId3v2();
-        final audioFile = Phonic.fromBytes(mp3Bytes, null);
+        final audioFile = await Phonic.fromBytesAsync(mp3Bytes, null);
 
         expect(audioFile, isA<PhonicAudioFile>());
         audioFile.dispose();
@@ -234,10 +234,10 @@ void main() {
     });
 
     group('memory management', () {
-      test('should create independent instances', () {
+      test('should create independent instances', () async {
         final mp3Bytes = _createMinimalMp3WithId3v2();
-        final audioFile1 = Phonic.fromBytes(mp3Bytes, 'test1.mp3');
-        final audioFile2 = Phonic.fromBytes(mp3Bytes, 'test2.mp3');
+        final audioFile1 = await Phonic.fromBytesAsync(mp3Bytes, 'test1.mp3');
+        final audioFile2 = await Phonic.fromBytesAsync(mp3Bytes, 'test2.mp3');
 
         // Should be different instances
         expect(identical(audioFile1, audioFile2), isFalse);
@@ -246,9 +246,9 @@ void main() {
         audioFile2.dispose();
       });
 
-      test('should handle disposal properly', () {
+      test('should handle disposal properly', () async {
         final mp3Bytes = _createMinimalMp3WithId3v2();
-        final audioFile = Phonic.fromBytes(mp3Bytes, 'test.mp3');
+        final audioFile = await Phonic.fromBytesAsync(mp3Bytes, 'test.mp3');
 
         // Should not throw when disposing
         expect(() => audioFile.dispose(), returnsNormally);

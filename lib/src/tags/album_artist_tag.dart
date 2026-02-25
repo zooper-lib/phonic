@@ -50,11 +50,10 @@ final class AlbumArtistTag extends MetadataTag<String> {
   /// ```
   const AlbumArtistTag(
     String value, {
-    TagProvenance provenance = const TagProvenance.none(),
+    super.provenance,
   }) : super(
          value: value,
          key: TagKey.albumArtist,
-         provenance: provenance,
        );
 
   /// Creates a new AlbumArtistTag instance with updated provenance information.
